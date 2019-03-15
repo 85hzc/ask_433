@@ -29,25 +29,35 @@ unsigned char SelfAddr[2]={0, 0};
 ///////////////////ASK初始化函数///////////////////////
 void Ask_Init()
 {
-  PD_DDR_DDR3=0;        //KEY1输入
-  PD_CR1_C13=0;         //悬浮输入
-  PD_CR2_C23=0;         //禁止外部中断
+  PC_DDR_DDR4=0;        //KEY1输入
+  PC_CR1_C14=0;         //悬浮输入
+  PC_CR2_C24=0;         //禁止外部中断
 }
+
+void Uart_Sendbyte(unsigned char ch)
+{
+    return;
+}
+
 ///////////////////ASK处理函数///////////////////////
 void Ask_process()
 {
   unsigned char key_value=0;
-  Ask_Init();   //ASK初始化
-  ReadSelfAddr();       //读eeprom里存储的ID
+  
+  Ask_Init();       //ASK初始化
+  ReadSelfAddr();   //读eeprom里存储的ID
+  
   while(1)
   {
     ProcessRecv();      //处理接收函数
     key_value=key_scan();
+    
+    Uart_Sendbyte(key_value);
+    
     if(key_value==0x01)
     {//对码
-      Led_on(2);
-      Led_on(3);
-      Learn_Sender();   
+      Led_on_all();
+      Learn_Sender();
       Led_off_all();
     }
     else if(key_value==0x02)
@@ -59,82 +69,88 @@ void Ask_process()
 ///////////////////接收函数///////////////////////
 void Recieve()
 {
-  //一进来就先把引脚的状态读取了，然后判断跟前面的是否一样，不一样的时候才进行后续运算
-  in_bit_n = inport;	//inport是ASK模块的数据脚
-  if(in_bit == in_bit_n)
-  {
-    return;
-  }
-  in_bit = in_bit_n;
-  //P3_7 = in_bit;	 //把值丢给LED口
-  if(timer_4_countover)
-  {//超时错误
-	RecieveError();
-	return;	
-  }
-  // 接收4 次电平变化，才能确定1 bit
-  if((timer_4_count > min_time_l)&&(timer_4_count < max_time_l)) 
-  {	//窄脉冲,4~14,就是200us~700us
-    if(in_bit) //高电平,现在为高电平，其实之前是低电平的
+    //一进来就先把引脚的状态读取了，然后判断跟前面的是否一样，不一样的时候才进行后续运算
+    in_bit_n = inport;  //inport是ASK模块的数据脚
+    if(in_bit == in_bit_n)
     {
-	recvbit[recvbitcount] = 0x00;	//低短
+        return;
     }
-    else	//低电平
+    in_bit = in_bit_n;
+    //P3_7 = in_bit;     //把值丢给LED口
+    if(timer_4_countover)
     {
-	recvbit[recvbitcount] = 0x01;	//高短
+        //超时错误
+        RecieveError();
+        return;
     }
-  }
-  else if((timer_4_count > min_time_h)&&(timer_4_count < max_time_h))
-  {	//宽脉冲，16~60，就是800us~3000us
-    if(in_bit)
+    // 接收4 次电平变化，才能确定1 bit
+    if((timer_4_count > min_time_l)&&(timer_4_count < max_time_l))
     {
-	recvbit[recvbitcount] = 0x02;	 //低长
+        //窄脉冲,4~14,就是200us~700us
+        if(in_bit) //高电平,现在为高电平，其实之前是低电平的
+        {
+            recvbit[recvbitcount] = 0x00;   //低短
+        }
+        else    //低电平
+        {
+            recvbit[recvbitcount] = 0x01;   //高短
+        }
+    }
+    else if((timer_4_count > min_time_h)&&(timer_4_count < max_time_h))
+    {
+        //宽脉冲，16~60，就是800us~3000us
+        if(in_bit)
+        {
+            recvbit[recvbitcount] = 0x02;    //低长
+        }
+        else
+        {
+            recvbit[recvbitcount] = 0x03;   //高长
+        }
     }
     else
     {
-	recvbit[recvbitcount] = 0x03;	//高长
+        //出错
+        RecieveError();
+        return;
     }
-  }
-  else
-  {//出错
-	RecieveError();
-	return;
-  }
-  timer_4_count = 0;
-  timer_4_countover = 0;
+    timer_4_count = 0;
+    timer_4_countover = 0;
 
- // 1527	
-  recvbitcount++;
-  if(recvbitcount < 2) 
-  {
-	return;
-  }
-  else
-  {
-    //这里判断的电平，应该是跟实际的相反的，因为只有电平变化了，才会做相应处理，不变化的话是直接退出的。
-    if((recvbit[0] == 1)&&(recvbit[1] == 2))   //高短低长
+    // 1527
+    recvbitcount++;
+    if(recvbitcount < 2) 
     {
-	recvbyte[recvbytecount] = 0;
-    }
-    else if((recvbit[0] == 3)&&(recvbit[1] == 0))  //高长低短
-    {
-	recvbyte[recvbytecount] = 1;
+        return;
     }
     else
     {
-	RecieveError();
-	return;
-    }		
-  }
-  recvbytecount++;	 	//接收到的字节数加1。
-  recvbitcount = 0;		//
-  if(recvbytecount < RECV_BIT_NUMBER)
-  {// 未接收完
-    return;
-  }
-  recvbytecount = 0;
-  timer_4_count = 0;
-  rx_data_ok = 1;
+        //这里判断的电平，应该是跟实际的相反的，因为只有电平变化了，才会做相应处理，不变化的话是直接退出的。
+        if((recvbit[0] == 1)&&(recvbit[1] == 2))   //高短低长
+        {
+            recvbyte[recvbytecount] = 0;
+        }
+        else if((recvbit[0] == 3)&&(recvbit[1] == 0))  //高长低短
+        {
+            recvbyte[recvbytecount] = 1;
+        }
+        else
+        {
+            RecieveError();
+            return;
+        }
+    }
+    
+    recvbytecount++;    //接收到的字节数加1。
+    recvbitcount = 0;   //
+    if(recvbytecount < RECV_BIT_NUMBER)
+    {
+        // 未接收完
+        return;
+    }
+    recvbytecount = 0;
+    timer_4_count = 0;
+    rx_data_ok = 1;
 }
 ///////////////////接收错误函数///////////////////////
 void RecieveError()
@@ -144,7 +160,7 @@ void RecieveError()
 
   recvbitcount = 0;
   recvbytecount = 0;
-	
+
   timer_4_count = 0;
   timer_4_countover = 0;
 
@@ -155,6 +171,7 @@ void ProcessRecv()
   unsigned char i,j;
   unsigned char p=0;
   unsigned char temp;
+  
   Recieve();
 
   if(rx_data_ok)
@@ -170,14 +187,16 @@ void ProcessRecv()
       Recv_data[p++]=temp;
       //UART0_TX(temp);
     }
+    Uart_Sendbyte('{');
     Uart_Sendbyte(Recv_data[0]);
     Uart_Sendbyte(Recv_data[1]);
     Uart_Sendbyte(Recv_data[2]);
+    Uart_Sendbyte('}');
     ProcessOut();
   }
   else 
-  {	
-			
+  {
+    Uart_Sendbyte(8);
   }
 }
 
@@ -188,10 +207,13 @@ void Learn_Sender()
   unsigned char i,j;
   unsigned char p=0;
   unsigned char temp;
+  
   LearnDelay = GetTimer();
   rx_data_ok = 0;
+  
   while(1)
-  {//5秒钟对码时间
+  {
+    //5秒钟对码时间
     //WDT_CountClear();
     Recieve();
     if(rx_data_ok)
@@ -216,24 +238,19 @@ void Learn_Sender()
         EEPROM_Byte_Write(EE_ADDR1, Recv_data[1]);
 
         ReadSelfAddr();	
-        for(i=0; i<3; i++)
+        for(i=0; i<5; i++)
         {//对码完成，跑马灯指示
           Led_on(1);
-          Led_on(2);
-          Led_off(3);
-          Led_off(4);
-          delay_ms(100);
+          delay_ms(200);
           Led_off(1);
-          Led_off(2);
-          Led_on(3);
-          Led_on(4);
-          delay_ms(100);
+          delay_ms(200);
         }
         //EX1 = 1;
         return;
     }
-    if(SpanTime(LearnDelay) > 5000)
-	return;
+    delay_ms(10);
+    if(SpanTime(LearnDelay) > 15000)//1ms
+        return;
   }
 }
 ///////////////////读取ID函数///////////////////////
@@ -247,51 +264,50 @@ void Dele_Sender()
 {
   EEPROM_Byte_Write(EE_ADDR0, 0x00);
   EEPROM_Byte_Write(EE_ADDR0, 0x00);
-  ReadSelfAddr();	
+  ReadSelfAddr();
 }
 ///////////////////输出处理函数///////////////////////
 void ProcessOut()
-{	
+{
   if((Recv_data[0]==SelfAddr[0])&&(Recv_data[1]==SelfAddr[1]))
   {//匹配ID
     switch(Recv_data[2]&0xff)
     {
-	case 0x01:
-		Led_on(1);
-        delay_ms(100);
-        Led_off(1);
-        delay_ms(100);
-        break;
-	case 0x02:
-		Led_on(2);
-        delay_ms(100);
-        Led_off(2);
-        delay_ms(100);
-        break;
-	case 0x04:
-		Led_on(3);
-        delay_ms(100);
-        Led_off(3);
-        delay_ms(100);
-        break;
-	case 0x08: 
-		Led_on(4);
-        delay_ms(100);
-        Led_off(4);
-        delay_ms(100);
-        break;
-	case 0x10: 
-    case 0x20: 
-	case 0x40: 
-	case 0x80: 
-		Led_on(4);
-        delay_ms(100);
-        Led_off(4);
-        delay_ms(100);
-        break;
-
-    default:
-		break;
+        case 0x01:
+            Led_on(1);
+            delay_ms(100);
+            Led_off(1);
+            delay_ms(100);
+            break;
+        case 0x02:
+            Led_on(2);
+            delay_ms(100);
+            Led_off(2);
+            delay_ms(100);
+            break;
+        case 0x04:
+            Led_on(3);
+            delay_ms(100);
+            Led_off(3);
+            delay_ms(100);
+            break;
+        case 0x08: 
+            Led_on(4);
+            delay_ms(100);
+            Led_off(4);
+            delay_ms(100);
+            break;
+        case 0x10: 
+        case 0x20: 
+        case 0x40: 
+        case 0x80: 
+            Led_on(4);
+            delay_ms(100);
+            Led_off(4);
+            delay_ms(100);
+            break;
+        default:
+            break;
     }
   }
 	

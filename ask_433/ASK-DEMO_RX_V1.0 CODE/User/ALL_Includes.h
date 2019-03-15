@@ -2,12 +2,13 @@
 #define  _ALL_Includes_H
 
 //#include "stm8s.h"
-#include <iostm8s103f3.h>
+//#include <iostm8s103f3.h>
+#include <iostm8l051f3.h>
 #include "mytype.h"
 #include "delay.h"
 #include "led.h"
 #include "key.h"
-#include "USART.h"
+//#include "USART.h"
 #include "time.h"
 #include "eeprom.h"
 #include <string.h>

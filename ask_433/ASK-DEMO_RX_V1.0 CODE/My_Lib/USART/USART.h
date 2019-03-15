@@ -11,9 +11,9 @@
 #include "ALL_Includes.h"
 
 //定义UART的TX、RX引脚
-#define  TXPort  PD
-#define  TXPin   (1 << 5) 
-#define  RXPort  PD
+#define  TXPort  PC
+#define  TXPin   (1 << 5)
+#define  RXPort  PC
 #define  RXPin   (1 << 6)
 
 void Uart_Init(u8 SYS_Clk, u32 baud);

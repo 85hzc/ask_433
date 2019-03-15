@@ -16,7 +16,7 @@
         <ShowSource>1</ShowSource>
     </Trace1>
     <DebugChecksum>
-        <Checksum>427699150</Checksum>
+        <Checksum>1088954131</Checksum>
     </DebugChecksum>
     <CodeCoverage>
         <Enabled>_ 0</Enabled>
@@ -80,11 +80,6 @@
         <GraphEnabled>0</GraphEnabled>
         <ShowTimeLog>1</ShowTimeLog>
     </DataSample>
-    <Breakpoints>
-        <Bp0>_ "STD_CODE" "{$PROJ_DIR$\..\User\ASK.C}.102.15" 1 0 0 0 "" 0 ""</Bp0>
-        <Bp1>_ "STD_CODE" "{$PROJ_DIR$\..\User\ASK.C}.105.7" 1 0 0 0 "" 0 ""</Bp1>
-        <Count>2</Count>
-    </Breakpoints>
     <LogFile>
         <LoggingEnabled>_ 0</LoggingEnabled>
         <LogFile>_ ""</LogFile>
@@ -94,6 +89,9 @@
         <LoggingEnabled>_ 0</LoggingEnabled>
         <LogFile>_ ""</LogFile>
     </TermIOLog>
+    <Breakpoints>
+        <Count>0</Count>
+    </Breakpoints>
     <Aliases>
         <A0>_ "E:\Workdocuments\07_Electronic Components\433mH\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\My_Lib\TIME\time.c" ""</A0>
         <A1>_ "E:\Workdocuments\07_Electronic Components\433mH\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\My_Lib\USART\USART.c" ""</A1>

@@ -8,9 +8,9 @@
 ***********************/
 void Led_Init(void)
 {
-    PC_DDR_DDR3 =1;
-    PC_CR1_C13  =1;
-    
+    PB_DDR_DDR4 =1;
+    PB_CR1_C14  =1;
+    /*
     PA_DDR_DDR1 =1;
     PA_CR1_C11  =1;
 
@@ -19,22 +19,34 @@ void Led_Init(void)
     
     PA_DDR_DDR3 =1;
     PA_CR1_C13  =1; 
-    
+    */
     Led_off_all();
 }
+
+void Pwm_Init(void)
+{
+    PB_DDR_DDR2 =1;
+    PB_CR1_C12  =1;
+
+    PB_DDR_DDR1 =1;
+    PB_CR1_C11  =1;
+}
+
 
 void Led_on(unsigned char m)
 {
   switch(m)
   {
-  case 1: LED_L1=1;
+  case 1: LED_L1=0;
     break;
+    /*
   case 2: LED_L2=1;
     break;
   case 3: LED_L3=1;
     break;
   case 4: LED_L4=1;
     break;
+    */
   default:
     break;
   }
@@ -44,14 +56,16 @@ void Led_off(unsigned char m)
 {
   switch(m)
   {
-  case 1: LED_L1=0;
+  case 1: LED_L1=1;
     break;
+    /*
   case 2: LED_L2=0;
     break;
   case 3: LED_L3=0;
     break;
   case 4: LED_L4=0;
     break;
+    */
   default:
     break;
   }
@@ -59,17 +73,17 @@ void Led_off(unsigned char m)
 
 void Led_on_all()
 {
-  LED_L1=1;
-  LED_L2=1;
-  LED_L3=1;
-  LED_L4=1;
+  LED_L1=0;
+  //LED_L2=1;
+  //LED_L3=1;
+  //LED_L4=1;
 }
 
 void Led_off_all()
 {
-  LED_L1=0;
-  LED_L2=0;
-  LED_L3=0;
-  LED_L4=0;
+  LED_L1=1;
+  //LED_L2=0;
+  //LED_L3=0;
+  //LED_L4=0;
 }
 

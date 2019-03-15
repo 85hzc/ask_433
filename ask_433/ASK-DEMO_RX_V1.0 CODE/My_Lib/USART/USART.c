@@ -84,11 +84,11 @@ void Uart_Senddata(unsigned char* st, unsigned char len)
 ***********************************/
 void UART_IOConfig(void)
 { 
-    PD_DDR |= TXPin;//输出模式
-    PD_CR1 |= TXPin;//推挽输出   
+    PC_DDR |= TXPin;//输出模式
+    PC_CR1 |= TXPin;//推挽输出   
     
-    PD_DDR &=~RXPin;//输入模式
-    PD_CR1 &=~RXPin;//浮空输入
+    PC_DDR &=~RXPin;//输入模式
+    PC_CR1 &=~RXPin;//浮空输入
 }
 
 #if 0

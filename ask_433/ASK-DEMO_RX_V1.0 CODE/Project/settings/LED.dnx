@@ -12,7 +12,7 @@
         <ByteLimit>50</ByteLimit>
     </Stack>
     <DebugChecksum>
-        <Checksum>-1492536126</Checksum>
+        <Checksum>3993755788</Checksum>
     </DebugChecksum>
     <CallStack>
         <ShowArgs>0</ShowArgs>
@@ -93,7 +93,20 @@
         <LogFile>_ ""</LogFile>
     </TermIOLog>
     <Breakpoints>
-        <Count>0</Count>
+        <Bp0>_ "STD_CODE" "{$PROJ_DIR$\..\User\Ask.c}.47.15" 1 0 0 0 "" 0 ""</Bp0>
+        <Bp1>_ "STD_CODE" "{$PROJ_DIR$\..\My_Lib\KEY\key.c}.19.5" 1 0 0 0 "" 0 ""</Bp1>
+        <Bp2>_ "STD_CODE" "{$PROJ_DIR$\..\My_Lib\KEY\key.c}.25.7" 1 0 0 0 "" 0 ""</Bp2>
+        <Bp3>_ "STD_CODE" "{$PROJ_DIR$\..\My_Lib\KEY\key.c}.39.13" 1 0 0 0 "" 0 ""</Bp3>
+        <Bp4>_ "STD_CODE" "{$PROJ_DIR$\..\User\Ask.c}.49.5" 1 0 0 0 "" 0 ""</Bp4>
+        <Bp5>_ "STD_CODE" "{$PROJ_DIR$\..\User\Ask.c}.171.3" 1 0 0 0 "" 0 ""</Bp5>
+        <Bp6>_ "STD_CODE" "{$PROJ_DIR$\..\User\Ask.c}.173.5" 1 0 0 0 "" 0 ""</Bp6>
+        <Bp7>_ "STD_CODE" "{$PROJ_DIR$\..\User\Ask.c}.193.5" 1 0 0 0 "" 0 ""</Bp7>
+        <Bp8>_ "STD_CODE" "{$PROJ_DIR$\..\User\Ask.c}.213.5" 1 0 0 0 "" 0 ""</Bp8>
+        <Bp9>_ "STD_CODE" "{$PROJ_DIR$\..\User\Ask.c}.215.9" 1 0 0 0 "" 0 ""</Bp9>
+        <Bp10>_ "STD_CODE" "{$PROJ_DIR$\..\User\Ask.c}.217.9" 1 0 0 0 "" 0 ""</Bp10>
+        <Bp11>_ "STD_CODE" "{$PROJ_DIR$\..\User\Ask.c}.238.11" 1 0 0 0 "" 0 ""</Bp11>
+        <Bp12>_ "STD_CODE" "{$PROJ_DIR$\..\User\Ask.c}.255.3" 1 0 0 0 "" 0 ""</Bp12>
+        <Count>13</Count>
     </Breakpoints>
     <Aliases>
         <A0>_ "F:\私用\今明\代码\IAR1.3\stm8s003f3p6\LED\User\main.c" ""</A0>

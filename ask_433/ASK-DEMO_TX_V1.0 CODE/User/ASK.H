@@ -1,8 +1,8 @@
-#ifndef			__ASK_H_
-#define			__ASK_H_
+#ifndef __ASK_H_
+#define __ASK_H_
 #include "ALL_Includes.h"
 
-#define	 	ASK		PD_ODR_ODR3
+#define ASK PD_ODR_ODR3
 void rf_delay_long();
 void rf_delay_short();
 void rf_delay_15ms();

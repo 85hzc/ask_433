@@ -1,42 +1,42 @@
-"E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\My_Lib\delay\delay.c"
+"E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\My_Lib\delay\delay.c"
 -std=c99
 -ferror-limit=0
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\Project\..\My_Lib\delay
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\Project\..\My_Lib\delay
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\Project\..\User
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\Project\..\User
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\Project\..\System
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\Project\..\System
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\Project\..\My_Lib\LED
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\Project\..\My_Lib\LED
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\Project\..\My_Lib\USART
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\Project\..\My_Lib\USART
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\Project\..\My_Lib\EEPROM
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\Project\..\My_Lib\EEPROM
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\Project\..\My_Lib\TIME
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\Project\..\My_Lib\TIME
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\Project\..\My_Lib\KEY
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\Project\..\My_Lib\KEY
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\stm8\inc
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\stm8\inc\c
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\My_Lib\delay
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\My_Lib\delay
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\User
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\User
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\System
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\System
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\My_Lib\LED
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\My_Lib\LED
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\My_Lib\USART
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\My_Lib\USART
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\My_Lib\EEPROM
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\My_Lib\EEPROM
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\My_Lib\TIME
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\My_Lib\TIME
 -I
-E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\My_Lib\KEY
+E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\My_Lib\KEY
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
 -D__CHAR_MIN__=0

@@ -2,9 +2,9 @@
 
 void Key_Init()
 {
-  PB_DDR_DDR4=0;        //KEY1输入
-  PB_CR1_C14=1;         //带上拉电阻输入
-  PB_CR2_C24=0;         //禁止外部中断
+  PB_DDR_DDR3=0;        //KEY1输入
+  PB_CR1_C13=1;         //带上拉电阻输入
+  PB_CR2_C23=0;         //禁止外部中断
 }
 
 unsigned char key_scan()
@@ -13,6 +13,7 @@ unsigned char key_scan()
   unsigned char key_value=0x00;
   unsigned long key_time=0x00;
   unsigned char t_over=0;
+  
   if(SW_K1==0)
   {
     delay_ms(10);
@@ -42,5 +43,6 @@ unsigned char key_scan()
       Led_off_all();
     }
   }  
+  
   return key_value;
 }

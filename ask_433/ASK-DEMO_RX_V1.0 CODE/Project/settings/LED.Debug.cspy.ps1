@@ -23,9 +23,9 @@ param([String]$debugfile = "");
 
 if ($debugfile -eq "")
 {
-& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\接收demo\软件工程文件\Project\settings\LED.Debug.general.xcl" --backend -f "E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\接收demo\软件工程文件\Project\settings\LED.Debug.driver.xcl" 
+& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "E:\github\ask_433\ASK-DEMO_RX_V1.0 CODE\Project\settings\LED.Debug.general.xcl" --backend -f "E:\github\ask_433\ASK-DEMO_RX_V1.0 CODE\Project\settings\LED.Debug.driver.xcl" 
 }
 else
 {
-& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\接收demo\软件工程文件\Project\settings\LED.Debug.general.xcl" --debug_file=$debugfile --backend -f "E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\接收demo\软件工程文件\Project\settings\LED.Debug.driver.xcl" 
+& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "E:\github\ask_433\ASK-DEMO_RX_V1.0 CODE\Project\settings\LED.Debug.general.xcl" --debug_file=$debugfile --backend -f "E:\github\ask_433\ASK-DEMO_RX_V1.0 CODE\Project\settings\LED.Debug.driver.xcl" 
 }

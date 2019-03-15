@@ -108,11 +108,13 @@ void Ask_process()
       }
       //Ask_send_buf[2] = (Ask_send_buf[2]&0xf0)| key_value;
       Ask_send_buf[2] = key_value;
-      
+      /*
       for(i=0; i<3; i++)
       {
         Uart_Sendbyte(Ask_send_buf[i]);
-      }
+      }*/
+
+      Uart_Sendbyte(Ask_send_buf[2]);
       ask_send(Ask_send_buf, 3);
       ask_send(Ask_send_buf, 3);
       ask_send(Ask_send_buf, 3);
