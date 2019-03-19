@@ -110,9 +110,9 @@ void Pwrup_Indicate()
   for(i=0; i<3; i++)
   {
     Led_on_all();
-    delay_ms(100);
+    delay_ms(200);
     Led_off_all();
-    delay_ms(100);
+    delay_ms(200);
   }
 }
 
