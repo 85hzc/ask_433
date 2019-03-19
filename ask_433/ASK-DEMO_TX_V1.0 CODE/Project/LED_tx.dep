@@ -60,6 +60,7 @@
             <file>$PROJ_DIR$\..\My_Lib\KEY\key.h</file>
             <file>$TOOLKIT_DIR$\inc\io_macros.h</file>
             <file>$PROJ_DIR$\..\..\..\..\433无线方案\My433_Rx\Ask.c</file>
+            <file>$PROJ_DIR$\..\..\..\..\433无线方案\My433_Rx\time.h</file>
         </outputs>
         <file>
             <name>$PROJ_DIR$\..\My_Lib\delay\delay.c</name>
