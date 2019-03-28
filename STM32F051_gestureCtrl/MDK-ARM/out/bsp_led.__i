@@ -1,5 +1,0 @@
--c --cpu Cortex-M0 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I..\ -I..\..\..\Libraries\CMSIS\Include -I..\..\..\Libraries\CMSIS\ST\STM32F0xx\Include -I..\..\..\Libraries\STM32F0xx_StdPeriph_Driver\inc -I..\..\..\BSP -I..\..\..\FONTS 
--I C:\Keil\ARM\RV31\INC 
--I C:\Keil\ARM\CMSIS\Include 
--I C:\Keil\ARM\Inc\ST\STM32F0xx 
--DUSE_STDPERIPH_DRIVER -DSTM32F0XX -o ".\out\bsp_led.o" --omf_browse ".\out\bsp_led.crf" --depend ".\out\bsp_led.d" "..\..\..\BSP\BSP_LED.c"
