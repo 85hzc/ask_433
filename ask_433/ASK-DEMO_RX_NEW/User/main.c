@@ -19,7 +19,7 @@ unsigned char table[]={"I like study high technology !\n"};
 
 int main(void)
 {
-  //unsigned char i;    
+  //unsigned char i;
   All_Congfig();        //所有的基本配置，除了ASK的
   __enable_interrupt(); //开总中断
   Pwrup_Indicate();     //开机指示
@@ -27,18 +27,18 @@ int main(void)
   Ask_process();
   
   while(1)
-  {         
+  {
     Led_on(1);
     delay_ms(200);
     Led_off(1);
     delay_ms(200);
-  }        
+  }
 }
 
 void All_Congfig(void)
 {
-    CLOCK_Config(SYS_CLOCK);//系统时钟初始化  
-    Led_Init();  
+    CLOCK_Config(SYS_CLOCK);//系统时钟初始化
+    Led_Init();
     Key_Init();
     Uart_Init(16, 9600);
     Tim4_Init();
