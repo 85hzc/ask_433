@@ -70,7 +70,7 @@ static void MX_USART1_UART_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_CRC_Init(void);
 static void MX_TIM3_Init(void);
-static void MX_ADC_Init(void);
+//static void MX_ADC_Init(void);
 static void MX_TIM1_Init(void);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
@@ -91,7 +91,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
   * @retval None
   */
 int main(void)
-{  
+{
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
@@ -105,7 +105,7 @@ int main(void)
   MX_CRC_Init();
   MX_TIM1_Init();
   MX_TIM3_Init();
-  MX_ADC_Init();
+  //MX_ADC_Init();
   
   /* Initialize FAN state */
   Drv_FAN_Init();
@@ -113,29 +113,34 @@ int main(void)
   Drv_SERIAL_Init();
   /* Initialize IR state */
   Drv_IR_Init();
+  
   /* Initialize LED state */
-  Drv_LED_Init();  
+  Drv_LED_Init();
+  
   /* Initialize DLPC state */
-  Drv_DLPC_Init();  
+  //Drv_DLPC_Init();
   /* Initialize HDMI Rx state */  
-  Drv_HDMI_RCVR_Init();  
+  //Drv_HDMI_RCVR_Init();
+  
   /* Initialize MOTOR state */
-  Drv_MOTOR_Init();  
+  //Drv_MOTOR_Init();
+  
   /* Initialize THERM state */
-  Drv_THERM_Init();
+  //Drv_THERM_Init();
   /* Initialize ACC state */
-//  Drv_ACC_Init();
+  //Drv_ACC_Init();
   /* Initialize AU AMP state */  
-//  Drv_AU_AMP_Init();  
+  //Drv_AU_AMP_Init();
 
   Drv_SERIAL_Log("starting...");
- 
+  
   /* Infinite loop */
   while (1)
   {
     Drv_SERIAL_Proc();
     Drv_LED_Proc();
     Drv_FAN_Proc();
+
     //Drv_IR_Proc();
     //Drv_DLPC_CMD_Proc();
     //Drv_HDMI_RCVR_Proc();
@@ -200,7 +205,7 @@ void SystemClock_Config(void)
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
-
+#if 0
 /* ADC init function */
 static void MX_ADC_Init(void)
 {
@@ -237,9 +242,8 @@ static void MX_ADC_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
 }
-
+#endif
 /* CRC init function */
 static void MX_CRC_Init(void)
 {
@@ -437,39 +441,23 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, MOTOR_BIN2_Pin|MOTOR_BIN1_Pin|MOTOR_AIN2_Pin 
-                          |MOTOR_AIN1_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LED_Pin|MOTOR_IN_Pin|PROJ_ON_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pins : PROJ_ON_Pin MOTOR_BIN2_Pin MOTOR_BIN1_Pin MOTOR_AIN2_Pin 
-                           MOTOR_AIN1_Pin */
-  GPIO_InitStruct.Pin = MOTOR_BIN2_Pin|MOTOR_BIN1_Pin|MOTOR_AIN2_Pin 
-                          |MOTOR_AIN1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  /*Configure GPIO pins : USART1_TX_Pin|USART1_RX_Pin */
+  GPIO_InitStruct.Pin = USART1_TX_Pin|USART1_RX_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Alternate = GPIO_AF1_USART1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_Pin MOTOR_IN_Pin */
-  GPIO_InitStruct.Pin = LED_Pin|MOTOR_IN_Pin|PROJ_ON_Pin;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, LED_Pin, GPIO_PIN_RESET);
+
+  memset(&GPIO_InitStruct, 0, sizeof(GPIO_InitTypeDef));
+  /*Configure GPIO pins : LED_Pin */
+  GPIO_InitStruct.Pin = LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : MOTOR_OUT_Pin */
-  GPIO_InitStruct.Pin = MOTOR_OUT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(MOTOR_OUT_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : GYRO_INT2_Pin GYRO_INT1_Pin */
-  GPIO_InitStruct.Pin = GYRO_INT2_Pin|GYRO_INT1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 

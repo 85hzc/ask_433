@@ -57,18 +57,11 @@
 #define IR_IN_GPIO_Port GPIOB
 #define LED_Pin GPIO_PIN_2
 #define LED_GPIO_Port GPIOB
-#define MOTOR_IN_Pin GPIO_PIN_14
-#define MOTOR_IN_GPIO_Port GPIOB
-#define MOTOR_OUT_Pin GPIO_PIN_15
-#define MOTOR_OUT_GPIO_Port GPIOB
-#define MOTOR_AIN1_Pin GPIO_PIN_8
-#define MOTOR_AIN1_GPIO_Port GPIOA
-#define MOTOR_AIN2_Pin GPIO_PIN_9
-#define MOTOR_AIN2_GPIO_Port GPIOA
-#define MOTOR_BIN1_Pin GPIO_PIN_10
-#define MOTOR_BIN1_GPIO_Port GPIOA
-#define MOTOR_BIN2_Pin GPIO_PIN_11
-#define MOTOR_BIN2_GPIO_Port GPIOA
+
+#define USART1_GPIO_Port GPIOA
+#define USART1_TX_Pin GPIO_PIN_9
+#define USART1_RX_Pin GPIO_PIN_10
+
 #define GYRO_INT2_Pin GPIO_PIN_4
 #define GYRO_INT2_GPIO_Port GPIOB
 #define GYRO_INT1_Pin GPIO_PIN_5

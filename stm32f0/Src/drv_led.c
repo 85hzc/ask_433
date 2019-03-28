@@ -27,7 +27,7 @@ void Drv_LED_Init(void)
 }
 
 void Drv_LED_Proc(void)
-{  
+{
   if((HAL_GetTick() - tickstart) >= 1000)
   {
     tickstart = HAL_GetTick();

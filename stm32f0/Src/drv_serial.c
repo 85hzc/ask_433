@@ -37,7 +37,7 @@ static uint8_t Drv_SERIAL_Write(uint8_t * pData, uint32_t Timeout);
 static uint8_t Drv_SERIAL_Read(uint8_t * pData, uint32_t Timeout);
 
 int8_t Drv_THERM_CMD_Handler(uint8_t code, uint16_t param);
-int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param);
+//int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param);
 int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t param);
 int8_t Drv_HDMI_RCVR_CMD_Handler(uint8_t code, uint16_t param);
 int8_t Drv_FAN_CMD_Handler(uint8_t code, uint16_t param);
@@ -55,7 +55,7 @@ static cmd_table_t cmd_tbl[] = {
   {CMD_CODE_MASK_ACC,   Drv_ACC_CMD_Handler},  
   //{CMD_CODE_MASK_AU,    Drv_AU_AMP_CMD_Handler},
   //{CMD_CODE_MASK_THERM, Drv_THERM_Handler},
-  {CMD_CODE_MASK_MOTOR, Drv_MOTOR_CMD_Handler},
+  //{CMD_CODE_MASK_MOTOR, Drv_MOTOR_CMD_Handler},
   {CMD_CODE_MASK_FAN,   Drv_FAN_CMD_Handler},
 };
 
@@ -120,6 +120,7 @@ void Drv_SERIAL_Log(const char *format, ...)
 
   log_len = strlen(log);
   if (log_len){
+    log[log_len++] = '\r';
     log[log_len++] = '\n';
     HAL_UART_Transmit(&huart1, (uint8_t*)log, log_len, HAL_MAX_DELAY);
   }
@@ -244,7 +245,7 @@ static int8_t Drv_THERM_CMD_Handler(uint8_t code, uint16_t param)
   
   return rc;
 }
-
+/*
 static int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param)
 {
   int8_t rc = HAL_OK;
@@ -260,7 +261,7 @@ static int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param)
   }
   
   return rc;
-}
+}*/
 
 int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t param)
 {    
@@ -401,10 +402,10 @@ static void handle_func_keys(uint8_t key)
   switch (key)
   {
   case KEY_CHUP:
-    Drv_MOTOR_CMD_Handler(CMD_OP_MOTOR_SET_FORWARD, 4);
+    //Drv_MOTOR_CMD_Handler(CMD_OP_MOTOR_SET_FORWARD, 4);
     break;
   case KEY_CHDN:
-    Drv_MOTOR_CMD_Handler(CMD_OP_MOTOR_SET_BACKWARD, 4);
+    //Drv_MOTOR_CMD_Handler(CMD_OP_MOTOR_SET_BACKWARD, 4);
     break;
   case KEY_1:
     Drv_DLPC_CMD_Handler(CMD_OP_DLPC_SET_PROJ_ON, 2);
