@@ -101,25 +101,30 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+
+  
+#ifdef HWI2C
   MX_I2C2_Init();
+#endif
+  
   MX_CRC_Init();
-  MX_TIM1_Init();
-  MX_TIM3_Init();
+  //MX_TIM1_Init();
+  //MX_TIM3_Init();
   //MX_ADC_Init();
   
   /* Initialize FAN state */
-  Drv_FAN_Init();
+  //Drv_FAN_Init();
   /* Initialize SERIAL state */
   Drv_SERIAL_Init();
   /* Initialize IR state */
-  Drv_IR_Init();
+  //Drv_IR_Init();
   
   /* Initialize LED state */
   Drv_LED_Init();
   
   /* Initialize DLPC state */
   //Drv_DLPC_Init();
-  /* Initialize HDMI Rx state */  
+  /* Initialize HDMI Rx state */
   //Drv_HDMI_RCVR_Init();
   
   /* Initialize MOTOR state */
@@ -129,10 +134,17 @@ int main(void)
   //Drv_THERM_Init();
   /* Initialize ACC state */
   //Drv_ACC_Init();
-  /* Initialize AU AMP state */  
+  /* Initialize AU AMP state */
   //Drv_AU_AMP_Init();
 
   Drv_SERIAL_Log("starting...");
+
+
+  //SILAB_ReadID();
+
+  DEMO_Init();
+  Drv_SERIAL_Log("go to while...");
+
   
   /* Infinite loop */
   while (1)
@@ -141,10 +153,12 @@ int main(void)
     Drv_LED_Proc();
     Drv_FAN_Proc();
 
+    Drv_SILICON_Proc();
+
     //Drv_IR_Proc();
     //Drv_DLPC_CMD_Proc();
     //Drv_HDMI_RCVR_Proc();
-    //Drv_MOTOR_CMD_Proc();    
+    //Drv_MOTOR_CMD_Proc();
     //Drv_ACC_Proc();
   }
 
@@ -193,6 +207,20 @@ void SystemClock_Config(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+/*
+  memset(&PeriphClkInit, 0, sizeof(RCC_PeriphCLKInitTypeDef));
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C1;
+  PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_SYSCLK;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  //RCC->APB1ENR |= RCC_APB1ENR_I2C1EN;
+  //RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+*/
+
+
 
     /**Configure the Systick interrupt time 
     */
@@ -271,7 +299,10 @@ static void MX_I2C2_Init(void)
 {
 
   hi2c2.Instance = I2C2;
+  //hi2c2.Instance = I2C1;
+  
   hi2c2.Init.Timing = 0x2000090E;
+  //hi2c2.Init.Timing = 0xb0420f13;
   hi2c2.Init.OwnAddress1 = 0;
   hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -279,6 +310,7 @@ static void MX_I2C2_Init(void)
   hi2c2.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
   hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
   hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+
   if (HAL_I2C_Init(&hi2c2) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -440,25 +472,56 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
+  //__HAL_RCC_I2C2_CLK_ENABLE();
 
   /*Configure GPIO pins : USART1_TX_Pin|USART1_RX_Pin */
   GPIO_InitStruct.Pin = USART1_TX_Pin|USART1_RX_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Alternate = GPIO_AF1_USART1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LED_Pin, GPIO_PIN_RESET);
+#ifdef HWI2C
+  memset(&GPIO_InitStruct, 0, sizeof(GPIO_InitTypeDef));
+  GPIO_InitStruct.Pin = I2C2_SCL_Pin|I2C2_SDA_Pin;
+  //GPIO_InitStruct.Pin = I2C1_SCL_Pin|I2C1_SDA_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  //GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  //GPIO_InitStruct.Alternate = GPIO_AF1_I2C1;
+  GPIO_InitStruct.Alternate = GPIO_AF1_I2C2;
+  HAL_GPIO_Init(I2C2_GPIO_Port, &GPIO_InitStruct);
+#else
+/*
+      RCC_AHBPeriphClockCmd(  RCC_AHBPeriph_GPIOF, ENABLE );  
+      GPIO_InitStruct.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+      GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT ;   //ÍÆÍìÊä³ö
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+      GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+      GPIO_Init(GPIOF, &GPIO_InitStructure);
+      GPIO_SetBits(GPIOF,GPIO_Pin_6|GPIO_Pin_7);  //PB10,PB11 Êä³ö¸ß
+*/
+  memset(&GPIO_InitStruct, 0, sizeof(GPIO_InitTypeDef));
+  GPIO_InitStruct.Pin = I2C2_SCL_Pin|I2C2_SDA_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  //GPIO_InitStruct.Alternate = GPIO_AF1_I2C1;
+  //GPIO_InitStruct.Alternate = GPIO_AF1_I2C2;
+  HAL_GPIO_Init(I2C2_GPIO_Port, &GPIO_InitStruct);
+#endif
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
   memset(&GPIO_InitStruct, 0, sizeof(GPIO_InitTypeDef));
   /*Configure GPIO pins : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 }
 
 /* USER CODE BEGIN 4 */

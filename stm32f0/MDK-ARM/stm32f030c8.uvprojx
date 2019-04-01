@@ -455,6 +455,21 @@
               <FileType>1</FileType>
               <FilePath>..\Src\drv_fan.c</FilePath>
             </File>
+            <File>
+              <FileName>siliconSi115x.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\siliconSi115x.c</FilePath>
+            </File>
+            <File>
+              <FileName>gesture.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\gesture.c</FilePath>
+            </File>
+            <File>
+              <FileName>softi2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\softi2c.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

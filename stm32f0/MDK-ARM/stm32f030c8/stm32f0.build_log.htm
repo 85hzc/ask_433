@@ -22,16 +22,29 @@ Dialog DLL:      TARMCM1.DLL V1.13.0.0
  
 <h2>Project:</h2>
 E:\github\stm32f0\MDK-ARM\stm32f030c8.uvprojx
-Project File Date:  03/28/2019
+Project File Date:  03/29/2019
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'stm32f0'
-compiling drv_serial.c...
+compiling main.c...
+../Src/main.c(145): warning:  #223-D: function "DEMO_Init" declared implicitly
+    DEMO_Init();
+../Src/main.c(156): warning:  #223-D: function "Drv_SILICON_Proc" declared implicitly
+      Drv_SILICON_Proc();
+../Src/main.c(506): warning:  #223-D: function "memset" declared implicitly
+    memset(&GPIO_InitStruct, 0, sizeof(GPIO_InitTypeDef));
+../Src/main.c(298): warning:  #177-D: function "MX_I2C2_Init"  was declared but never referenced
+  static void MX_I2C2_Init(void)
+../Src/main.c(403): warning:  #177-D: function "MX_TIM3_Init"  was declared but never referenced
+  static void MX_TIM3_Init(void)
+../Src/main.c(336): warning:  #177-D: function "MX_TIM1_Init"  was declared but never referenced
+  static void MX_TIM1_Init(void)
+../Src/main.c: 6 warnings, 0 errors
 linking...
-Program Size: Code=19908 RO-data=528 RW-data=348 ZI-data=1724  
+Program Size: Code=19152 RO-data=528 RW-data=356 ZI-data=1804  
 FromELF: creating hex file...
-"stm32f030c8\stm32f0.axf" - 0 Error(s), 0 Warning(s).
+"stm32f030c8\stm32f0.axf" - 0 Error(s), 6 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -54,7 +67,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.1
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>

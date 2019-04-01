@@ -49,24 +49,31 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define THERM_Pin GPIO_PIN_1
-#define THERM_GPIO_Port GPIOA
-#define PROJ_ON_Pin GPIO_PIN_10
-#define PROJ_ON_GPIO_Port GPIOA
-#define IR_IN_Pin GPIO_PIN_1
-#define IR_IN_GPIO_Port GPIOB
-#define LED_Pin GPIO_PIN_2
-#define LED_GPIO_Port GPIOB
+#define THERM_Pin           GPIO_PIN_1
+#define THERM_GPIO_Port     GPIOA
+#define PROJ_ON_Pin         GPIO_PIN_10
+#define PROJ_ON_GPIO_Port   GPIOA
+#define IR_IN_Pin           GPIO_PIN_1
+#define IR_IN_GPIO_Port     GPIOB
+#define LED_Pin             GPIO_PIN_2
+#define LED_GPIO_Port       GPIOB
 
-#define USART1_GPIO_Port GPIOA
-#define USART1_TX_Pin GPIO_PIN_9
-#define USART1_RX_Pin GPIO_PIN_10
+#define USART1_GPIO_Port    GPIOA
+#define USART1_TX_Pin       GPIO_PIN_9
+#define USART1_RX_Pin       GPIO_PIN_10
 
+#define I2C2_GPIO_Port      GPIOB
+#define I2C2_SCL_Pin        GPIO_PIN_10
+#define I2C2_SDA_Pin        GPIO_PIN_11
+#define I2C1_SCL_Pin        GPIO_PIN_8
+#define I2C1_SDA_Pin        GPIO_PIN_9
+
+/*
 #define GYRO_INT2_Pin GPIO_PIN_4
 #define GYRO_INT2_GPIO_Port GPIOB
 #define GYRO_INT1_Pin GPIO_PIN_5
 #define GYRO_INT1_GPIO_Port GPIOB
-
+*/
 /* ########################## Assert Selection ############################## */
 /**
   * @brief Uncomment the line below to expanse the "assert_param" macro in the 

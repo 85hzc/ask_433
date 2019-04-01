@@ -60,6 +60,8 @@ static cmd_table_t cmd_tbl[] = {
 };
 
 static uint8_t single_cmd[CMD_LEN_MAX];
+static uint8_t rx_cmd[CMD_LEN_MAX];
+
 static struct {
   uint8_t wr_id;
   uint8_t rd_id;
@@ -79,10 +81,13 @@ void Drv_SERIAL_Init(void)
   * @brief  The drv_serial init.
   */
 void Drv_SERIAL_Proc(void)
-{  
+{
+  //static uint8_t rxidx = 0;
+  
   /* 1. read the uart buffer... */
   if (HAL_OK == Drv_SERIAL_Read(single_cmd, 0))
   {
+    //Drv_SERIAL_Log("%s",single_cmd);
     if (Drv_CMD_Handler(single_cmd) > 0)
     {
       if (CMD_HEADER_REQ == single_cmd[0])
@@ -91,7 +96,20 @@ void Drv_SERIAL_Proc(void)
         Drv_SERIAL_Write(single_cmd, 0);
       }
     }
-  }
+  } 
+  /*else {
+    rx_cmd[rxidx++] = single_cmd[0];
+    if(single_cmd[0] == '\n' ||
+        single_cmd[0] == '\r' ||
+        //single_cmd[0] == '\0' ||
+        single_cmd[0] == 0x0d ||
+        single_cmd[0] == 0x0a) {
+        
+      rxidx = 0;
+      Drv_SERIAL_Log("--%c%c%c%c%c%c--",rx_cmd[0],rx_cmd[1],rx_cmd[2],rx_cmd[3],rx_cmd[4],rx_cmd[5]);
+      memset(rx_cmd, 0, CMD_LEN_MAX);
+    }
+  }*/
   
   /* 2. read the action buffer... */
   if (HAL_OK == Drv_SERIAL_Read_Act(single_cmd))
@@ -114,7 +132,7 @@ void Drv_SERIAL_Log(const char *format, ...)
   va_list args;
 
   memset((uint8_t*)log, 0, MAX_LOG_LEN);
-  va_start(args, format);  
+  va_start(args, format);
   vsnprintf(log, MAX_LOG_LEN, format, args);
   va_end(args);
 
@@ -125,6 +143,25 @@ void Drv_SERIAL_Log(const char *format, ...)
     HAL_UART_Transmit(&huart1, (uint8_t*)log, log_len, HAL_MAX_DELAY);
   }
 }
+
+void Drv_SERIAL_Log_byte(const char *format, ...)
+{
+#define MAX_LOG_LEN 64
+  static char log[MAX_LOG_LEN];
+  char log_len;
+  va_list args;
+
+  memset((uint8_t*)log, 0, MAX_LOG_LEN);
+  va_start(args, format);
+  vsnprintf(log, MAX_LOG_LEN, format, args);
+  va_end(args);
+
+  log_len = strlen(log);
+  if (log_len){
+    HAL_UART_Transmit(&huart1, (uint8_t*)log, log_len, HAL_MAX_DELAY);
+  }
+}
+
 
 uint8_t Drv_SERIAL_Act(uint8_t code, uint16_t param)
 {
