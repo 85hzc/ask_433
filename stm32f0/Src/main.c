@@ -136,6 +136,8 @@ int main(void)
   /* Initialize AU AMP state */
   //Drv_AU_AMP_Init();
 
+  App_Init();
+
   Drv_SERIAL_Log("starting...");
   DEMO_Init();
   Drv_SERIAL_Log("go to while...");
@@ -488,15 +490,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF1_I2C2;
   HAL_GPIO_Init(I2C2_GPIO_Port, &GPIO_InitStruct);
 #else
-/*
-      RCC_AHBPeriphClockCmd(  RCC_AHBPeriph_GPIOF, ENABLE );  
-      GPIO_InitStruct.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
-      GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT ;   //ÍÆÍìÊä³ö
-    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
-      GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-      GPIO_Init(GPIOF, &GPIO_InitStructure);
-      GPIO_SetBits(GPIOF,GPIO_Pin_6|GPIO_Pin_7);  //PB10,PB11 Êä³ö¸ß
-*/
   memset(&GPIO_InitStruct, 0, sizeof(GPIO_InitTypeDef));
   GPIO_InitStruct.Pin = I2C2_SCL_Pin|I2C2_SDA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -516,7 +509,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
-}
+
+  /*Configure GPIO pin : INT_Pin */
+  GPIO_InitStruct.Pin = INT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(INT_GPIO_Port, &GPIO_InitStruct);
+
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+  }
 
 /* USER CODE BEGIN 4 */
 

@@ -21,8 +21,8 @@ void delayus(unsigned long time)
 {
     unsigned int i;
     while(time--)
-    for(i=50;i>0;i--)
-    delay_us(); 
+    for(i=10;i>0;i--)
+    delay_us();
 }
 
 

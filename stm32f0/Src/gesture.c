@@ -243,7 +243,7 @@ void Si115xForce(void)
     _sendCmd(0x11);
 }
 
-void getSensorDataByHostout(void)
+void getSensorDataByHostout(uint16_t *ps)
 {
     uint32_t CH1_PS,CH2_PS,CH3_PS;
 
@@ -255,8 +255,10 @@ void getSensorDataByHostout(void)
     CH3_PS = Si115xReadFromRegister (SI115x_REG_HOSTOUT5) +
          256*Si115xReadFromRegister(SI115x_REG_HOSTOUT4);
 
-    SILAB_log("- ch1:%d  ch2:%d  ch3:%d -\r\n",CH1_PS,CH2_PS,CH3_PS);
-    //Si115xForce();
+    ps[0] = CH1_PS;
+    ps[1] = CH2_PS;
+    ps[2] = CH3_PS;
+    SILAB_log("ch1:%d ch2:%d ch3:%d",CH1_PS,CH2_PS,CH3_PS);
 }
 
 
@@ -284,14 +286,16 @@ void DEMO_Init()
 
 void Drv_SILICON_Proc(void)
 {
-  if((HAL_GetTick() - tickstart) >= 100)
-  {
+  if((HAL_GetTick() - tickstart) >= 40) {
+
     tickstart = HAL_GetTick();
-    
     Si115xForce();
-    HAL_Delay(10);
-    getSensorDataByHostout();
+    HAL_Delay(2);
+    App_Task();
   }
+
+  //App_Task();
+
 }
 
 

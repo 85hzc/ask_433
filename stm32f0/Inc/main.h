@@ -68,6 +68,9 @@
 #define I2C1_SCL_Pin        GPIO_PIN_8
 #define I2C1_SDA_Pin        GPIO_PIN_9
 
+#define INT_Pin             GPIO_PIN_5
+#define INT_GPIO_Port       GPIOB
+
 /*
 #define GYRO_INT2_Pin GPIO_PIN_4
 #define GYRO_INT2_GPIO_Port GPIOB
@@ -88,6 +91,21 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
+
+#define DEBUG_ENABLE                        1
+#define LOG_ENABLE                          0
+
+#if DEBUG_ENABLE
+//#define LOG_DEBUG(format, args...)    do { \
+//                                        printf(format, ##args);\
+//                                      } while(0)
+#define LOG_DEBUG                       Drv_SERIAL_Log
+
+#else
+#define LOG_DEBUG(format, args...)    do {\
+                                      } while(0)
+#endif
+
 void _Error_Handler(char *, int);
 
 #define Error_Handler() _Error_Handler(__FILE__, __LINE__)

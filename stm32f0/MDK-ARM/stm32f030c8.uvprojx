@@ -470,6 +470,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\softi2c.c</FilePath>
             </File>
+            <File>
+              <FileName>App.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\App.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
