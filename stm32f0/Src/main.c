@@ -102,7 +102,6 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
 
-  
 #ifdef HWI2C
   MX_I2C2_Init();
 #endif
@@ -138,20 +137,15 @@ int main(void)
   //Drv_AU_AMP_Init();
 
   Drv_SERIAL_Log("starting...");
-
-
-  //SILAB_ReadID();
-
   DEMO_Init();
   Drv_SERIAL_Log("go to while...");
 
-  
   /* Infinite loop */
   while (1)
   {
     Drv_SERIAL_Proc();
     Drv_LED_Proc();
-    Drv_FAN_Proc();
+    //Drv_FAN_Proc();
 
     Drv_SILICON_Proc();
 

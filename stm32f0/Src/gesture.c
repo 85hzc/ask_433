@@ -239,7 +239,7 @@ int16_t Si115xInitProxAls( uint8_t proxOnly )
 
 void Si115xForce(void)
 {
-    SILAB_log("------------Si115xForce-------------\r\n");
+    //SILAB_log("------------Si115xForce-------------\r\n");
     _sendCmd(0x11);
 }
 
@@ -247,7 +247,7 @@ void getSensorDataByHostout(void)
 {
     uint32_t CH1_PS,CH2_PS,CH3_PS;
 
-    SILAB_log("------------getSensorDataByHostout-------------\r\n");
+    //SILAB_log("------------getSensorDataByHostout-------------\r\n");
     CH1_PS = Si115xReadFromRegister (SI115x_REG_HOSTOUT1) +
          256*Si115xReadFromRegister(SI115x_REG_HOSTOUT0);
     CH2_PS = Si115xReadFromRegister (SI115x_REG_HOSTOUT3) +
@@ -255,7 +255,7 @@ void getSensorDataByHostout(void)
     CH3_PS = Si115xReadFromRegister (SI115x_REG_HOSTOUT5) +
          256*Si115xReadFromRegister(SI115x_REG_HOSTOUT4);
 
-    SILAB_log("-------------ch1:%d,ch2:%d,ch3:%d-------------\r\n",CH1_PS,CH2_PS,CH3_PS);
+    SILAB_log("- ch1:%d  ch2:%d  ch3:%d -\r\n",CH1_PS,CH2_PS,CH3_PS);
     //Si115xForce();
 }
 
@@ -284,22 +284,13 @@ void DEMO_Init()
 
 void Drv_SILICON_Proc(void)
 {
-  if((HAL_GetTick() - tickstart) >= 3000)
+  if((HAL_GetTick() - tickstart) >= 100)
   {
     tickstart = HAL_GetTick();
     
-#if 0
-SILAB_ReadID();
-
-//Si115xWriteToRegister(0xf, 0x01);
-#else
-
-
     Si115xForce();
-    HAL_Delay(100);
+    HAL_Delay(10);
     getSensorDataByHostout();
-#endif
-
   }
 }
 
@@ -307,7 +298,7 @@ SILAB_ReadID();
 void i2cmsginfo(char const *tx, int txlen, char const *rx, int rxlen)
 {
     int i;
-
+/*
     if (tx != NULL) {
         Drv_SERIAL_Log_byte("TX:");
         for(i=0;i<txlen;i++) {
@@ -324,6 +315,7 @@ void i2cmsginfo(char const *tx, int txlen, char const *rx, int rxlen)
         Drv_SERIAL_Log("");
     }
     Drv_SERIAL_Log("----------\r\n");
+*/
 }
 
    

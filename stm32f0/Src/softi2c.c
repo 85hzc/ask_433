@@ -12,16 +12,16 @@ GPIO_InitTypeDef        GPIO_InitStructure;
 void delay_us(void)
 { 
     __ASM("nop");
-    __ASM("nop");
-    __ASM("nop");
-    __ASM("nop"); 
+    //__ASM("nop");
+    //__ASM("nop");
+    //__ASM("nop"); 
 }
 
 void delayus(unsigned long time)
 {
     unsigned int i;
     while(time--)
-    for(i=100;i>0;i--)
+    for(i=50;i>0;i--)
     delay_us(); 
 }
 
