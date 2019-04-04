@@ -258,7 +258,7 @@ void getSensorDataByHostout(uint16_t *ps)
     ps[0] = CH1_PS;
     ps[1] = CH2_PS;
     ps[2] = CH3_PS;
-    SILAB_log("ch1:%d ch2:%d ch3:%d",CH1_PS,CH2_PS,CH3_PS);
+    //SILAB_log("ch1:%d ch2:%d ch3:%d",CH1_PS,CH2_PS,CH3_PS);
 }
 
 
@@ -286,11 +286,11 @@ void DEMO_Init()
 
 void Drv_SILICON_Proc(void)
 {
-  if((HAL_GetTick() - tickstart) >= 40) {
+  if((HAL_GetTick() - tickstart) >= 30) {
 
     tickstart = HAL_GetTick();
     Si115xForce();
-    HAL_Delay(2);
+    HAL_Delay(1);
     App_Task();
   }
 

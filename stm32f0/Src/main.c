@@ -107,12 +107,12 @@ int main(void)
 #endif
   
   MX_CRC_Init();
-  //MX_TIM1_Init();
+  MX_TIM1_Init();
   //MX_TIM3_Init();
   //MX_ADC_Init();
   
   /* Initialize FAN state */
-  //Drv_FAN_Init();
+  Drv_FAN_Init();
   /* Initialize SERIAL state */
   Drv_SERIAL_Init();
   /* Initialize IR state */
@@ -518,9 +518,9 @@ static void MX_GPIO_Init(void)
 
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
-  }
+  //HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+  //HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+}
 
 /* USER CODE BEGIN 4 */
 

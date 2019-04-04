@@ -495,14 +495,14 @@ uint8_t Ges_Analysis(void)
         if ((left_up==GES_CHN_DOWN_LEFT)&&(right_up==GES_CHN_UP))
         {
             res=GES_LEVEL2_RIGHT;
-            return res;             
+            return res;
         }
         //从右到左
         if ((left_up==GES_CHN_UP)&&(right_up==GES_CHN_DOWN_RIGHT))
         {
             res=GES_LEVEL2_LEFT;
-            return res;             
-        }           
+            return res;
+        }
         //从上到下
         if ((left_up==GES_CHN_UP)||(right_up==GES_CHN_UP))
         {
@@ -514,19 +514,19 @@ uint8_t Ges_Analysis(void)
         {
             res=GES_LEVEL2_UP;
             return res;
-        }           
+        }
         //从左到右
         if (left_right==GES_CHN_DOWN_LEFT)
         {
             res=GES_LEVEL2_RIGHT;
-            return res;         
+            return res;
         }
         //从右到左
         if (left_right==GES_CHN_DOWN_RIGHT)
         {
             res=GES_LEVEL2_LEFT;
-            return res;         
-        }               
+            return res;
+        }
         
 #if (0)     
         //此次是UP位置
@@ -768,7 +768,7 @@ void App_Task(void)
         //一次数组填充完毕
         if (res==1)
         {
-            LOG_DEBUG("sample[%d] %d",gs.sample_size,res);
+            //LOG_DEBUG("sample[%d] %d",gs.sample_size,res);
 
             //第一次采样数据作为定标用
             if (!calib_num)
@@ -780,7 +780,7 @@ void App_Task(void)
 
             res=Ges_Analysis();
             if (res)
-            {/*
+            {
                 //当前是short采样，改变sample_size继续采样
                 if (gs.sample_size==GES_SAMPLE_ARRAY_NUM_S)
                 {
@@ -788,7 +788,7 @@ void App_Task(void)
                     gs.sample_size_raw=GES_SAMPLE_RAW_ARRAY_NUM_L;
                     gs.ges_sample_raw_cur=GES_SAMPLE_ARRAY_NUM_S;
                     return;
-                }*/
+                }
                 
                 uint64_t tick=Systick_Get();
                 
