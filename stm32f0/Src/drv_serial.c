@@ -113,7 +113,7 @@ void Drv_SERIAL_Proc(void)
   
   /* 2. read the action buffer... */
   if (HAL_OK == Drv_SERIAL_Read_Act(single_cmd))
-  {    
+  {
     (void)Drv_CMD_Handler(single_cmd);
   }
   
@@ -275,9 +275,9 @@ static int8_t Drv_THERM_CMD_Handler(uint8_t code, uint16_t param)
     
   switch (code)
   {
-  case CMD_OP_THERM_GET_VALUE:
-    rc = drv_therm_get_value();
-    break;
+      case CMD_OP_THERM_GET_VALUE:
+        rc = drv_therm_get_value();
+        break;
   }
   
   return rc;
@@ -289,12 +289,12 @@ static int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param)
     
   switch (code)
   {
-  case CMD_OP_MOTOR_SET_FORWARD:
-    drv_motor_move_forward(4);
-    break;
-  case CMD_OP_MOTOR_SET_BACKWARD:
-    drv_motor_move_reverse(4);
-    break;
+      case CMD_OP_MOTOR_SET_FORWARD:
+        drv_motor_move_forward(4);
+        break;
+      case CMD_OP_MOTOR_SET_BACKWARD:
+        drv_motor_move_reverse(4);
+        break;
   }
   
   return rc;
@@ -308,11 +308,11 @@ int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t param)
 
     switch (key)
     {
-    case REMOTE_POWER:
-      handle_power_key();
-      break;
-    default:
-      handle_func_keys(key);
+        case REMOTE_POWER:
+          handle_power_key();
+          break;
+        default:
+          handle_func_keys(key);
     }      
   }
   return 0;
@@ -324,10 +324,10 @@ int8_t Drv_HDMI_RCVR_CMD_Handler(uint8_t code, uint16_t param)
 
   switch (code)
   {
-  case CMD_OP_HDMI_GET_STATUS:
-    drv_hdmi_get_p0_status();
-    rc = HAL_OK;
-    break;
+      case CMD_OP_HDMI_GET_STATUS:
+        drv_hdmi_get_p0_status();
+        rc = HAL_OK;
+        break;
   }
   
   return rc;
@@ -339,15 +339,18 @@ int8_t Drv_FAN_CMD_Handler(uint8_t code, uint16_t param)
 
   switch (code)
   {
-  case CMD_OP_FAN_SPEED:
-    drv_fan_speed(param);
-    break;
-  case CMD_OP_FAN_ON:
-    drv_fan_on();
-    break;
-  case CMD_OP_FAN_OFF:
-    drv_fan_off(0);
-    break;
+      case CMD_OP_FAN_SPEED:
+        drv_fan_speed(param);
+        break;
+      case CMD_OP_FAN_ON:
+        drv_fan_on();
+        break;
+      case CMD_OP_FAN_OFF:
+        drv_fan_off(0);
+        break;
+      case CMD_OP_PWM_RGB:
+        drv_pwm_speed_rgb(param);
+        break;
   }
 
   return rc;
@@ -359,14 +362,14 @@ int8_t Drv_EEPROM_CMD_Handler(uint8_t code, uint16_t param)
 
   switch (code)
   {
-  case CMD_OP_EEPROM_READ_EDID:
-    drv_eeprom_read_edid();
-    rc = HAL_OK;
-    break;
-  case CMD_OP_EEPROM_WRITE_EDID:
-    drv_eeprom_write_edid();
-    rc = HAL_OK;
-    break;
+      case CMD_OP_EEPROM_READ_EDID:
+        drv_eeprom_read_edid();
+        rc = HAL_OK;
+        break;
+      case CMD_OP_EEPROM_WRITE_EDID:
+        drv_eeprom_write_edid();
+        rc = HAL_OK;
+        break;
   }
   
   return rc;

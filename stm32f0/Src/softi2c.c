@@ -14,7 +14,7 @@ void delay_us(void)
     __ASM("nop");
     //__ASM("nop");
     //__ASM("nop");
-    //__ASM("nop"); 
+    //__ASM("nop");
 }
 
 void delayus(unsigned long time)

@@ -140,7 +140,6 @@ int main(void)
 
   Drv_SERIAL_Log("starting...");
   DEMO_Init();
-  Drv_SERIAL_Log("go to while...");
 
   /* Infinite loop */
   while (1)

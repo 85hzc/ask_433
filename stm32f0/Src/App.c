@@ -11,14 +11,14 @@
 #include "main.h"  
 #include "stm32f0xx_hal.h"
 //#include "VCNL4035.h"
-//#include "I2C.h"
+#include "drv_serial.h"
 #include "App.h"
 #include "stdio.h"
 //#include "arm_math.h"
 //#include "arm_const_structs.h"
 //#include "math.h"
 
-uint64_t sys_tick=0;                                //系统tick计数
+uint64_t sys_tick=0;            //系统tick计数
 gs_struct gs={0};
 uint16_t led_counter=0;
 //uint16_t led
@@ -819,81 +819,55 @@ void App_Task(void)
                 {
                     //HAL_GPIO_WritePin(LED_UP_GPIO_Port, LED_UP_Pin, GPIO_PIN_SET);
                     led_counter=LED_FLASH_DELAY;
-                    LOG_DEBUG("Ges: UP!\n");
+                    LOG_DEBUG("Ges: UP!");
                     Ges_Log();
-                    //开SW2
-                    //HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_SET);
+                    Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_FAN, CMD_OP_PWM_RGB), GES_LEVEL2_UP);
                 }
                 else if (res==GES_LEVEL2_DOWN)
                 {
                     //HAL_GPIO_WritePin(LED_DOWN_GPIO_Port, LED_DOWN_Pin, GPIO_PIN_SET);
                     led_counter=LED_FLASH_DELAY;
-                    LOG_DEBUG("Ges: DOWN!\n");
+                    LOG_DEBUG("Ges: DOWN!");
                     Ges_Log();
-                    //关SW2
-                    //HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_RESET);
+                    Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_FAN, CMD_OP_PWM_RGB), GES_LEVEL2_DOWN);
                 }
                 else if (res==GES_LEVEL2_LEFT)
                 {
                     //HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_SET);
                     led_counter=LED_FLASH_DELAY;
-                    LOG_DEBUG("Ges: LEFT!\n");
+                    LOG_DEBUG("Ges: LEFT!");
                     Ges_Log();
-                    //关SW1
-                    //HAL_GPIO_WritePin(SW1_GPIO_Port, SW1_Pin, GPIO_PIN_RESET);
+                    Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_FAN, CMD_OP_PWM_RGB), GES_LEVEL2_LEFT);
                 }
                 else if (res==GES_LEVEL2_RIGHT)
                 {
                     //HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_SET);
                     led_counter=LED_FLASH_DELAY;
-                    LOG_DEBUG("Ges: RIGHT!\n");
+                    LOG_DEBUG("Ges: RIGHT!");
                     Ges_Log();
-                    //开SW1
-                    //HAL_GPIO_WritePin(SW1_GPIO_Port, SW1_Pin, GPIO_PIN_SET);
+                    Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_FAN, CMD_OP_PWM_RGB), GES_LEVEL2_RIGHT);
                 }
                 else if (res==GES_LEVEL2_HOLD)
                 {
                     static uint8_t sw_state=0;
-                    
-//                  gs.hold_counter++;
-//                  if (gs.hold_counter==0)
-//                  {
-//                      HAL_GPIO_WritePin(LED_HOLD_GPIO_Port, LED_HOLD_Pin, GPIO_PIN_SET);
-//                      led_counter=LED_FLASH_DELAY;                    
-//                      LOG_DEBUG("Ges: HOLD!\n");      
-//                      Ges_Log();              
-//                      if (!sw_state)
-//                      {
-//                          HAL_GPIO_WritePin(SW1_GPIO_Port, SW1_Pin, GPIO_PIN_SET);
-//                          HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_SET);
-//                          sw_state=1;
-//                      }
-//                      else
-//                      {
-//                          HAL_GPIO_WritePin(SW1_GPIO_Port, SW1_Pin, GPIO_PIN_RESET);  
-//                          HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_RESET);
-//                          sw_state=0;
-//                      }
-//                  }
+
                     if (gs.hold_counter<SAMPLE_HOLD_COUNT)
                     {
                         gs.hold_counter++;
                         if (gs.hold_counter==SAMPLE_HOLD_COUNT)
                         {
-                            //HAL_GPIO_WritePin(LED_HOLD_GPIO_Port, LED_HOLD_Pin, GPIO_PIN_SET);
-                            led_counter=LED_FLASH_DELAY;
-                            LOG_DEBUG("Ges: HOLD!\n");
+                            Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_FAN, CMD_OP_PWM_RGB), GES_LEVEL2_HOLD);
+                            //led_counter=LED_FLASH_DELAY;
+                            LOG_DEBUG("Ges: HOLD!");
                             Ges_Log();
                             if (!sw_state)
                             {
-                                //HAL_GPIO_WritePin(SW1_GPIO_Port, SW1_Pin, GPIO_PIN_SET);
-                                //HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_SET);
+                                //Drv_SERIAL_Rpt(SET_CODE(CMD_CODE_MASK_FAN, CMD_OP_PWM_RGB), GES_LEVEL2_UP);
                                 sw_state=1;
                             }
                             else
                             {
-                                //HAL_GPIO_WritePin(SW1_GPIO_Port, SW1_Pin, GPIO_PIN_RESET);  
-                                //HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_RESET);
+                                //Drv_SERIAL_Rpt(SET_CODE(CMD_CODE_MASK_FAN, CMD_OP_PWM_RGB), GES_LEVEL2_UP);
                                 sw_state=0;
                             }
                         }
@@ -901,9 +875,9 @@ void App_Task(void)
                 }
                 else if (res==GES_LEVEL2_DCLK)
                 {
-                    //HAL_GPIO_WritePin(LED_DCLK_GPIO_Port, LED_DCLK_Pin, GPIO_PIN_SET);
+                    Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_FAN, CMD_OP_PWM_RGB), GES_LEVEL2_DCLK);
                     led_counter=LED_FLASH_DELAY;
-                    LOG_DEBUG("Ges: DCLK!\n");
+                    LOG_DEBUG("Ges: DCLK!");
                     Ges_Log();
                 }
             }
@@ -920,11 +894,6 @@ void App_Task(void)
                 //HAL_GPIO_WritePin(LED_HOLD_GPIO_Port, LED_HOLD_Pin, GPIO_PIN_RESET);
             }
         }
-    
-//      VCNL4035_ReadData(VCNL4035_PS1_DATA,&ps1);
-//      VCNL4035_ReadData(VCNL4035_PS2_DATA,&ps2);
-//      VCNL4035_ReadData(VCNL4035_PS3_DATA,&ps3);
-//      LOG_DEBUG("PS1: 0x%04x, PS2: 0x%04x, PS3: 0x%04x\n",ps1,ps2,ps3);
     }
 }
 

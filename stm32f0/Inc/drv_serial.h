@@ -25,7 +25,7 @@
 #define CMD_HEADER_RSP        0x6D
 #define CMD_HEADER_RPT        0x55
 
-#define CMD_CODE_MASK         0xE0
+#define CMD_CODE_MASK         0xF0
 #define CMD_CODE_MASK_IR      0x01
 #define CMD_CODE_MASK_AU      0x02
 #define CMD_CODE_MASK_HDMI    0x03
@@ -35,8 +35,8 @@
 #define CMD_CODE_MASK_MOTOR   0x07
 #define CMD_CODE_MASK_FAN     0x08
 
-#define SET_CODE(m,c)         ((uint8_t)(m<<5|c))
-#define GET_MASK(m)           ((m&CMD_CODE_MASK)>>5)
+#define SET_CODE(m,c)         ((uint8_t)(m<<4|c))
+#define GET_MASK(m)           ((m&CMD_CODE_MASK)>>4)
 #define GET_OP(m)             (m&~CMD_CODE_MASK)
 
 typedef enum
@@ -78,6 +78,7 @@ typedef enum
   CMD_OP_FAN_SPEED                          = 0x00,
   CMD_OP_FAN_ON                             = 0x01,
   CMD_OP_FAN_OFF                            = 0x02,
+  CMD_OP_PWM_RGB                            = 0x03,
 }fan_op_t;
 typedef enum
 {

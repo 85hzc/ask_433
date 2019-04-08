@@ -279,7 +279,6 @@ void DEMO_Init()
             Si115xInitLongRangeProx();
             break;
     }
-    //Si115xInitLongRangeProx();// init for this project.hzc
     Si115xForce();
 }
 
