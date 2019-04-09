@@ -87,12 +87,12 @@ void drv_pwm_speed_rgb(uint16_t param)
         break;
   }
 
-  Drv_SERIAL_Log("speed=%d",speed);
+  //Drv_SERIAL_Log("speed=%d",speed);
 
   if(speed <= pre_speed) {
 
       for(int i=0; i < times && speed > 0 && speed < 100; i++) {
-          Drv_SERIAL_Log("speed=%d",speed);
+          //Drv_SERIAL_Log("speed=%d",speed);
 
           __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2, --speed);
           HAL_Delay(25);
@@ -101,7 +101,7 @@ void drv_pwm_speed_rgb(uint16_t param)
 
       for(int i=0; i < times && speed < 100; i++) {
   
-          Drv_SERIAL_Log("speed=%d",speed);
+          //Drv_SERIAL_Log("speed=%d",speed);
           __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2, ++speed);
           HAL_Delay(25);
       }

@@ -57,7 +57,7 @@ SILAB_SENSOR_StatusTypeDef SILAB_IO_Write(uint8_t* pBuffer, uint8_t DeviceAddr, 
   for (stringpos = 0; stringpos < NumByteToWrite; stringpos++) {
     array[stringpos + 1] = *(pBuffer + stringpos);
   }
-#ifdef HWI2C
+#if(HWI2C)
   SILAB_WRITE(array[0], pBuffer, NumByteToWrite);
 #else
   i2c_write(DeviceAddr, array, NumByteToWrite+1);
@@ -99,7 +99,7 @@ SILAB_SENSOR_StatusTypeDef SILAB_IO_Write_Block(uint8_t* pBuffer, uint8_t Device
   for (stringpos = 0; stringpos < NumByteToWrite; stringpos++) {
     array[stringpos + 1] = *(pBuffer + stringpos);
   }
-#ifdef HWI2C
+#if(HWI2C)
   SILAB_WRITE(array[0], pBuffer, NumByteToWrite);
 #else
   i2c_write(DeviceAddr, array, NumByteToWrite+1);
@@ -171,8 +171,8 @@ uint8_t SILAB_IO_Read(uint8_t* pBuffer, uint8_t DeviceAddr, uint8_t RegisterAddr
 
   memset(pBuffer, 0, NumByteToRead);
   arraytx[0] = 0x40 | RegisterAddr;
-#ifdef HWI2C
-  //iError = SILAB_READ(arraytx[0], pBuffer, NumByteToRead);
+#if(HWI2C)
+  iError = SILAB_READ(arraytx[0], pBuffer, NumByteToRead);
 #else
   i2c_write(DeviceAddr, arraytx, 1);
   i2c_read(DeviceAddr, pBuffer, NumByteToRead);

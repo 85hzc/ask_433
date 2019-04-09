@@ -102,7 +102,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
 
-#ifdef HWI2C
+#if(HWI2C)
   MX_I2C2_Init();
 #endif
   
@@ -477,7 +477,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF1_USART1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-#ifdef HWI2C
+#if(HWI2C)
   memset(&GPIO_InitStruct, 0, sizeof(GPIO_InitTypeDef));
   GPIO_InitStruct.Pin = I2C2_SCL_Pin|I2C2_SDA_Pin;
   //GPIO_InitStruct.Pin = I2C1_SCL_Pin|I2C1_SDA_Pin;

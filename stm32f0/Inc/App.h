@@ -11,12 +11,12 @@
 #define SAMPLE_HOLD_END_SHIFT       10              //从采样数组末尾起10个作为检测基准
 #define SAMPLE_HOLD_COUNT           3               //最多3个HOLD的count再次发送一次HOLD
 #define SAMPLE_HOLD_LIST_NUM        10              //hold数组的最大元素个数
-//#define SAMPLE_HOLD_START     
+//#define SAMPLE_HOLD_START
 
 #define GES_CHN_NUM                 3               //手势采样的通道数，3
-#define GES_CHN_UP                  1               //上通道
-#define GES_CHN_DOWN_LEFT           0               //下左通道
-#define GES_CHN_DOWN_RIGHT          2               //下右通道
+#define GES_CHN_UP                  2               //上通道
+#define GES_CHN_DOWN_LEFT           1               //下左通道
+#define GES_CHN_DOWN_RIGHT          0               //下右通道
 #define GES_CHN_INVALID             0xFF            //无效通道
 
 #define GES_SAMPLE_AVE_NUM          1               //用以平均的数据大小：1 

@@ -63,8 +63,8 @@
 #define USART1_RX_Pin       GPIO_PIN_10
 
 #define I2C2_GPIO_Port      GPIOB
-#define I2C2_SCL_Pin        GPIO_PIN_10
-#define I2C2_SDA_Pin        GPIO_PIN_11
+#define I2C2_SCL_Pin        GPIO_PIN_8
+#define I2C2_SDA_Pin        GPIO_PIN_9
 #define I2C1_SCL_Pin        GPIO_PIN_8
 #define I2C1_SDA_Pin        GPIO_PIN_9
 
@@ -77,6 +77,9 @@
 #define GYRO_INT1_Pin GPIO_PIN_5
 #define GYRO_INT1_GPIO_Port GPIOB
 */
+
+#define HWI2C 0
+
 /* ########################## Assert Selection ############################## */
 /**
   * @brief Uncomment the line below to expanse the "assert_param" macro in the 

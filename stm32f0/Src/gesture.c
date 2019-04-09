@@ -1,9 +1,10 @@
 #include "main.h"
 #include "stm32f0xx_hal.h"
 #include "drv.h"
-
+#include "app.h"
 #include "siliconSi115x.h"
 
+extern gs_struct gs;
 static uint32_t tickstart;
 
 #define SILAB_log Drv_SERIAL_Log
@@ -258,7 +259,11 @@ void getSensorDataByHostout(uint16_t *ps)
     ps[0] = CH1_PS;
     ps[1] = CH2_PS;
     ps[2] = CH3_PS;
-    //SILAB_log("ch1:%d ch2:%d ch3:%d",CH1_PS,CH2_PS,CH3_PS);
+#if (LOG_ENABLE)
+    LOG_DEBUG("%d  %d  %d",CH2_PS<=gs.sample_base[1]?0:CH2_PS-gs.sample_base[1],
+                        CH3_PS<=gs.sample_base[2]?0:CH3_PS-gs.sample_base[2],
+                        CH1_PS<=gs.sample_base[0]?0:CH1_PS-gs.sample_base[0]);
+#endif
 }
 
 
@@ -267,6 +272,8 @@ void DEMO_Init()
     uint8_t data;
 
     tickstart = HAL_GetTick();
+
+    SILAB_log("------------DEMO_Init-------------\r\n");
 
     //Get HW ID of the part and use that to decide what we are talking to
     data = Si115xReadFromRegister( SI1153_REG_HW_ID);
