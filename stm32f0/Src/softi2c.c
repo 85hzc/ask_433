@@ -8,7 +8,7 @@ GPIO_InitTypeDef        GPIO_InitStructure;
    
 #define BYTE uint8_t
 
-
+#if 1
 void delay_us(void)
 { 
     __ASM("nop");
@@ -20,12 +20,104 @@ void delay_us(void)
 void delayus(unsigned long time)
 {
     unsigned int i;
-    while(time--)
-        for(i=1;i>0;i--)
-            delay_us();
+    while(time--);
+      //delay_us();
+}
+#else
+
+#define  MY_MCU_SYSCLK           (48000000)
+#define  DWT_CR      *(volatile uint32_t *)0xE0001000
+#define  DWT_CYCCNT  *(volatile uint32_t *)0xE0001004
+#define  DEM_CR      *(volatile uint32_t *)0xE000EDFC
+#define  DEM_CR_TRCENA                   (1 << 24)
+#define  DWT_CR_CYCCNTENA                (1 <<  0)
+
+#define Delayms(msec)         delayus(msec*1000)  //对于延时毫秒级的只需要定义一个宏
+
+static uint32_t cpuclkfeq=0;     //用于保存cpu运行频率，可运行时动态修改
+
+//初始化延时系统，参数为CPU频率
+void DWTDelayInit(uint32_t clk)
+{
+    cpuclkfeq = clk;
+
+    //打开CYCCNT功能,并把计数器清零，最后打开计数器对cpu时钟进行向上计数
+    DEM_CR         |=  DEM_CR_TRCENA; 
+    DWT_CYCCNT     = 0u;    //根据需要如果调试，或其他程序要使用CYCCNT时注释掉，否则可直接清零 
+    DWT_CR         |= DWT_CR_CYCCNTENA;
+}
+
+//延时函数，参数为需要延时的微秒数
+void delayus(uint32_t usec)
+{
+    uint32_t startts,endts,ts;
+    Drv_SERIAL_Log("[%d]ctccnt:%d",__LINE__,DWT_CYCCNT);
+/*
+    if (!cpuclkfeq)
+        DWTDelayInit(SystemCoreClock);//(MY_MCU_SYSCLK);
+*/
+    //保存进入函数时的计数器值
+    startts = DWT_CYCCNT;
+    ts =  usec * (cpuclkfeq /(1000*1000));   //计算达到所需延时值的cpu时钟数,^-^如果想要更精确此处可以减去运行前面代码所需的时钟数。
+    endts = startts + ts;           //计算达到所需延时时间的DWT_CYCCNT计数值，超过32bit所能表达的最大值2的32次方-1是自动绕回丢弃进位
+    if(endts > startts)            //判断是否跨越最大值边界
+    {
+    Drv_SERIAL_Log("[%d]ctccnt:%d",__LINE__,DWT_CYCCNT);
+        while(DWT_CYCCNT < endts)
+            ;        //等到计数到所需延时值的cpu时钟数值
+    }
+    else
+    {
+    Drv_SERIAL_Log("[%d]ctccnt:%d",__LINE__,DWT_CYCCNT);
+        while(DWT_CYCCNT > endts)
+            ;       //等待跨域32bit的最大值，2的32次方-1
+        while(DWT_CYCCNT < endts)
+            ;        //等到计数到所需延时值的cpu时钟数值
+    }
+    Drv_SERIAL_Log("[%d]ctccnt:%d",__LINE__,DWT_CYCCNT);
+
 }
 
 
+/* DWT (Data Watchpoint and Trace) registers, only exists on ARM Cortex with a DWT unit */
+#define KIN1_DWT_CONTROL             (*((volatile uint32_t*)0xE0001000))
+/*!< DWT Control register */
+
+#define KIN1_DWT_CYCCNTENA_BIT       (1UL<<0)
+/*!< CYCCNTENA bit in DWT_CONTROL register */
+
+#define KIN1_DWT_CYCCNT              (*((volatile uint32_t*)0xE0001004))
+/*!< DWT Cycle Counter register */
+
+#define KIN1_DEMCR                   (*((volatile uint32_t*)0xE000EDFC))
+/*!< DEMCR: Debug Exception and Monitor Control Register */
+
+#define KIN1_TRCENA_BIT              (1UL<<24)
+/*!< Trace enable bit in DEMCR register */
+
+
+
+#define KIN1_InitCycleCounter() \
+  KIN1_DEMCR |= KIN1_TRCENA_BIT
+  /*!< TRCENA: Enable trace and debug block DEMCR (Debug Exception and Monitor Control Register */
+ 
+#define KIN1_ResetCycleCounter() \
+  KIN1_DWT_CYCCNT = 0
+  /*!< Reset cycle counter */
+ 
+#define KIN1_EnableCycleCounter() \
+  KIN1_DWT_CONTROL |= KIN1_DWT_CYCCNTENA_BIT
+  /*!< Enable cycle counter */
+ 
+#define KIN1_DisableCycleCounter() \
+  KIN1_DWT_CONTROL &= ~KIN1_DWT_CYCCNTENA_BIT
+  /*!< Disable cycle counter */
+ 
+#define KIN1_GetCycleCounter() \
+  KIN1_DWT_CYCCNT
+  /*!< Read cycle counter register */
+
+#endif
 
 /**
   * @brief  Set SDA Pin as Output Mode
@@ -117,7 +209,7 @@ void IIC_SCL_0()
 void IIC_Start(void)
 {
 	SDA_OUT();     //sda output
-	IIC_SDA_1();	  	  
+	IIC_SDA_1();
 	IIC_SCL_1();
 	delayus(4);
  	IIC_SDA_0();   //START:when CLK is high,DATA change form high to low 
@@ -150,9 +242,9 @@ BYTE IIC_Wait_Ack(void)
 	BYTE ucErrTime = 0;
 	SDA_IN();      //set as input mode
 	IIC_SDA_1();
-  delayus(1);
+	delayus(1);
 	IIC_SCL_1();
-  delayus(1);
+	delayus(1);
 	while(SDA_READ())
 	{
 		ucErrTime++;
@@ -194,7 +286,7 @@ void IIC_NAck(void)
 	IIC_SCL_1();
 	delayus(2);
 	IIC_SCL_0();
-}   
+}
 
 
 /**
@@ -227,7 +319,7 @@ void IIC_Send_Byte(BYTE txd)
   }
 
   IIC_Wait_Ack();//hzc +
-} 	  
+}
 
 //¶Á1¸ö×Ö½Ú£¬ack=1Ê±£¬·¢ËÍACK£¬ack=0£¬·¢ËÍnACK   
 /**
@@ -301,7 +393,4 @@ void i2c_write(unsigned char addr, unsigned char* buf, int len)
 	    IIC_Send_Byte(buf[i]);
 	IIC_Stop();                     //终止条件，结束数据通信
 }
-
-
-
 

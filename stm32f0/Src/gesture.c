@@ -293,11 +293,20 @@ void DEMO_Init()
 void Drv_SILICON_Proc(void)
 {
   if((HAL_GetTick() - tickstart) >= 30) {
+#if 1
 
     tickstart = HAL_GetTick();
     Si115xForce();
     HAL_Delay(1);
     App_Task();
+#else
+    for(int i=0;i<30;i++){
+        IIC_SCL_1();
+        HAL_Delay(1);
+        IIC_SCL_0();
+        HAL_Delay(1);
+    }
+#endif
   }
 
   //App_Task();

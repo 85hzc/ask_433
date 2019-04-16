@@ -136,6 +136,8 @@ int main(void)
   /* Initialize AU AMP state */
   //Drv_AU_AMP_Init();
 
+  //DWTDelayInit(SystemCoreClock);
+
   App_Init();
 
   Drv_SERIAL_Log("starting...");

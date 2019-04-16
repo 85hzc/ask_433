@@ -336,7 +336,7 @@ uint8_t Ges_Wave_Search(uint8_t chn,uint16_t *pindex)
 //  {
 //      res=GES_LEVEL1_LEAVE;
 //  }
-    if ((gs.wave[chn].peak_index!=GES_INVALID_INDEX)&&(gs.wave[chn].peak_value>gs.sample_up_limit[chn]))        
+    if ((gs.wave[chn].peak_index!=GES_INVALID_INDEX)&&(gs.wave[chn].peak_value>gs.sample_up_limit[chn]))
     {
         //峰值是最后一个数据
         if (gs.wave[chn].peak_index==(gs.sample_size-1))
@@ -392,15 +392,23 @@ uint8_t Ges_Wave_Lead(uint8_t chn1,uint8_t chn2)
         else if (gs.wave[chn1].rise_index>gs.wave[chn2].rise_index)
             return chn2;        
     }
+/*
     if ((gs.wave[chn1].rise_index!=GES_INVALID_INDEX)&&
         ((gs.wave[chn2].fall_index!=GES_INVALID_INDEX)||
-        (gs.wave[chn2].peak_index!=GES_INVALID_INDEX)))
+        (gs.wave[chn2].peak_index!=GES_INVALID_INDEX))){
+#if (LOG_ENABLE)
+        LOG_DEBUG("Wave lead by guess ch2");
+#endif
         return chn2;
-    
+    }
     if ((gs.wave[chn2].rise_index!=GES_INVALID_INDEX)&&
         ((gs.wave[chn1].fall_index!=GES_INVALID_INDEX)||
-        (gs.wave[chn1].peak_index!=GES_INVALID_INDEX)))
+        (gs.wave[chn1].peak_index!=GES_INVALID_INDEX))){
+#if (LOG_ENABLE)
+        LOG_DEBUG("Wave lead by guess ch1");
+#endif
         return chn1;
+    }*/
     
     return GES_CHN_INVALID;
 }
@@ -671,9 +679,14 @@ void Ges_Calib(void)
 //归一化采样数组
 void Ges_Normalize(void)
 {
-    uint8_t i,j;
+    uint8_t i,j,jj;
     for (i=0;i<GES_CHN_NUM;i++)
     {
+        if(gs.sample_size == GES_SAMPLE_ARRAY_NUM_L)
+            jj = 10;
+        else
+            jj = 0;
+        
         for (j=0;j<gs.sample_size;j++)
         {
             if (gs.ges_sample_array[i][j]>=gs.sample_base[i])
@@ -768,8 +781,9 @@ void App_Task(void)
         //一次数组填充完毕
         if (res==1)
         {
-            //LOG_DEBUG("sample[%d] %d",gs.sample_size,res);
-
+//#if (LOG_ENABLE)
+            LOG_DEBUG("sample[%d]",gs.sample_size);
+//#endif
             //第一次采样数据作为定标用
             if (!calib_num)
             {
@@ -817,7 +831,6 @@ void App_Task(void)
                 
                 if (res==GES_LEVEL2_UP)
                 {
-                    //HAL_GPIO_WritePin(LED_UP_GPIO_Port, LED_UP_Pin, GPIO_PIN_SET);
                     led_counter=LED_FLASH_DELAY;
                     LOG_DEBUG("Ges: UP!");
                     Ges_Log();
@@ -825,7 +838,6 @@ void App_Task(void)
                 }
                 else if (res==GES_LEVEL2_DOWN)
                 {
-                    //HAL_GPIO_WritePin(LED_DOWN_GPIO_Port, LED_DOWN_Pin, GPIO_PIN_SET);
                     led_counter=LED_FLASH_DELAY;
                     LOG_DEBUG("Ges: DOWN!");
                     Ges_Log();
@@ -833,7 +845,6 @@ void App_Task(void)
                 }
                 else if (res==GES_LEVEL2_LEFT)
                 {
-                    //HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_SET);
                     led_counter=LED_FLASH_DELAY;
                     LOG_DEBUG("Ges: LEFT!");
                     Ges_Log();
@@ -841,7 +852,6 @@ void App_Task(void)
                 }
                 else if (res==GES_LEVEL2_RIGHT)
                 {
-                    //HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_SET);
                     led_counter=LED_FLASH_DELAY;
                     LOG_DEBUG("Ges: RIGHT!");
                     Ges_Log();
