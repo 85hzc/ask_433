@@ -259,11 +259,11 @@ void getSensorDataByHostout(uint16_t *ps)
     ps[0] = CH1_PS;
     ps[1] = CH2_PS;
     ps[2] = CH3_PS;
-#if (LOG_ENABLE)
-    LOG_DEBUG("%d  %d  %d",CH2_PS<=gs.sample_base[1]?0:CH2_PS-gs.sample_base[1],
+//#if (LOG_ENABLE)
+    LOG_DEBUG("%5d  %5d  %5d",CH2_PS<=gs.sample_base[1]?0:CH2_PS-gs.sample_base[1],
                         CH3_PS<=gs.sample_base[2]?0:CH3_PS-gs.sample_base[2],
                         CH1_PS<=gs.sample_base[0]?0:CH1_PS-gs.sample_base[0]);
-#endif
+//#endif
 }
 
 
