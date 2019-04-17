@@ -64,11 +64,11 @@
 
 #define INT_Pin             GPIO_PIN_5
 #define INT_GPIO_Port       GPIOB
-
+/*
 #define USART1_GPIO_Port    GPIOA
 #define USART1_TX_Pin       GPIO_PIN_9
 #define USART1_RX_Pin       GPIO_PIN_10
-
+*/
 #define SCL_GPIO_Port       GPIOB
 #define SDA_GPIO_Port       GPIOB
 #define SCL1_Pin            GPIO_PIN_10

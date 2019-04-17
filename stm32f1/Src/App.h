@@ -15,8 +15,8 @@
 
 #define GES_CHN_NUM					3				//手势采样的通道数，3
 #define GES_CHN_UP					2				//上通道
-#define GES_CHN_DOWN_LEFT			0				//下左通道
-#define GES_CHN_DOWN_RIGHT			1				//下右通道
+#define GES_CHN_DOWN_LEFT			1				//下左通道
+#define GES_CHN_DOWN_RIGHT			0				//下右通道
 #define GES_CHN_INVALID				0xFF			//无效通道
 
 #define GES_SAMPLE_AVE_NUM			1				//用以平均的数据大小：1		
