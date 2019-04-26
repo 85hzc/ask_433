@@ -21,28 +21,45 @@
 ***/
 
 #include "stm32f4xx.h"
-#include "led.h"   
+#include "led.h"
 #include "delay.h"
 #include "key.h"
-#include "usart.h"  
+#include "usart.h"
+#include "gpio.h"
 
 int main(void)
 {
-	u8 key_flag = 0;	//按键标志
+	uint8_t key_flag = 0;	//按键标志
 	
-
+	SystemInit();
+	
 	Delay_Init();		//延时函数初始化
 	LED_Init();			//LED初始化
 	KEY_Init();			//按键IO口初始化
 	Usart_Config();	// USART初始化函数
+	MBI_GPIO_Init();//初始化MBI驱动pin
 	
-	printf("FK407M2核心板测试\r\n");
+	printf("system start.\r\n");
+	
+	SystemCoreClockUpdate();
+	
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//系统中断优先级分组2
+	#if 0
+	Pulse_output(1000,8000);//1KHZ,8000个
+	#else
+
+	TIM14_PWM_Init(100-1,42-1);//168M/42=4Mhz的计数频率,重装载值100，所以PWM频率为 4M/100=40Khz.
+	TIM_SetCompare1(TIM14,50);
+
+#endif
+	
+	MBI5153();
 	
 	while (1)
 	{	
-		Delay_ms(500);
-		printf("while\r\n");
-	  //printf("FK407M2核心板测试\r\n");
+		Delay_ms(100);
+
+		//printf("FK407M2核心板测试\r\n");
 		/*
 		LED1_ON;
 		LED2_OFF;
@@ -50,7 +67,7 @@ int main(void)
 		LED1_OFF;
 		LED2_ON;
 		Delay_ms(500);*/
-		
+		#if 0
 		//每次按键按下对标志进行取反
 		if( KEY_Scan() == KEY_ON )
 		{			
@@ -66,10 +83,7 @@ int main(void)
 		{
 			LED1_OFF;
 		}
-	}	
+		#endif
+	}
 }
-
-
-
-
 
