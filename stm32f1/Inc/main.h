@@ -41,6 +41,8 @@
 
 /* Private define ------------------------------------------------------------*/
 
+#define SENSOR3             1
+
 #define LED_DCLK_Pin        GPIO_PIN_4
 #define LED_DCLK_GPIO_Port  GPIOA
 #define LED_HOLD_Pin        GPIO_PIN_5
@@ -51,6 +53,7 @@
 #define SW2_Pin GPIO_PIN_7
 #define SW2_GPIO_Port GPIOA
 */
+#if(SENSOR3==1)
 #define LED_LEFT_Pin        GPIO_PIN_0
 #define LED_LEFT_GPIO_Port  GPIOB
 #define LED_DOWN_Pin        GPIO_PIN_6
@@ -59,6 +62,17 @@
 #define LED_UP_GPIO_Port    GPIOB
 #define LED_RIGHT_Pin       GPIO_PIN_7
 #define LED_RIGHT_GPIO_Port GPIOA
+#else
+#define LED_LEFT_Pin        GPIO_PIN_1
+#define LED_LEFT_GPIO_Port  GPIOB
+#define LED_DOWN_Pin        GPIO_PIN_0
+#define LED_DOWN_GPIO_Port  GPIOB
+#define LED_UP_Pin          GPIO_PIN_6
+#define LED_UP_GPIO_Port    GPIOA
+#define LED_RIGHT_Pin       GPIO_PIN_7
+#define LED_RIGHT_GPIO_Port GPIOA
+#endif
+
 //#define LED1_Pin GPIO_PIN_12
 //#define LED1_GPIO_Port GPIOB
 

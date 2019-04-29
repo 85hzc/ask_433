@@ -3,6 +3,8 @@
 #include "stm32f1xx_hal.h"
 //#include "drv.h"
 
+volatile uint16_t I2C_SDA_PIN = 0;
+volatile uint16_t I2C_SCL_PIN = 0;
 
 GPIO_InitTypeDef        GPIO_InitStructure;  
    
@@ -21,7 +23,7 @@ void delayus(unsigned long time)
 {
     unsigned int i;
     while(time--)
-        for(i=1;i>0;i--)
+        for(i=2;i>0;i--)
             delay_us();
 }
 
@@ -35,7 +37,7 @@ void SDA_OUT()
 {  
   memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
 
-  GPIO_InitStructure.Pin = SDA1_Pin;
+  GPIO_InitStructure.Pin = I2C_SDA_PIN;
   GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStructure.Pull = GPIO_NOPULL;
   GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -51,7 +53,7 @@ void SDA_IN()
 
     memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
 
-    GPIO_InitStructure.Pin = SDA1_Pin;
+    GPIO_InitStructure.Pin = I2C_SDA_PIN;
     GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
     GPIO_InitStructure.Pull = GPIO_NOPULL;
     GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -64,7 +66,7 @@ void SDA_IN()
   */
 GPIO_PinState SDA_READ()
 {
-  return HAL_GPIO_ReadPin(GPIOB, SDA1_Pin);
+  return HAL_GPIO_ReadPin(GPIOB, I2C_SDA_PIN);
 }
 
 /**
@@ -73,7 +75,7 @@ GPIO_PinState SDA_READ()
   */
 void IIC_SDA_1()
 {
-  HAL_GPIO_WritePin(GPIOB, SDA1_Pin, 1);
+  HAL_GPIO_WritePin(GPIOB, I2C_SDA_PIN, 1);
 }
 
 /**
@@ -84,7 +86,7 @@ void IIC_SDA_0()
 {
   //GPIO_ResetBits(GPIOF, GPIO_Pin_7);
   
-    HAL_GPIO_WritePin(GPIOB, SDA1_Pin, 0);
+    HAL_GPIO_WritePin(GPIOB, I2C_SDA_PIN, 0);
 }
 
 /**
@@ -95,7 +97,7 @@ void IIC_SCL_1()
 {
 //GPIO_SetBits(GPIOF, GPIO_Pin_6);
 
-    HAL_GPIO_WritePin(GPIOB, SCL1_Pin, 1);
+    HAL_GPIO_WritePin(GPIOB, I2C_SCL_PIN, 1);
 }
 
 /**
@@ -105,7 +107,7 @@ void IIC_SCL_1()
 void IIC_SCL_0()
 {
 //GPIO_ResetBits(GPIOF, GPIO_Pin_6);  
-    HAL_GPIO_WritePin(GPIOB, SCL1_Pin, 0);
+    HAL_GPIO_WritePin(GPIOB, I2C_SCL_PIN, 0);
 
 }
 

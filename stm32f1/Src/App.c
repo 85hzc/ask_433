@@ -18,6 +18,10 @@
 #include "arm_const_structs.h"
 //#include "math.h"
 
+extern volatile uint16_t I2C_SDA_PIN;
+extern volatile uint16_t I2C_SCL_PIN;
+
+static uint32_t tickstart;
 uint64_t sys_tick=0;								//系统tick计数
 gs_struct gs={0};
 uint16_t led_counter=0;
@@ -43,12 +47,34 @@ void App_Var_Init(void)
 //应用初始化
 void App_Init(void)
 {
-	uint16_t read_val;
-	uint8_t res;
+	//uint16_t read_val;
+	//uint8_t res;
 
 	App_Var_Init();
-	
+
+	tickstart = HAL_GetTick();
+	while((HAL_GetTick() - tickstart) <= 200)//delay
+		;
+
+#if(SENSOR3==1)
+	I2C_SDA_PIN = SDA1_Pin;
+	I2C_SCL_PIN = SCL1_Pin;
 	I2C_init();
+	DEMO_Init();
+	I2C_SDA_PIN = SDA2_Pin;
+	I2C_SCL_PIN = SCL2_Pin;
+	I2C_init();
+	DEMO_Init();
+	I2C_SDA_PIN = SDA3_Pin;
+	I2C_SCL_PIN = SCL3_Pin;
+	I2C_init();
+	DEMO_Init();
+#else
+	I2C_SDA_PIN = SDA3_Pin;
+	I2C_SCL_PIN = SCL3_Pin;
+	I2C_init();
+	DEMO_Init();
+#endif
 	LOG_DEBUG("Start!\n");
 	
 	//res=VCNL4035_ReadData(VCNL4035_ID,&read_val);
@@ -239,8 +265,8 @@ uint8_t Ges_Edge_Find(uint16_t *ps,uint8_t chn,uint16_t *pindex)
 				fall=1;
 				fall_index=i;
 				break;
-			}		
-		}		
+			}
+		}
 	}
 	
 	//从末尾值开始寻找下降沿
@@ -253,24 +279,24 @@ uint8_t Ges_Edge_Find(uint16_t *ps,uint8_t chn,uint16_t *pindex)
 				fall=1;
 				fall_index=i+1;
 				break;
-			}		
+			}
 		}
 	}
 	
 	if (rise&&fall)
 	{
 		res=GES_LEVEL1_FULL;
-		*pindex=rise_index;		
+		*pindex=rise_index;
 	}
 	else if (rise)
 	{
 		res=GES_LEVEL1_APPROACH;
-		*pindex=rise_index;		
+		*pindex=rise_index;
 	}
 	else if (fall)
 	{
 		res=GES_LEVEL1_LEAVE;
-		*pindex=fall_index;		
+		*pindex=fall_index;
 	}
 	return res;
 }
@@ -314,10 +340,10 @@ uint8_t Ges_Wave_Search(uint8_t chn,uint16_t *pindex)
 				(gs.ges_sample_array[chn][i+1]<gs.sample_down_limit[chn]))
 			{
 				gs.wave[chn].fall_value=gs.ges_sample_array[chn][i];
-				gs.wave[chn].fall_index=i;				
+				gs.wave[chn].fall_index=i;
 			}
 		}
-	}	
+	}
 	if ((gs.sample_size==GES_SAMPLE_ARRAY_NUM_L)&&(hold_flag==1))
 	{
 		res=GES_LEVEL1_HOLD;
@@ -336,25 +362,25 @@ uint8_t Ges_Wave_Search(uint8_t chn,uint16_t *pindex)
 //	{
 //		res=GES_LEVEL1_LEAVE;
 //	}
-	if ((gs.wave[chn].peak_index!=GES_INVALID_INDEX)&&(gs.wave[chn].peak_value>gs.sample_up_limit[chn]))		
+	if ((gs.wave[chn].peak_index!=GES_INVALID_INDEX)&&(gs.wave[chn].peak_value>gs.sample_up_limit[chn]))
 	{
 		//峰值是最后一个数据
 		if (gs.wave[chn].peak_index==(gs.sample_size-1))
 		{
 			res=GES_LEVEL1_APPROACH;
-			*pindex=gs.wave[chn].peak_index;			
+			*pindex=gs.wave[chn].peak_index;
 		}
 		//峰值是第一个数据
 		else if (gs.wave[chn].peak_index==0)
 		{
 			res=GES_LEVEL1_LEAVE;
-			*pindex=gs.wave[chn].peak_index;			
+			*pindex=gs.wave[chn].peak_index;
 		}
 		//峰值在中间
 		else
 		{
 			res=GES_LEVEL1_FULL;
-			*pindex=gs.wave[chn].peak_index;			
+			*pindex=gs.wave[chn].peak_index;
 		}
 	}
 	return res;
@@ -382,7 +408,7 @@ uint8_t Ges_Wave_Lead(uint8_t chn1,uint8_t chn2)
 		if (gs.wave[chn1].fall_index<gs.wave[chn2].fall_index)
 			return chn1;
 		else if (gs.wave[chn1].fall_index>gs.wave[chn2].fall_index)
-			return chn2;		
+			return chn2;
 	}
 	if ((gs.wave[chn1].rise_index!=GES_INVALID_INDEX)&&
 		(gs.wave[chn2].rise_index!=GES_INVALID_INDEX))
@@ -390,7 +416,7 @@ uint8_t Ges_Wave_Lead(uint8_t chn1,uint8_t chn2)
 		if (gs.wave[chn1].rise_index<gs.wave[chn2].rise_index)
 			return chn1;
 		else if (gs.wave[chn1].rise_index>gs.wave[chn2].rise_index)
-			return chn2;		
+			return chn2;
 	}
 	if ((gs.wave[chn1].rise_index!=GES_INVALID_INDEX)&&
 		((gs.wave[chn2].fall_index!=GES_INVALID_INDEX)||
@@ -440,9 +466,9 @@ uint8_t Ges_Analysis(void)
 			gs.ges_record[i].add_time=gs.frame_start_tick+(index*SAMPLE_FREQUENCY_DEF*GES_SAMPLE_AVE_NUM);
 			chn|=(1<<i);
 //			res=1;
-#if (LOG_ENABLE)			
+#if (LOG_ENABLE)
 			LOG_DEBUG("tick: %lld, CHN%d ges: leave!\n",gs.ges_record[i].add_time,i);
-#endif			
+#endif
 		}
 		else if (basic_ges==GES_LEVEL1_FULL)
 		{
@@ -450,17 +476,17 @@ uint8_t Ges_Analysis(void)
 			gs.ges_record[i].add_time=gs.frame_start_tick+(index*SAMPLE_FREQUENCY_DEF*GES_SAMPLE_AVE_NUM);
 			chn|=(1<<i);
 //			res=1;
-#if (LOG_ENABLE)			
-			LOG_DEBUG("tick: %lld, CHN%d ges: full!\n",gs.ges_record[i].add_time,i);	
-#endif			
+#if (LOG_ENABLE)
+			LOG_DEBUG("tick: %lld, CHN%d ges: full!\n",gs.ges_record[i].add_time,i);
+#endif
 		}
 		else if (basic_ges==GES_LEVEL1_HOLD)
 		{
 			gs.ges_record[i].ges=basic_ges;
 			gs.ges_record[i].add_time=gs.frame_start_tick+(index*SAMPLE_FREQUENCY_DEF*GES_SAMPLE_AVE_NUM);
 			chn|=(1<<i);
-#if (LOG_ENABLE)			
-			LOG_DEBUG("tick: %lld, CHN%d ges: hold!\n",gs.ges_record[i].add_time,i);	
+#if (LOG_ENABLE)
+			LOG_DEBUG("tick: %lld, CHN%d ges: hold!\n",gs.ges_record[i].add_time,i);
 #endif			
 			hold_flag++;
 //			res=GES_LEVEL2_HOLD;
@@ -475,13 +501,13 @@ uint8_t Ges_Analysis(void)
 		{
 			res=GES_LEVEL2_HOLD;
 			return res;
-		}		
+		}
 		if (chn&(1<<GES_CHN_UP))
 			//重置last_ges_record
 			gs.last_ges_record[GES_CHN_UP]=gs.ges_record[GES_CHN_UP];
 		if (chn&(1<<GES_CHN_DOWN_LEFT))
 			//重置last_ges_record
-			gs.last_ges_record[GES_CHN_DOWN_LEFT]=gs.ges_record[GES_CHN_DOWN_LEFT];			
+			gs.last_ges_record[GES_CHN_DOWN_LEFT]=gs.ges_record[GES_CHN_DOWN_LEFT];
 		if (chn&(1<<GES_CHN_DOWN_RIGHT))
 			//重置last_ges_record
 			gs.last_ges_record[GES_CHN_DOWN_RIGHT]=gs.ges_record[GES_CHN_DOWN_RIGHT];
@@ -490,19 +516,19 @@ uint8_t Ges_Analysis(void)
 		left_up=Ges_Wave_Lead(GES_CHN_DOWN_LEFT,GES_CHN_UP);
 		left_right=Ges_Wave_Lead(GES_CHN_DOWN_LEFT,GES_CHN_DOWN_RIGHT);
 		right_up=Ges_Wave_Lead(GES_CHN_DOWN_RIGHT,GES_CHN_UP);
-		
+#if 0
 		//从左到右
 		if ((left_up==GES_CHN_DOWN_LEFT)&&(right_up==GES_CHN_UP))
 		{
 			res=GES_LEVEL2_RIGHT;
-			return res;				
+			return res;
 		}
 		//从右到左
 		if ((left_up==GES_CHN_UP)&&(right_up==GES_CHN_DOWN_RIGHT))
 		{
 			res=GES_LEVEL2_LEFT;
-			return res;				
-		}			
+			return res;
+		}
 		//从上到下
 		if ((left_up==GES_CHN_UP)||(right_up==GES_CHN_UP))
 		{
@@ -515,6 +541,7 @@ uint8_t Ges_Analysis(void)
 			res=GES_LEVEL2_UP;
 			return res;
 		}
+#endif
 		//从左到右
 		if (left_right==GES_CHN_DOWN_LEFT)
 		{
@@ -665,28 +692,23 @@ void Ges_Calib(void)
 //		gs.sample_down_limit[i]=SAMPLE_DOWN_LIMIT_DEF+delta;
 //		gs.sample_up_limit[i]=SAMPLE_UP_LIMIT_DEF+delta;
 		LOG_DEBUG("CHN %d-> base: %d,down_limit: %d,up limit: %d\n",i,gs.sample_base[i],gs.sample_down_limit[i],gs.sample_up_limit[i]);
-	}	
+	}
 }
 
 //归一化采样数组
 void Ges_Normalize(void)
 {
-	uint8_t i,j,jj;
+	uint8_t i,j;
 	for (i=0;i<GES_CHN_NUM;i++)
 	{
-        if(gs.sample_size == GES_SAMPLE_ARRAY_NUM_L)
-            jj = 10;
-        else
-            jj = 0;
-        
 		for (j=0;j<gs.sample_size;j++)
 		{
-			if (gs.ges_sample_array[i][j]>=gs.sample_base[i])
+			if (gs.ges_sample_array[i][j]>=gs.sample_base[i])    
 				gs.ges_sample_array[i][j]=gs.ges_sample_array[i][j]-gs.sample_base[i];
 			else
 				gs.ges_sample_array[i][j]=0;
-		}				
-	}		
+		}
+	}
 }
 
 ////判断是否需要改变sample_size并改变
@@ -886,6 +908,10 @@ void App_Task(void)
 						if (gs.hold_counter==SAMPLE_HOLD_COUNT)
 						{
 							HAL_GPIO_WritePin(LED_HOLD_GPIO_Port, LED_HOLD_Pin, GPIO_PIN_RESET);
+                            HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
+                            HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
+                            HAL_GPIO_WritePin(LED_UP_GPIO_Port, LED_UP_Pin, GPIO_PIN_RESET);
+                            HAL_GPIO_WritePin(LED_DOWN_GPIO_Port, LED_DOWN_Pin, GPIO_PIN_RESET);
 							led_counter=LED_FLASH_DELAY;
 							LOG_DEBUG("Ges: HOLD!\n");
 							Ges_Log();

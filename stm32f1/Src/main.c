@@ -39,8 +39,15 @@
 
 /* USER CODE END Includes */
 
+static uint32_t tickstart;
+uint32_t        turn_off;
+
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart1;
+//TIM_HandleTypeDef  htim1;
+
+extern volatile uint16_t I2C_SDA_PIN;
+extern volatile uint16_t I2C_SCL_PIN;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -81,23 +88,21 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  //MX_TIM1_Init();//for pwm schedule
 
   /* USER CODE BEGIN 2 */
-
   App_Init();
+  //Drv_PWM_Init();
+  //DEMO_Init();
   /* USER CODE END 2 */
-
-  DEMO_Init();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     Drv_SILICON_Proc();
-  /*
-    Si115xForce();
-    HAL_Delay(1000);
-    App_Task();*/
+    //Drv_PWM_Proc();
+
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -173,6 +178,21 @@ static void MX_USART1_UART_Init(void)
 
 }
 
+void init_pwmIO()
+{
+    GPIO_InitTypeDef GPIO_InitStruct;//GPIOÁªìÊûÑ‰Ω?
+    
+    GPIO_InitStruct.Mode=GPIO_MODE_AF_PP;//Â§çÁî®Êé®ÊåΩËæìÂá∫
+    GPIO_InitStruct.Pin=GPIO_PIN_6|GPIO_PIN_7;//PA6
+    GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_LOW;//ÁøªËΩ¨ÈÄüÂ∫¶=10MHZ
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);//TIM3ÈÄöÈÅì1IOÂè?
+    
+    GPIO_InitStruct.Mode=GPIO_MODE_AF_PP;//Â§çÁî®Êé®ÊåΩËæìÂá∫
+    GPIO_InitStruct.Pin=GPIO_PIN_0|GPIO_PIN_1;//PB0
+    GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_LOW;//ÁøªËΩ¨ÈÄüÂ∫¶=10MHZ
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);//TIM3ÈÄöÈÅì3IOÂè?
+}
+
 /** Configure pins as 
         * Analog 
         * Input 
@@ -193,7 +213,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, LED_DCLK_Pin|LED_HOLD_Pin|LED_DOWN_Pin|LED_RIGHT_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LED_LEFT_Pin|LED_UP_Pin|SCL1_Pin|SDA1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LED_LEFT_Pin|LED_UP_Pin|SCL1_Pin|SDA1_Pin|SCL2_Pin|SDA2_Pin|SCL3_Pin|SDA3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : LED_DCLK_Pin LED_HOLD_Pin SW1_Pin SW2_Pin */
   GPIO_InitStruct.Pin = LED_DCLK_Pin|LED_HOLD_Pin|LED_DOWN_Pin|LED_RIGHT_Pin;
@@ -215,17 +235,105 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(INT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SCL_Pin SDA_Pin */
-  GPIO_InitStruct.Pin = SCL1_Pin|SDA1_Pin;
+  GPIO_InitStruct.Pin = SCL1_Pin|SDA1_Pin|SCL2_Pin|SDA2_Pin|SCL3_Pin|SDA3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  //init_pwmIO();// can not work
+
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+}
+#if 0
+/* TIM1 init function */
+static void MX_TIM1_Init(void)
+{
 
+  TIM_ClockConfigTypeDef sClockSourceConfig;
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
+
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 7;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 99;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  //htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler(__FILE__, __LINE__);
+  }
+
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler(__FILE__, __LINE__);
+  }
+
+  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler(__FILE__, __LINE__);
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler(__FILE__, __LINE__);
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler(__FILE__, __LINE__);
+  }
+
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    Error_Handler(__FILE__, __LINE__);
+  }
 }
 
+
+/**
+  * @brief  The drv_led init.
+  */
+void Drv_PWM_Init(void)
+{  
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);  
+
+  tickstart = HAL_GetTick();
+}
+
+void Drv_PWM_Proc(void)
+{
+  if (turn_off)
+  {
+    if((HAL_GetTick() - tickstart) > 1000)
+    {
+      turn_off = 0;
+      __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2, (uint32_t)0);
+    }
+  }
+}
+#endif
 /*****************************************************************************
 *    function:
 *        void SHT_set_scl_state(uint8_t flag)
@@ -240,9 +348,9 @@ static void MX_GPIO_Init(void)
 void I2C_set_scl_state(uint8_t flag)
 {
     if (flag)
-        HAL_GPIO_WritePin(SCL_GPIO_Port, SCL1_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(SCL_GPIO_Port, I2C_SCL_PIN, GPIO_PIN_SET);
     else
-        HAL_GPIO_WritePin(SCL_GPIO_Port, SCL1_Pin, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(SCL_GPIO_Port, I2C_SCL_PIN, GPIO_PIN_RESET);
 }
 
 /*****************************************************************************
@@ -257,7 +365,7 @@ void I2C_set_scl_state(uint8_t flag)
 *****************************************************************************/
 uint8_t I2C_get_sda_state(void)
 {
-    if (GPIO_PIN_RESET!=HAL_GPIO_ReadPin(SDA_GPIO_Port, SDA1_Pin))
+    if (GPIO_PIN_RESET!=HAL_GPIO_ReadPin(SDA_GPIO_Port, I2C_SDA_PIN))
     {
         return 1;
     }
@@ -282,9 +390,9 @@ uint8_t I2C_get_sda_state(void)
 void I2C_set_sda_state(uint8_t flag)
 {
     if (flag)
-        HAL_GPIO_WritePin(SDA_GPIO_Port, SDA1_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(SDA_GPIO_Port, I2C_SDA_PIN, GPIO_PIN_SET);
     else
-        HAL_GPIO_WritePin(SDA_GPIO_Port, SDA1_Pin, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(SDA_GPIO_Port, I2C_SDA_PIN, GPIO_PIN_RESET);
 }
 
 //Init I2C pin
@@ -292,16 +400,16 @@ void I2C_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct;
 
-    GPIO_InitStruct.Pin = SDA1_Pin;
+    GPIO_InitStruct.Pin = I2C_SDA_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
     HAL_GPIO_Init(SDA_GPIO_Port, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = SCL1_Pin;
-    //    GPIO_InitStruct.Pull = GPIO_PULLUP;         //test
+    GPIO_InitStruct.Pin = I2C_SCL_PIN;
+    //GPIO_InitStruct.Pull = GPIO_PULLUP;         //test
     HAL_GPIO_Init(SCL_GPIO_Port, &GPIO_InitStruct);
-//    SHT_set_scl_dir(1);//SCL…Ë÷√≥… ‰≥ˆ
+    //SHT_set_scl_dir(1);//SCL…Ë÷√≥… ‰≥ˆ
 
     I2C_set_sda_state(1);
     I2C_set_scl_state(1);
@@ -313,7 +421,7 @@ void I2C_init(void)
 //    I2C_SDA_OUTPUT();
 //    I2C_SDA_DIGIT();
 //    I2C_SDA_NOPULL();
-//    I2C_SDA_1();    
+//    I2C_SDA_1();
 }
 
 

@@ -5,6 +5,8 @@
 #include "siliconSi115x.h"
 
 extern gs_struct gs;
+extern volatile uint16_t I2C_SDA_PIN;
+extern volatile uint16_t I2C_SCL_PIN;
 static uint32_t tickstart;
 
 static int16_t _waitUntilSleep()
@@ -91,7 +93,7 @@ int16_t _sendCmd(uint8_t command)
 int16_t Si115xBlockWrite(uint8_t address, uint8_t length, uint8_t * data)
 {
 
-    LOG_DEBUG("Si115xBlockWrite address=0x%x",address);
+    LOG_DEBUG("Si115xBlockWrite address=0x%x\r\n",address);
 
     //siliconSensor_IO_Write_block(data, SI1153_I2C_ADDR, address, length);
     //siliconSensor_IO_Read(&data, SI1153_I2C_ADDR, RegisterAddr, 1);
@@ -108,7 +110,7 @@ int16_t Si115xParamSet(uint8_t address, uint8_t value)
   int16_t response_stored;
   int16_t response;
 
-  LOG_DEBUG("Si115xParamSet address=0x%x",address);
+  LOG_DEBUG("Si115xParamSet address=0x%x\r\n",address);
 
   retval = _waitUntilSleep();
   if(retval !=0)
@@ -171,12 +173,20 @@ int16_t Si115xInitLongRangeProx(  )
 {
     int16_t    retval;
 
-    LOG_DEBUG("------------Si115xInitLongRangeProx 3cho-------------\r\n");
-
     retval  = Si115xReset( );
     HAL_Delay(100);
     LOG_DEBUG("------------Si115xInitLongRangeProx 3cho-------------\r\n");
 
+#if(SENSOR3==1)
+    retval += Si115xParamSet( SI115x_PARAM_CH_LIST, 0x01);
+
+    retval += Si115xParamSet( SI115x_PARAM_LED1_A, 0x3f);
+
+    retval += Si115xParamSet( SI115x_PARAM_ADCCONFIG0, 0x62);
+    retval += Si115xParamSet( SI115x_PARAM_MEASCONFIG0, 0x01);
+
+    retval += Si115xParamSet( SI115x_PARAM_ADCSENS0, 0x03);
+#else
     retval += Si115xParamSet( SI115x_PARAM_CH_LIST, 0x07);
 
     retval += Si115xParamSet( SI115x_PARAM_LED1_A, 0x3f);
@@ -190,8 +200,11 @@ int16_t Si115xInitLongRangeProx(  )
     retval += Si115xParamSet( SI115x_PARAM_ADCCONFIG2, 0x62);
     retval += Si115xParamSet( SI115x_PARAM_MEASCONFIG2, 0x04);
 
-    retval += Si115xWriteToRegister( SI115x_REG_IRQ_ENABLE, 0x07, 1);
-    //retval += Si115xWriteToRegister( SI115x_REG_IRQ_ENABLE, 0);
+    retval += Si115xParamSet( SI115x_PARAM_ADCSENS0, 0x03);
+    retval += Si115xParamSet( SI115x_PARAM_ADCSENS1, 0x03);
+    retval += Si115xParamSet( SI115x_PARAM_ADCSENS2, 0x03);
+#endif
+    //retval += Si115xWriteToRegister( SI115x_REG_IRQ_ENABLE, 0x07, 1);
 
     return retval;
 }
@@ -246,7 +259,47 @@ void getSensorDataByHostout(uint16_t *ps)
 {
     uint32_t CH1_PS,CH2_PS,CH3_PS;
 
-    //LOG_DEBUG("------------getSensorDataByHostout-------------\r\n");
+#if(SENSOR3==1)
+    I2C_SCL_PIN = SCL1_Pin;
+    I2C_SDA_PIN = SDA1_Pin;
+    Si115xForce();
+    HAL_Delay(1);
+
+    CH1_PS = Si115xReadFromRegister (SI115x_REG_HOSTOUT1) +
+         256*Si115xReadFromRegister(SI115x_REG_HOSTOUT0);
+    ps[0] = CH1_PS;
+
+    I2C_SCL_PIN = SCL2_Pin;
+    I2C_SDA_PIN = SDA2_Pin;
+    Si115xForce();
+    HAL_Delay(1);
+
+    CH1_PS = Si115xReadFromRegister (SI115x_REG_HOSTOUT1) +
+         256*Si115xReadFromRegister(SI115x_REG_HOSTOUT0);
+    ps[1] = CH1_PS;
+
+    I2C_SCL_PIN = SCL3_Pin;
+    I2C_SDA_PIN = SDA3_Pin;
+    Si115xForce();
+    HAL_Delay(1);
+
+    CH1_PS = Si115xReadFromRegister (SI115x_REG_HOSTOUT1) +
+         256*Si115xReadFromRegister(SI115x_REG_HOSTOUT0);
+
+    ps[2] = CH1_PS;
+
+//#if (LOG_ENABLE)
+    //LOG_DEBUG("%5d  %5d  %5d\r\n",ps[1]<=gs.sample_base[1]?0:ps[1]-gs.sample_base[1],
+    //                    ps[2]<=gs.sample_base[2]?0:ps[2]-gs.sample_base[2],
+    //                    ps[0]<=gs.sample_base[0]?0:ps[0]-gs.sample_base[0]);
+    LOG_DEBUG("%5d  %5d  %5d\r\n",ps[1],ps[2],ps[0]);
+//#endif
+#else
+    I2C_SCL_PIN = SCL3_Pin;
+    I2C_SDA_PIN = SDA3_Pin;
+    Si115xForce();
+    HAL_Delay(1);
+
     CH1_PS = Si115xReadFromRegister (SI115x_REG_HOSTOUT1) +
          256*Si115xReadFromRegister(SI115x_REG_HOSTOUT0);
     CH2_PS = Si115xReadFromRegister (SI115x_REG_HOSTOUT3) +
@@ -257,22 +310,20 @@ void getSensorDataByHostout(uint16_t *ps)
     ps[0] = CH1_PS;
     ps[1] = CH2_PS;
     ps[2] = CH3_PS;
-//#if (LOG_ENABLE)
-    LOG_DEBUG("%d  %d  %d\r\n",CH2_PS<=gs.sample_base[1]?0:CH2_PS-gs.sample_base[1],
-                        CH3_PS<=gs.sample_base[2]?0:CH3_PS-gs.sample_base[2],
-                        CH1_PS<=gs.sample_base[0]?0:CH1_PS-gs.sample_base[0]);
-//#endif
+
+    //#if (LOG_ENABLE)
+        //LOG_DEBUG("%5d  %5d  %5d\r\n",CH2_PS<=gs.sample_base[1]?0:CH2_PS-gs.sample_base[1],
+        //                    CH3_PS<=gs.sample_base[2]?0:CH3_PS-gs.sample_base[2],
+        //                    CH1_PS<=gs.sample_base[0]?0:CH1_PS-gs.sample_base[0]);
+        LOG_DEBUG("%5d  %5d  %5d\r\n",CH2_PS,CH3_PS,CH1_PS);
+    //#endif
+#endif
 }
 
 
 void DEMO_Init()
 {
     uint8_t data = 0xff;
-
-    tickstart = HAL_GetTick();
-
-    while((HAL_GetTick() - tickstart) <= 1000)//delay 1s
-        ;
 
     LOG_DEBUG("------------DEMO_Init-------------\r\n");
 
@@ -295,9 +346,9 @@ void Drv_SILICON_Proc(void)
 {
   //if((HAL_GetTick() - tickstart) >= 20) {
 
-    tickstart = HAL_GetTick();
-    Si115xForce();
-    HAL_Delay(2);
+    //tickstart = HAL_GetTick();
+    //Si115xForce();
+    //HAL_Delay(2);
     App_Task();
   //}
 }
@@ -326,4 +377,4 @@ void i2cmsginfo(char const *tx, int txlen, char const *rx, int rxlen)
 #endif
 }
 
-   
+
