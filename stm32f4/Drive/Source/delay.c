@@ -52,8 +52,8 @@ void TimingDelay_Decrement(void)
 // 参数：nTime - 延时时间，单位ms
 //	说明：每次调用都会重新给TimingDelay赋值，实现 n 毫秒的延时，最大延时 4294967295 ms。	
 //
-void Delay_ms(u32 nTime)
-{ 
+void Delay_us(u32 nTime)
+{
 	TimingDelay = nTime;
 
 	while(TimingDelay != 0);

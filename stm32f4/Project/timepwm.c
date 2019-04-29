@@ -98,6 +98,7 @@ void TIM2_IRQHandler(void)
 }
 #else
 
+#if 0
 //TIM14 PWM????? 
 //PWM?????
 //arr:?????
@@ -137,5 +138,43 @@ void TIM14_PWM_Init(u32 arr,u32 psc)
 
 	TIM_ARRPreloadConfig(TIM14,ENABLE);//ARPE??
 	TIM_Cmd(TIM14, ENABLE);  //??TIM14
-} 
+}
+
+#else
+void TIM1_PWM_Init(u32 arr,u32 psc)
+{
+	
+	GPIO_InitTypeDef GPIO_InitStructure;
+	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+	TIM_OCInitTypeDef  TIM_OCInitStructure;
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1 , ENABLE); 
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE); 	//??PORTF??	
+
+	GPIO_PinAFConfig(GPIOE,GPIO_PinSource9,GPIO_AF_TIM1); //GPIOF9??????14
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;           //GPIOF9
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;        //????
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;	//??100MHz
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;      //??????
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;        //??
+	GPIO_Init(GPIOE,&GPIO_InitStructure);              //???PF9
+
+	TIM_TimeBaseStructure.TIM_Prescaler=psc;  //定时器分频
+	TIM_TimeBaseStructure.TIM_CounterMode=TIM_CounterMode_Up; //向上计数
+	TIM_TimeBaseStructure.TIM_Period=arr;   //自动重载
+	TIM_TimeBaseStructure.TIM_ClockDivision=TIM_CKD_DIV1;
+	TIM_TimeBaseInit(TIM1,&TIM_TimeBaseStructure);//??????14
+	//???TIM14 Channel1 PWM??
+	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; //???????:TIM????????2
+ 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; //??????
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low; //????:TIM???????
+	TIM_OC1Init(TIM1, &TIM_OCInitStructure);  //??T??????????TIM1 4OC1
+
+	TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);  //??TIM14?CCR1????????
+
+	TIM_ARRPreloadConfig(TIM1,ENABLE);//ARPE??
+	TIM_Cmd(TIM1, ENABLE);  //??TIM14
+}
+#endif
 #endif

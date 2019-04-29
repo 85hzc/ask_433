@@ -3,10 +3,11 @@
 
 #include "stm32f4xx.h"
 
-#define delay(a) Delay_ms(a)
+#define Delay_ms(a) Delay_us(a*1000)
+#define delay(a) Delay_us(a)
 
 void Delay_Init(void);				//延时函数初始化
-void Delay_ms(u32 nTime);	//毫秒延时函数
+void Delay_us(u32 nTime);	//毫秒延时函数
 
 #endif //__DELAY_H
 

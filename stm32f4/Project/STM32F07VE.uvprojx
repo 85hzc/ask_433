@@ -420,6 +420,21 @@
               <FileType>1</FileType>
               <FilePath>..\Drive\Source\usart.c</FilePath>
             </File>
+            <File>
+              <FileName>gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drive\Source\gpio.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbi5153.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\mbi5153.c</FilePath>
+            </File>
+            <File>
+              <FileName>timepwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\timepwm.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -454,6 +469,11 @@
               <FileName>stm32f4xx_usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\STM32\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\STM32\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_tim.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -27,6 +27,8 @@
 #include "usart.h"
 #include "gpio.h"
 
+uint8_t circuit=0;
+
 int main(void)
 {
 	uint8_t key_flag = 0;	//按键标志
@@ -44,22 +46,43 @@ int main(void)
 	SystemCoreClockUpdate();
 	
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//系统中断优先级分组2
-	#if 0
+#if 0
 	Pulse_output(1000,8000);//1KHZ,8000个
-	#else
-
-	TIM14_PWM_Init(100-1,42-1);//168M/42=4Mhz的计数频率,重装载值100，所以PWM频率为 4M/100=40Khz.
+#else
+#if 0
+	TIM14_PWM_Init(100-1,21-1);//168M/42=4Mhz的计数频率,重装载值100，所以PWM频率为 4M/100=40Khz.
 	TIM_SetCompare1(TIM14,50);
-
+#else
+	TIM1_PWM_Init(100-1,8-1);
+	TIM_SetCompare1(TIM1,50);
+	TIM_CtrlPWMOutputs(TIM1, ENABLE);
 #endif
-	
-	MBI5153();
+#endif
+
+	//printf("befor reset\r\n");
+	//Delay_ms(5000);
+	///soft_reset();
+	//printf("after reset\r\n");
+	//Delay_ms(5000);
+	MBI_Init();
+	printf("after mbi init\r\n");
+	//Delay_ms(2000);
+	//printf("mbi init reset\r\n");
+	//circuit++;
+
+	//MBI5153();
 	
 	while (1)
-	{	
-		Delay_ms(100);
+	{
 
-		//printf("FK407M2核心板测试\r\n");
+		Delay_ms(300);
+		
+		//soft_reset();
+		//MBI_Init();
+		
+		MBI5153();
+		printf("circuit:%d\r\n",circuit%16);
+		circuit++;
 		/*
 		LED1_ON;
 		LED2_OFF;
@@ -67,12 +90,12 @@ int main(void)
 		LED1_OFF;
 		LED2_ON;
 		Delay_ms(500);*/
-		#if 0
+#if 0
 		//每次按键按下对标志进行取反
 		if( KEY_Scan() == KEY_ON )
-		{			
-			key_flag = ~key_flag;	
-		}	
+		{
+			key_flag = ~key_flag;
+		}
 		
 		//根据按键标志进行LED的亮灭操作
 		if(key_flag == 0)
@@ -83,7 +106,7 @@ int main(void)
 		{
 			LED1_OFF;
 		}
-		#endif
+#endif
 	}
 }
 

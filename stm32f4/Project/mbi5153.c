@@ -17,7 +17,14 @@
 #include "usart.h"
 #include "gpio.h"
 
-#define MBI5153_SIZE							2
+#define MBI5153_SIZE							1
+
+extern uint8_t circuit;
+
+//unsigned short sdi_data[16]={1<<0,1<<1,1<<2,1<<3,1<<4,1<<5,1<<6,1<<7,\
+//							1<<8,1<<9,1<<10,1<<11,1<<12,1<<13,1<<14,1<<15};
+
+unsigned short sdi_data=0x0f0;
 
 void soft_reset(void)
 {
@@ -36,6 +43,26 @@ void soft_reset(void)
 		}
 		LE_PIN_L
 		delay(1);
+}
+
+void vsync(void)
+{
+		unsigned int sck_cnt;
+	
+		TIM1->CR1 &= ~(0x01);
+		delay(5);
+		//2个clk拉高LE，发送Vsync
+		LE_PIN_H
+		for(sck_cnt = 0;sck_cnt < 2;sck_cnt ++)
+		{
+				delay(1);
+				DCLK_PIN_H
+				delay(1);
+				DCLK_PIN_L
+		}
+		LE_PIN_L
+		delay(5);//LE下降沿与gclk上升沿满足要求
+		TIM1->CR1 |= 0x01;
 }
 
 void pre_active(void)
@@ -88,7 +115,7 @@ void reg1_config(void)
 				}
 		}
 		LE_PIN_L
-		//SDI_PIN_L
+		SDI_PIN_L
 		delay(2);
 }
 
@@ -166,17 +193,8 @@ void reg3_config(void)
 		delay(2);
 }
 
-void MBI5153()
+void MBI_Init(void)
 {
-		unsigned int sck_cnt;
-		unsigned short i,j,k,m,sdi_data;
-		//unsigned short red1,green1,blue1,red2,green2,blue2;
-		unsigned int mask;
-		//unsigned int bufaddA,bufaddB;
-
-		sdi_data = 0x1234;
-		//sdi_data = 0xffff;
-
 		//前置时间
 		pre_active();
 		//写状态寄存器1
@@ -188,9 +206,20 @@ void MBI5153()
 		reg2_config();
 
 		//前置时间
-		pre_active();
+		//pre_active();
 		//写状态寄存器1
-		reg3_config();
+		//reg3_config();
+}
+
+void MBI5153()
+{
+		unsigned int sck_cnt;
+		unsigned short i,j,k,m;
+		//unsigned short red1,green1,blue1,red2,green2,blue2;
+		unsigned int mask;
+		//unsigned int bufaddA,bufaddB;
+
+		//vsync();
 
 		//写入16*2*16数据
 		//for(m = 0;m < 16;m++)//共有16行
@@ -198,7 +227,7 @@ void MBI5153()
 		{
 				for(i = 0; i < 16; i++)//每个MBI5052有16个通道
 				{
-						delay(60);
+						delay(10);
 						for(j = 0; j < MBI5153_SIZE; j++)//级联IC数量
 						{
 								for(k = 0; k < 16; k++)
@@ -206,11 +235,15 @@ void MBI5153()
 										mask = 0x8000 >> k;
 
 										if(j == MBI5153_SIZE-1)
-												if(k == 15){
-													LE_PIN_H
+										{
+												if(k == 15)
+												{
+														LE_PIN_H
 												}
+										}
 
-										if(sdi_data & mask)
+									  if((sdi_data & mask) && (circuit%16==i))
+										//if(sdi_data & mask)
 											SDI_PIN_H
 										else
 											SDI_PIN_L
@@ -226,21 +259,10 @@ void MBI5153()
 						delay(1);
 				}
 		}
-		
-		delay(5);
-		//2个clk拉高LE，发送Vsync
-		LE_PIN_H
-		for(sck_cnt = 0;sck_cnt < 2;sck_cnt ++)
-		{
-				delay(1);
-				DCLK_PIN_H
-				delay(1);
-				if(sck_cnt < 1)
-				DCLK_PIN_L
-		}
-		LE_PIN_L
-		delay(5);//LE下降沿与gclk上升沿满足要求
 
+		vsync();
+
+#if 0
 		for(i=0;i<16;i++)
 		{
 				//源项目作为 消隐
@@ -259,6 +281,7 @@ void MBI5153()
 				GCLK_PIN_L
 				delay(50);
 		}
+#endif
 		//DCLK_PIN_L
 #if 0
 		//开始显示
