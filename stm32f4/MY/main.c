@@ -53,7 +53,8 @@ int main(void)
 	TIM14_PWM_Init(100-1,21-1);//168M/42=4Mhz的计数频率,重装载值100，所以PWM频率为 4M/100=40Khz.
 	TIM_SetCompare1(TIM14,50);
 #else
-	TIM1_PWM_Init(100-1,8-1);
+	//TIM1_PWM_Init(100-1,14-1);//(75-1,6-1); OK
+	TIM1_PWM_Init(100-1,6-1); //OK
 	TIM_SetCompare1(TIM1,50);
 	TIM_CtrlPWMOutputs(TIM1, ENABLE);
 #endif
@@ -70,19 +71,20 @@ int main(void)
 	//printf("mbi init reset\r\n");
 	//circuit++;
 
+	//vsync();
 	//MBI5153();
 	
 	while (1)
 	{
 
-		Delay_ms(300);
-		
 		//soft_reset();
 		//MBI_Init();
-		
+		//circuit = (circuit != 0)?0:15;
+		//printf("circuit:%d\r\n",circuit);
 		MBI5153();
 		printf("circuit:%d\r\n",circuit%16);
 		circuit++;
+		Delay_ms(50);
 		/*
 		LED1_ON;
 		LED2_OFF;

@@ -14,9 +14,7 @@
 
 static u32 TimingDelay;  //计数变量
 
-#if 1
-#define delay(a) Delay_ms(a)
-//#else
+
 void delay_ns(u32 time)
 {
 	//u32 tt = time;
@@ -27,14 +25,13 @@ void delay_ns(u32 time)
 		__ASM("nop");
 	}
 }
-#endif
 
 //	函数：延时初始化
 //	说明：配置 SysTick 为1ms中断，并启动定时器
 //
 void Delay_Init(void)
 {
-	SysTick_Config(SystemCoreClock / (1000*1000));  //配置SysTick时钟为1ms中断
+	SysTick_Config(SystemCoreClock / (1000*100));  //配置SysTick时钟为1ms(1000) 1us(1000*1000)中断
 }
 
 //	函数：计时函数

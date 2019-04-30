@@ -16,15 +16,14 @@
 #include "key.h"
 #include "usart.h"
 #include "gpio.h"
-
-#define MBI5153_SIZE							1
+#include "mbi5153.h"
 
 extern uint8_t circuit;
 
 //unsigned short sdi_data[16]={1<<0,1<<1,1<<2,1<<3,1<<4,1<<5,1<<6,1<<7,\
 //							1<<8,1<<9,1<<10,1<<11,1<<12,1<<13,1<<14,1<<15};
 
-unsigned short sdi_data=0x0f0;
+unsigned short sdi_data=0x5ff;
 
 void soft_reset(void)
 {
@@ -50,7 +49,8 @@ void vsync(void)
 		unsigned int sck_cnt;
 	
 		TIM1->CR1 &= ~(0x01);
-		delay(5);
+		//TIM1->CCR1 = 0;//duty cycle
+		delay(10);
 		//2个clk拉高LE，发送Vsync
 		LE_PIN_H
 		for(sck_cnt = 0;sck_cnt < 2;sck_cnt ++)
@@ -61,8 +61,9 @@ void vsync(void)
 				DCLK_PIN_L
 		}
 		LE_PIN_L
-		delay(5);//LE下降沿与gclk上升沿满足要求
+		delay(10);//LE下降沿与gclk上升沿满足要求
 		TIM1->CR1 |= 0x01;
+		//TIM1->CCR1 = 50;//duty cycle
 }
 
 void pre_active(void)
@@ -85,8 +86,8 @@ void pre_active(void)
 void reg1_config(void)
 {
 		unsigned int sck_cnt;
-		unsigned short i,j,k,m;
-		unsigned short state_reg=0x006B;
+		unsigned short j;
+		unsigned short state_reg=0x006B;// | SCAN_LINE_2<<8;
 		unsigned int mask;
 		
 		for(j = 0; j < MBI5153_SIZE; j++)//N片IC级联
@@ -122,7 +123,7 @@ void reg1_config(void)
 void reg2_config(void)
 {
 		unsigned int sck_cnt;
-		unsigned short i,j,k,m;
+		unsigned short j;
 		unsigned short state_reg=0x0400;
 		unsigned int mask;
 		
@@ -159,7 +160,7 @@ void reg2_config(void)
 void reg3_config(void)
 {
 		unsigned int sck_cnt;
-		unsigned short i,j,k,m;
+		unsigned short j;
 		unsigned short state_reg=0x0000;
 		unsigned int mask;
 		
@@ -209,6 +210,8 @@ void MBI_Init(void)
 		//pre_active();
 		//写状态寄存器1
 		//reg3_config();
+
+		vsync();
 }
 
 void MBI5153()
@@ -243,7 +246,7 @@ void MBI5153()
 										}
 
 									  if((sdi_data & mask) && (circuit%16==i))
-										//if(sdi_data & mask)
+										//if((sdi_data & mask) && (i==circuit))
 											SDI_PIN_H
 										else
 											SDI_PIN_L

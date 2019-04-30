@@ -157,7 +157,7 @@ void TIM1_PWM_Init(u32 arr,u32 psc)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;        //????
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;	//??100MHz
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;      //??????
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;        //??
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;        //??
 	GPIO_Init(GPIOE,&GPIO_InitStructure);              //???PF9
 
 	TIM_TimeBaseStructure.TIM_Prescaler=psc;  //¶¨Ê±Æ÷·ÖÆµ

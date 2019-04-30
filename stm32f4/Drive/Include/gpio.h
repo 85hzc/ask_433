@@ -18,12 +18,12 @@
 #define DCLK_PIN_H        MBI_PORT->BSRRL = DCLK_PIN;		// 输出高电平
 #define DCLK_PIN_L        MBI_PORT->BSRRH = DCLK_PIN;		// 输出低电平
 #define LE_PIN_H          MBI_PORT->BSRRL = LE_PIN;			// 输出高电平
-#define LE_PIN_L          MBI_PORT->BSRRH = LE_PIN;;		// 输出低电平
+#define LE_PIN_L          MBI_PORT->BSRRH = LE_PIN; 		// 输出低电平
 #define SDI_PIN_H         MBI_PORT->BSRRL = SDI_PIN;		// 输出高电平
-#define SDI_PIN_L         MBI_PORT->BSRRH = SDI_PIN;;		// 输出低电平
+#define SDI_PIN_L         MBI_PORT->BSRRH = SDI_PIN;		// 输出低电平
 
 #define GCLK_PIN_H        MBI_PORT->BSRRL = GCLK_PIN;		// 输出高电平
-#define GCLK_PIN_L        MBI_PORT->BSRRH = GCLK_PIN;;		// 输出低电平
+#define GCLK_PIN_L        MBI_PORT->BSRRH = GCLK_PIN;		// 输出低电平
 
 
 /*---------------------- 函数声明 ----------------------------*/
