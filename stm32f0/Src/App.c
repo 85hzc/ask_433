@@ -392,7 +392,7 @@ uint8_t Ges_Wave_Lead(uint8_t chn1,uint8_t chn2)
         else if (gs.wave[chn1].rise_index>gs.wave[chn2].rise_index)
             return chn2;        
     }
-/*
+
     if ((gs.wave[chn1].rise_index!=GES_INVALID_INDEX)&&
         ((gs.wave[chn2].fall_index!=GES_INVALID_INDEX)||
         (gs.wave[chn2].peak_index!=GES_INVALID_INDEX))){
@@ -408,7 +408,7 @@ uint8_t Ges_Wave_Lead(uint8_t chn1,uint8_t chn2)
         LOG_DEBUG("Wave lead by guess ch1");
 #endif
         return chn1;
-    }*/
+    }
     
     return GES_CHN_INVALID;
 }
@@ -679,13 +679,9 @@ void Ges_Calib(void)
 //归一化采样数组
 void Ges_Normalize(void)
 {
-    uint8_t i,j,jj;
+    uint8_t i,j;
     for (i=0;i<GES_CHN_NUM;i++)
     {
-        if(gs.sample_size == GES_SAMPLE_ARRAY_NUM_L)
-            jj = 10;
-        else
-            jj = 0;
         
         for (j=0;j<gs.sample_size;j++)
         {

@@ -22,7 +22,7 @@ Dialog DLL:      TARMCM1.DLL V1.13.0.0
  
 <h2>Project:</h2>
 E:\github\stm32f0\MDK-ARM\stm32f030c8.uvprojx
-Project File Date:  04/03/2019
+Project File Date:  04/17/2019
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
@@ -30,40 +30,36 @@ Build target 'stm32f0'
 compiling gesture.c...
 ../Inc/siliconSi115x.h(168): warning:  #1295-D: Deprecated declaration SILAB_ReadID - give arg types
   extern SILAB_SENSOR_StatusTypeDef SILAB_ReadID();
-..\Src\gesture.c(19): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
+..\Src\gesture.c(20): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
       retval = Si115xReadFromRegister(SI115x_REG_RESPONSE0);
-..\Src\gesture.c(37): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
+..\Src\gesture.c(38): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
     response = Si115xReadFromRegister(SI115x_REG_RESPONSE0);
-..\Src\gesture.c(67): warning:  #223-D: function "Si115xWriteToRegister" declared implicitly
+..\Src\gesture.c(68): warning:  #223-D: function "Si115xWriteToRegister" declared implicitly
     if(retval = (Si115xWriteToRegister(SI115x_REG_COMMAND, command, 1))!= 0)
-..\Src\gesture.c(67): warning:  #1293-D: assignment in condition
+..\Src\gesture.c(68): warning:  #1293-D: assignment in condition
     if(retval = (Si115xWriteToRegister(
 I115x_REG_COMMAND, command, 1))!= 0)
-..\Src\gesture.c(99): warning:  #223-D: function "SILAB_IO_Write_Block" declared implicitly
+..\Src\gesture.c(100): warning:  #223-D: function "SILAB_IO_Write_Block" declared implicitly
       SILAB_IO_Write_Block(data, SI1153_I2C_ADDR, address, length);
-..\Src\gesture.c(121): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
+..\Src\gesture.c(122): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
                       & Si115xReadFromRegister(SI115x_REG_RESPONSE0);
-..\Src\gesture.c(160): warning:  #223-D: function "Si115xWriteToRegister" declared implicitly
+..\Src\gesture.c(161): warning:  #223-D: function "Si115xWriteToRegister" declared implicitly
     retval += Si115xWriteToRegister(SI115x_REG_COMMAND, 1, 1);
-..\Src\gesture.c(194): warning:  #223-D: function "Si115xWriteToRegister" declared implicitly
-      retval += Si115xWriteToRegister( SI115x_REG_IRQ_ENABLE, 0x07, 1);
-..\Src\gesture.c(215): warning:  #223-D: function "Si115xWriteToRegister" declared implicitly
+..\Src\gesture.c(217): warning:  #223-D: function "Si115xWriteToRegister" declared implicitly
           retval += Si115xWriteToRegister(  SI115x_REG_IRQ_ENABLE, 0x01);
-..\Src\gesture.c(234): warning:  #223-D: function "Si115xWriteToRegister" declared implicitly
+..\Src\gesture.c(236): warning:  #223-D: function "Si115xWriteToRegister" declared implicitly
           retval += Si115xWriteToRegister(  SI115x_REG_IRQ_ENABLE, 0x0f);
-..\Src\gesture.c(251): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
+..\Src\gesture.c(253): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
       CH1_PS = Si115xReadFromRegister (SI115x_REG_HOSTOUT1) +
-..\Src\gesture.c(272): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
+..\Src\gesture.c(280): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
       data = Si115xReadFromRegister( SI1153_REG_HW_ID);
-..\Src\gesture.c(294): warning:  #223-D: function "App_Task" declared implicitly
-      App_Task();
-..\Src\gesture.c(304): warning:  #177-D: variable "i"  was declared but never referenced
+..\Src\gesture.c(320): warning:  #177-D: variable "i"  was declared but never referenced
       int i;
-..\Src\gesture.c: 15 warnings, 0 errors
+..\Src\gesture.c: 13 warnings, 0 errors
 linking...
-Program Size: Code=20496 RO-data=528 RW-data=376 ZI-data=2384  
+Program Size: Code=22496 RO-data=528 RW-data=376 ZI-data=2264  
 FromELF: creating hex file...
-"stm32f030c8\stm32f0.axf" - 0 Error(s), 15 Warning(s).
+"stm32f030c8\stm32f0.axf" - 0 Error(s), 13 Warning(s).
 
 <h2>Software Packages used:</h2>
 

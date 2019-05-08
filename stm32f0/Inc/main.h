@@ -96,7 +96,7 @@
 #endif
 
 #define DEBUG_ENABLE                        1
-#define LOG_ENABLE                          0
+#define LOG_ENABLE                          1
 
 #if DEBUG_ENABLE
 //#define LOG_DEBUG(format, args...)    do { \
