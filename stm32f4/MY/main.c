@@ -26,6 +26,7 @@
 #include "key.h"
 #include "usart.h"
 #include "gpio.h"
+#include "mbi5153.h"
 
 uint8_t circuit=0;
 
@@ -46,8 +47,8 @@ int main(void)
 	SystemCoreClockUpdate();
 	
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//系统中断优先级分组2
-#if 0
-	Pulse_output(1000,8000);//1KHZ,8000个
+#if(TWO_TIMER_PULSE==1)
+	//Pulse_output(100,129);//1KHZ,8000个
 #else
 #if 0
 	TIM14_PWM_Init(100-1,21-1);//168M/42=4Mhz的计数频率,重装载值100，所以PWM频率为 4M/100=40Khz.
@@ -81,6 +82,7 @@ int main(void)
 		//MBI_Init();
 		//circuit = (circuit != 0)?0:15;
 		//printf("circuit:%d\r\n",circuit);
+		
 		MBI5153();
 		printf("circuit:%d\r\n",circuit%16);
 		circuit++;

@@ -2,6 +2,9 @@
 #ifndef __MBI5153_H
 #define __MBI5153_H
 
+#define TWO_TIMER_PULSE								0
+#define GCLKNUM										5
+
 #define MBI5153_SIZE								1
 
 #define SCAN_LINE_1									0x0

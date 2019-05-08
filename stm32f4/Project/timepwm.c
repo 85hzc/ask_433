@@ -5,26 +5,31 @@
 #include "key.h"
 #include "usart.h"
 #include "gpio.h" 
+#include "mbi5153.h"
 
-#if 0
+#if(TWO_TIMER_PULSE==1)
 /*定时器1主模式*/
 void TIM1_config(u32 Cycle)
 {
+
     GPIO_InitTypeDef GPIO_InitStructure;
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     TIM_OCInitTypeDef  TIM_OCInitStructure;
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1 , ENABLE); 
-	  RCC_AHB1PeriphClockCmd (MBI_CLK, ENABLE); 	//初始化GPIOG时钟
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;               //TIM1_CH4 PA11
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;             //复用
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-		GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;      //推挽输出
-		GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;        //上拉
-    GPIO_Init(GPIOE, &GPIO_InitStructure);	
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1 , ENABLE); 
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE); 	//初始化GPIOG时钟
+
+    GPIO_PinAFConfig(GPIOE,GPIO_PinSource9,GPIO_AF_TIM1); //GPIOF9??????14
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;					//复用
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;				//推挽输出
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;					//上拉
+    GPIO_Init(GPIOE, &GPIO_InitStructure);
 
     TIM_TimeBaseStructure.TIM_Period = Cycle-1;
-    TIM_TimeBaseStructure.TIM_Prescaler =71;                    //设置用来作为TIMx时钟频率除数的预分频值                                    
+    TIM_TimeBaseStructure.TIM_Prescaler =21;                    //设置用来作为TIMx时钟频率除数的预分频值                                    
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;     //设置时钟分割:TDTS= Tck_tim
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; //TIM向上计数
     TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;            //重复计数，一定要=0!!!
@@ -34,16 +39,15 @@ void TIM1_config(u32 Cycle)
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; //比较输出使能
     TIM_OCInitStructure.TIM_Pulse = Cycle/2-1;                    //设置待装入捕获寄存器的脉冲值                    
     TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;      //输出极性
-
-    TIM_OC4Init(TIM1, &TIM_OCInitStructure);
+    TIM_OC1Init(TIM1, &TIM_OCInitStructure);
 
     TIM_SelectMasterSlaveMode(TIM1, TIM_MasterSlaveMode_Enable);
     TIM_SelectOutputTrigger(TIM1, TIM_TRGOSource_Update);
-    
 
-    TIM_OC4PreloadConfig(TIM1, TIM_OCPreload_Enable);
+    TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
     TIM_ARRPreloadConfig(TIM1, ENABLE);
 }
+
 /***???2???***/
 void TIM2_config(u32 PulseNum)
 {
@@ -72,29 +76,49 @@ void TIM2_config(u32 PulseNum)
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 }
+
 void Pulse_output(u32 Cycle,u32 PulseNum)
 {
+	printf("Pulse_output Cycle %d,PulseNum %d\r\n",Cycle,PulseNum);
+#if 1
     TIM2_config(PulseNum);
     TIM_Cmd(TIM2, ENABLE);
     TIM_ClearITPendingBit(TIM2,TIM_IT_Update);
     TIM_ITConfig(TIM2,TIM_IT_Update,ENABLE);
+#endif
     TIM1_config(Cycle);
-    
     TIM_Cmd(TIM1, ENABLE);
     TIM_CtrlPWMOutputs(TIM1, ENABLE);   //??????????,?????
 }
 
+int8_t pre_vsync=0,gclk_num=5;
+
 void TIM2_IRQHandler(void)
-{ 
+{
+
+    printf("TIM2_IRQHandler gclk_num %d\r\n",gclk_num);
+
     if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)     // TIM_IT_CC1
-    { 
+    {
+        printf("TIM2_IRQHandler SET\r\n");
         TIM_ClearITPendingBit(TIM2, TIM_IT_Update); // ??????? 
         TIM_CtrlPWMOutputs(TIM1, DISABLE);  //?????
         TIM_Cmd(TIM1, DISABLE); // ????? 
         TIM_Cmd(TIM2, DISABLE); // ????? 
         TIM_ITConfig(TIM2, TIM_IT_Update, DISABLE);
-        
-    } 
+
+        gclk_num++;
+
+        if(pre_vsync == 0 && gclk_num < GCLKNUM-1)
+        {
+            //Pulse_output(100,10);
+            TIM_Cmd(TIM2, ENABLE);
+            TIM_ClearITPendingBit(TIM2,TIM_IT_Update);
+            TIM_ITConfig(TIM2,TIM_IT_Update,ENABLE);
+            IM_Cmd(TIM1, ENABLE);
+            TIM_CtrlPWMOutputs(TIM1, ENABLE);
+        }
+    }
 }
 #else
 

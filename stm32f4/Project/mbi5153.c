@@ -20,6 +20,10 @@
 
 extern uint8_t circuit;
 
+#if(TWO_TIMER_PULSE==1)
+extern uint8_t gclk_num;
+#endif
+
 //unsigned short sdi_data[16]={1<<0,1<<1,1<<2,1<<3,1<<4,1<<5,1<<6,1<<7,\
 //							1<<8,1<<9,1<<10,1<<11,1<<12,1<<13,1<<14,1<<15};
 
@@ -47,8 +51,17 @@ void soft_reset(void)
 void vsync(void)
 {
 		unsigned int sck_cnt;
-	
+
+#if(TWO_TIMER_PULSE==1)
+		while(gclk_num!=GCLKNUM){
+			delay(100);
+		}
+#endif
+
+#if(TWO_TIMER_PULSE==0)
 		TIM1->CR1 &= ~(0x01);
+		//GCLK_PIN_L
+#endif
 		//TIM1->CCR1 = 0;//duty cycle
 		delay(10);
 		//2个clk拉高LE，发送Vsync
@@ -62,7 +75,13 @@ void vsync(void)
 		}
 		LE_PIN_L
 		delay(10);//LE下降沿与gclk上升沿满足要求
+#if(TWO_TIMER_PULSE==0)
 		TIM1->CR1 |= 0x01;
+#elif(TWO_TIMER_PULSE==1)
+		gclk_num = 0;
+		//Pulse_output(100,129);
+		Pulse_output(100,10);
+#endif
 		//TIM1->CCR1 = 50;//duty cycle
 }
 

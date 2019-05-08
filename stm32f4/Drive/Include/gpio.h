@@ -7,7 +7,7 @@
 /*---------------------- GPIO配置宏 ------------------------*/
 
 #define DCLK_PIN          GPIO_Pin_5             // LED1 引脚
-#define GCLK_PIN          GPIO_Pin_6             // LED1 引脚
+#define GCLK_PIN          GPIO_Pin_9             // LED1 引脚
 #define LE_PIN            GPIO_Pin_7             // LED1 引脚
 #define SDI_PIN           GPIO_Pin_8             // LED1 引脚
 #define MBI_PORT          GPIOE                  // MBI驱动 GPIO端口
