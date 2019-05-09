@@ -95,7 +95,7 @@
 /* USER CODE BEGIN Private defines */
 #define DEBUG_ENABLE        1                   //debug输出开启
 #define SYS_FREQUENCY       32000000            //32MHz主频
-#define LOG_ENABLE          0                   //使能输出记录
+#define LOG_ENABLE          1                   //使能输出记录
 
 #define HWI2C               0
 

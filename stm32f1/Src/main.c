@@ -210,10 +210,16 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED_DCLK_Pin|LED_HOLD_Pin|LED_DOWN_Pin|LED_RIGHT_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LED_DCLK_Pin|LED_HOLD_Pin, GPIO_PIN_RESET);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, SCL1_Pin|SDA1_Pin|SCL2_Pin|SDA2_Pin|SCL3_Pin|SDA3_Pin, GPIO_PIN_RESET);
+
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LED_LEFT_Pin|LED_UP_Pin|SCL1_Pin|SDA1_Pin|SCL2_Pin|SDA2_Pin|SCL3_Pin|SDA3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LED_DOWN_Pin|LED_RIGHT_Pin, GPIO_PIN_SET);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, LED_LEFT_Pin|LED_UP_Pin, GPIO_PIN_SET);
+
 
   /*Configure GPIO pins : LED_DCLK_Pin LED_HOLD_Pin SW1_Pin SW2_Pin */
   GPIO_InitStruct.Pin = LED_DCLK_Pin|LED_HOLD_Pin|LED_DOWN_Pin|LED_RIGHT_Pin;
