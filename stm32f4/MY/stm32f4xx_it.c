@@ -117,11 +117,12 @@ void PendSV_Handler(void)
 
 extern void TimingDelay_Decrement(void);	//函数声明，定义在delay.c
 
-//	函数：SysTick中断服务处理
+//  函数：SysTick中断服务处理
 //
 void SysTick_Handler(void)
 {
-	TimingDelay_Decrement();
+    TimingDelay_Decrement();
+    gclk();
 }
 
 /******************************************************************************/

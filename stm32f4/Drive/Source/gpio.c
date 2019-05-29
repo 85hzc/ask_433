@@ -26,9 +26,11 @@ void MBI_GPIO_Init(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz; 	//速度选择
 	
 	//初始化引脚
-	GPIO_InitStructure.GPIO_Pin = LE_PIN|SDI_PIN|DCLK_PIN;//|GCLK_PIN;
+	//GPIO_InitStructure.GPIO_Pin = LE_PIN|SDI_PIN|DCLK_PIN;//|GCLK_PIN;
+	GPIO_InitStructure.GPIO_Pin = LE_PIN|SDI_PIN|DCLK_PIN|GCLK_PIN|AG_CLK_PIN|AG_DIN_PIN|AG_OE_PIN;
 	GPIO_Init(MBI_PORT, &GPIO_InitStructure);
 	
-	GPIO_ResetBits(MBI_PORT,LE_PIN|SDI_PIN|DCLK_PIN);//|GCLK_PIN);  //输出低电平
+	//GPIO_ResetBits(MBI_PORT,LE_PIN|SDI_PIN|DCLK_PIN);//|GCLK_PIN);  //输出低电平
+	GPIO_ResetBits(MBI_PORT,LE_PIN|SDI_PIN|DCLK_PIN|GCLK_PIN|AG_CLK_PIN|AG_DIN_PIN|AG_OE_PIN);  //输出低电平
 }
 

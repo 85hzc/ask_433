@@ -29,6 +29,7 @@
 #include "mbi5153.h"
 
 uint8_t circuit=0;
+extern volatile uint8_t pluse_enable;
 
 int main(void)
 {
@@ -37,7 +38,7 @@ int main(void)
 	SystemInit();
 	
 	Delay_Init();		//延时函数初始化
-	LED_Init();			//LED初始化
+	//LED_Init();			//LED初始化
 	KEY_Init();			//按键IO口初始化
 	Usart_Config();	// USART初始化函数
 	MBI_GPIO_Init();//初始化MBI驱动pin
@@ -54,10 +55,20 @@ int main(void)
 	TIM14_PWM_Init(100-1,21-1);//168M/42=4Mhz的计数频率,重装载值100，所以PWM频率为 4M/100=40Khz.
 	TIM_SetCompare1(TIM14,50);
 #else
-	//TIM1_PWM_Init(100-1,14-1);//(75-1,6-1); OK
-	TIM1_PWM_Init(100-1,6-1); //OK
-	TIM_SetCompare1(TIM1,50);
+
+#if(TIMER==1)
+	TIM1_PWM_Init(0x36-1,2-1); //OK
+	TIM_SetCompare1(TIM1,30);
 	TIM_CtrlPWMOutputs(TIM1, ENABLE);
+#elif(TIMER==3)
+	//TIM3_Int_Init(5000-1,84-1);
+
+    TIM2_config(50000-1);
+    TIM_Cmd(TIM2, ENABLE);
+    TIM_ClearITPendingBit(TIM2,TIM_IT_Update);
+    TIM_ITConfig(TIM2,TIM_IT_Update,ENABLE);
+
+#endif
 #endif
 #endif
 
@@ -74,7 +85,8 @@ int main(void)
 
 	//vsync();
 	//MBI5153();
-	
+	pluse_enable = 0;
+
 	while (1)
 	{
 
@@ -84,9 +96,10 @@ int main(void)
 		//printf("circuit:%d\r\n",circuit);
 		
 		MBI5153();
-		printf("circuit:%d\r\n",circuit%16);
-		circuit++;
-		Delay_ms(50);
+		//printf("circuit:%d\r\n",circuit%16);
+		//circuit++;
+		//MBI_ScanDisplay();
+		//Delay_ms(200);
 		/*
 		LED1_ON;
 		LED2_OFF;
