@@ -15,7 +15,7 @@
 #include "mbi5153.h"
 
 static u32 TimingDelay;  //计数变量
-volatile uint32_t gclk_pluse = 0;
+volatile uint32_t gclk_pluse = 0xff;
 volatile uint16_t gclk_auto = 0;
 //volatile uint16_t gclk_time = 0;
 volatile uint8_t pluse_force = 1, pluse_enable = 1;
@@ -61,6 +61,7 @@ void Delay_us(u32 nTime)
 }
 
 //#define PWM_129 129
+#if 0
 void gclk(void)
 {
 #if(TIMER==0)
@@ -101,6 +102,30 @@ void gclk(void)
     }*/
 #endif
 }
-
+#else
+void gclk(void)
+{
+    if(gclk_pluse<129&&pluse_enable)
+    {
+        GCLK_PIN_H
+        GCLK_PIN_H
+        GCLK_PIN_H
+        GCLK_PIN_H
+        GCLK_PIN_H
+        GCLK_PIN_H
+        GCLK_PIN_H
+        GCLK_PIN_H
+        GCLK_PIN_H
+        GCLK_PIN_H
+        GCLK_PIN_H
+        GCLK_PIN_H
+        GCLK_PIN_H
+        GCLK_PIN_H
+        //gclk_pluse = (gclk_pluse==128)?(0):(gclk_pluse+1);
+        gclk_pluse++;
+        GCLK_PIN_L
+    }
+}
+#endif
 
 
