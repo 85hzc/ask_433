@@ -98,6 +98,8 @@
 #define LOG_ENABLE          1                   //使能输出记录
 
 #define HWI2C               0
+#define HOLD_GES            0
+#define COMB_GES            1
 
 
 #if DEBUG_ENABLE

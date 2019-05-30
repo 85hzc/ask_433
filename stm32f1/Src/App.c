@@ -16,7 +16,7 @@
 #include "stdio.h"
 #include "arm_math.h"
 #include "arm_const_structs.h"
-//#include "math.h"
+#include "siliconSi115x.h"
 
 extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
@@ -27,14 +27,15 @@ gs_struct gs={0};
 uint16_t led_counter=0;
 //uint16_t led
 uint8_t led_flag=0;
+gs_comb_struct comb_ges;
 
 //变量初始化
 void App_Var_Init(void)
 {
-    gs.sample_counter=0;
-    gs.sample_ready_flag=0;
-    gs.sample_start_flag=0;
-    gs.sample_frequency=SAMPLE_FREQUENCY_DEF;
+    //gs.sample_counter=0;
+    //gs.sample_ready_flag=0;
+    //gs.sample_start_flag=0;
+    //gs.sample_frequency=SAMPLE_FREQUENCY_DEF;
     gs.sample_size=GES_SAMPLE_ARRAY_NUM_S;
     gs.sample_size_raw=GES_SAMPLE_RAW_ARRAY_NUM_S;
     for (uint8_t i=0;i<GES_CHN_NUM;i++)
@@ -42,6 +43,8 @@ void App_Var_Init(void)
         gs.sample_down_limit[i]=SAMPLE_DOWN_LIMIT_DEF;
         gs.sample_up_limit[i]=SAMPLE_UP_LIMIT_DEF;
     }
+
+    memset(&comb_ges, 0, sizeof(gs_comb_struct));
 }
 
 //应用初始化
@@ -143,7 +146,73 @@ uint8_t Ges_Add_Sample(uint16_t *ps)
         return 0;
 }
 
+//对每一次采样值判断是否手势到来
+//输入：     ps->读取的采样值数组
+//返回：     0-->数组未完全包含手势
+//        1-->数组手势已完毕
+uint8_t Ges_Detect_Sample(uint16_t *ps)
+{
+    uint8_t i,j,k;
+    uint32_t sum;
+    uint16_t ges_dynamic_sample_raw_cur_temp;
+    static uint8_t gesStart = false;
+
+    if(!gesStart && ((ps[0]-gs.sample_base_last[0]>SAMPLE_DOWN_LIMIT_DEF) ||
+        (ps[1]-gs.sample_base_last[1]>SAMPLE_DOWN_LIMIT_DEF) ||
+        (ps[2]-gs.sample_base_last[2]>SAMPLE_DOWN_LIMIT_DEF)))
+    {
+#if (LOG_ENABLE)
+        LOG_DEBUG("ges start.\r\n");
+#endif
+        gesStart = true;
+        gs.ges_dynamic_sample_size = 0;
+        gs.ges_dynamic_sample_raw_cur = 0;
+        gs.sample_size = GES_SAMPLE_ARRAY_NUM_L;
+        gs.sample_size_raw = GES_SAMPLE_RAW_ARRAY_NUM_L;
+    }
+
+    if(gesStart)
+    {
+        for (i=0;i<GES_CHN_NUM;i++)
+        {
+            ges_dynamic_sample_raw_cur_temp=gs.ges_dynamic_sample_raw_cur;
+            gs.ges_dynamic_sample_array[i][ges_dynamic_sample_raw_cur_temp]=ps[i];
+            ges_dynamic_sample_raw_cur_temp++;
+        }
+        //在每一帧的开始记录时间
+        //if (gs.ges_sample_raw_cur==0)
+        //    gs.frame_start_tick=Systick_Get();
+
+
+        if(gesStart &&
+            (ps[0]-gs.sample_base_last[0]<SAMPLE_DOWN_LIMIT_DEF) &&
+            (ps[1]-gs.sample_base_last[1]<SAMPLE_DOWN_LIMIT_DEF) &&
+            (ps[2]-gs.sample_base_last[2]<SAMPLE_DOWN_LIMIT_DEF))
+        {
+#if (LOG_ENABLE)
+            LOG_DEBUG("ges stop.\r\n");
+#endif
+            gs.ges_sample_raw_cur=0;            //基准值计算数组此时重新开始取值
+            gesStart = 0;
+            return 1;
+        }
+
+        gs.ges_dynamic_sample_raw_cur++;
+        if (gs.ges_dynamic_sample_raw_cur>=gs.sample_size_raw)
+        {
+            LOG_DEBUG("sample array overflow!  hold  approach  leave.\r\n");
+            gesStart = 0;
+            return 1;
+        }
+
+        gs.ges_dynamic_sample_size++; //can be the last array index[23]
+    }
+    
+    return 0;
+}
+
 //手势采样技术
+/*
 void Ges_Tick_Check(void)
 {
     gs.sample_counter++;
@@ -162,7 +231,7 @@ void Ges_It_Handle(void)
         gs.sample_ready_flag=1;
     }
 }
-
+*/
 #if (0)
 
 //对某一帧进行寻找峰值
@@ -336,6 +405,36 @@ uint8_t Ges_Trend_Find(uint8_t chn)
     return GES_NULL;
 }
 
+uint8_t Ges_Trend_DynamicFind(uint8_t chn)
+{
+    uint8_t i,j,num_per_section;
+    uint32_t total[SECTION_NUM];
+    num_per_section = GES_SAMPLE_ARRAY_NUM_L/SECTION_NUM;
+
+    memset(total,0,sizeof(total));
+    for(i=0;i<SECTION_NUM;i++)
+    {
+        for(j=0;j<num_per_section;j++)
+        {
+            total[i] += gs.ges_dynamic_sample_array[chn][j+i*num_per_section];
+        }
+    }
+
+    if(total[0]>total[1] && total[1]>total[2] && total[2]>total[3] &&
+        total[3]>40)
+    {
+        LOG_DEBUG("Ges_Trend_Find {chn[%d] leave}\r\n",chn);
+        return GES_LEVEL1_LEAVE;
+    }
+    if(total[0]<total[1] && total[1]<total[2] && total[2]<total[3]) //&& total[0]>40)
+    {
+        LOG_DEBUG("Ges_Trend_Find {chn[%d] apporach}\r\n",chn);
+        return GES_LEVEL1_APPROACH;
+    }
+
+    return GES_NULL;
+}
+
 //对某一帧进行波形寻找
 //输入： chn     --> 寻边沿的通道号
 //      pindex  --> 峰值index指针
@@ -381,9 +480,9 @@ uint8_t Ges_Wave_Search(uint8_t chn,uint16_t *pindex)
     }
     if ((gs.sample_size==GES_SAMPLE_ARRAY_NUM_L)&&(hold_flag==1))
     {
-        LOG_DEBUG("after a hold Ges.\r\n");
+        LOG_DEBUG("                                                 after a hold Ges.\r\n");
         res = Ges_Trend_Find(chn);
-        
+
         if(GES_NULL==res)
             res=GES_LEVEL1_HOLD;
 /*
@@ -459,6 +558,7 @@ uint8_t Ges_Wave_Search(uint8_t chn,uint16_t *pindex)
 //      0xFF    --> 无法判断
 uint8_t Ges_Wave_Lead(uint8_t chn1,uint8_t chn2)
 {
+/*
     if ((gs.wave[chn1].peak_index!=GES_INVALID_INDEX)&&
         (gs.wave[chn2].peak_index!=GES_INVALID_INDEX))
     {
@@ -467,6 +567,7 @@ uint8_t Ges_Wave_Lead(uint8_t chn1,uint8_t chn2)
         else if (gs.wave[chn1].peak_index>gs.wave[chn2].peak_index)
             return chn2;
     }
+    */
     if ((gs.wave[chn1].fall_index!=GES_INVALID_INDEX)&&
         (gs.wave[chn2].fall_index!=GES_INVALID_INDEX))
     {
@@ -496,6 +597,111 @@ uint8_t Ges_Wave_Lead(uint8_t chn1,uint8_t chn2)
     return GES_CHN_INVALID;
 }
 
+
+//对某一帧进行波形寻找
+//输入： chn     --> 寻边沿的通道号
+//      pindex  --> 峰值index指针
+//返回：             在此帧中具有的手势类型
+uint8_t Ges_Wave_DynamicSearch(uint8_t chn,uint16_t *pindex)
+{
+    uint16_t i,res;
+//  uint32_t sum;
+    uint8_t hold_flag=1;
+    res=GES_NULL;
+    
+    //初始化
+    gs.wave[chn].fall_index=GES_INVALID_INDEX;
+    gs.wave[chn].rise_index=GES_INVALID_INDEX;
+    gs.wave[chn].peak_index=GES_INVALID_INDEX;
+    
+    //求峰值、上升沿、下降沿及峰值、上升沿、下降沿位置和平均值
+    for (i=0,gs.wave[chn].peak_value=0;i<gs.ges_dynamic_sample_size;i++)
+    {
+        if ((i>=(gs.ges_dynamic_sample_size/2))&&(gs.ges_dynamic_sample_array[chn][i]<SAMPLE_HOLD_LIMIT_DEF))
+            hold_flag=0;
+
+        if (gs.ges_dynamic_sample_array[chn][i]>gs.wave[chn].peak_value)
+        {
+            gs.wave[chn].peak_value=gs.ges_dynamic_sample_array[chn][i];
+            gs.wave[chn].peak_index=i;
+        }
+        if (i<gs.ges_dynamic_sample_size-1)
+        {
+            if ((gs.ges_dynamic_sample_array[chn][i]<gs.sample_down_limit[chn])&&
+                (gs.ges_dynamic_sample_array[chn][i+1]>=gs.sample_down_limit[chn]))
+            {
+                gs.wave[chn].rise_value=gs.ges_dynamic_sample_array[chn][i+1];
+                gs.wave[chn].rise_index=i+1;
+            }
+            if ((gs.ges_dynamic_sample_array[chn][i]>=gs.sample_down_limit[chn])&&
+                (gs.ges_dynamic_sample_array[chn][i+1]<gs.sample_down_limit[chn]))
+            {
+                gs.wave[chn].fall_value=gs.ges_dynamic_sample_array[chn][i];
+                gs.wave[chn].fall_index=i;
+            }
+        }
+    }
+    if ((gs.ges_dynamic_sample_size==GES_SAMPLE_ARRAY_NUM_L-1)&&(hold_flag==1))
+    {
+        LOG_DEBUG("                                                 after a hold Ges.\r\n");
+        res = Ges_Trend_DynamicFind(chn);
+
+        if(GES_NULL==res)
+            res=GES_LEVEL1_HOLD;
+/*
+        if (gs.wave[chn].peak_index==(gs.sample_size-1) &&
+            gs.ges_sample_array[chn][gs.sample_size-1]-gs.ges_sample_array[chn][0]>200)
+        {
+            LOG_DEBUG("hold {apporach}\r\n");
+            res=GES_LEVEL1_APPROACH;
+        }
+        else if (gs.wave[chn].peak_index==0 &&
+            gs.ges_sample_array[chn][0]-gs.ges_sample_array[chn][gs.sample_size-1]>200)
+        {
+            LOG_DEBUG("hold {leave}\r\n");
+            res=GES_LEVEL1_LEAVE;
+        }
+*/
+        *pindex=GES_SAMPLE_ARRAY_NUM_S-1;
+        return res;
+    }
+
+    if ((gs.wave[chn].peak_index!=GES_INVALID_INDEX)&&(gs.wave[chn].peak_value>gs.sample_up_limit[chn]))
+    {
+
+        if(GES_SAMPLE_ARRAY_NUM_L-1 == gs.ges_dynamic_sample_size)//采样队列满
+        {
+            res = Ges_Trend_DynamicFind(chn);
+
+            if(GES_NULL==res)
+                res=GES_LEVEL1_FULL;
+        }
+        else
+        {
+            //峰值是最后一个数据
+            if (gs.wave[chn].peak_index==gs.ges_dynamic_sample_size)
+            {
+                res=GES_LEVEL1_APPROACH;
+                //*pindex=gs.wave[chn].peak_index;
+            }
+            //峰值是第一个数据
+            else if (gs.wave[chn].peak_index==0)
+            {
+                res=GES_LEVEL1_LEAVE;
+                //*pindex=gs.wave[chn].peak_index;
+            }
+            //峰值在中间
+            else
+            {
+                res=GES_LEVEL1_FULL;
+                //*pindex=gs.wave[chn].peak_index;
+            }
+        }
+        *pindex=gs.wave[chn].peak_index;
+    }
+    return res;
+}
+
 //对某一帧进行手势分析
 //返回：         在此帧中具有的手势类型
 uint8_t Ges_Analysis(void)
@@ -523,7 +729,7 @@ uint8_t Ges_Analysis(void)
             chn|=(1<<i);
 //          res=1;
 #if (LOG_ENABLE)
-            LOG_DEBUG("tick: %lld, CHN%d ges: approach!\r\n",gs.ges_record[i].add_time,i);
+            LOG_DEBUG("                                                 tick: %lld, CHN%d ges: approach!\r\n",gs.ges_record[i].add_time,i);
 #endif
         }
         else if (basic_ges==GES_LEVEL1_LEAVE)
@@ -533,7 +739,7 @@ uint8_t Ges_Analysis(void)
             chn|=(1<<i);
 //          res=1;
 #if (LOG_ENABLE)
-            LOG_DEBUG("tick: %lld, CHN%d ges: leave!\r\n",gs.ges_record[i].add_time,i);
+            LOG_DEBUG("                                                 tick: %lld, CHN%d ges: leave!\r\n",gs.ges_record[i].add_time,i);
 #endif
         }
         else if (basic_ges==GES_LEVEL1_FULL)
@@ -543,7 +749,7 @@ uint8_t Ges_Analysis(void)
             chn|=(1<<i);
 //          res=1;
 #if (LOG_ENABLE)
-            LOG_DEBUG("tick: %lld, CHN%d ges: full!\r\n",gs.ges_record[i].add_time,i);
+            LOG_DEBUG("                                                 tick: %lld, CHN%d ges: full!\r\n",gs.ges_record[i].add_time,i);
 #endif
         }
         else if (basic_ges==GES_LEVEL1_HOLD)
@@ -552,9 +758,11 @@ uint8_t Ges_Analysis(void)
             //gs.ges_record[i].add_time=gs.frame_start_tick+(index*SAMPLE_FREQUENCY_DEF*GES_SAMPLE_AVE_NUM);
             chn|=(1<<i);
 #if (LOG_ENABLE)
-            LOG_DEBUG("tick: %lld, CHN%d ges: hold!\r\n",gs.ges_record[i].add_time,i);
-#endif          
+            LOG_DEBUG("                                                 tick: %lld, CHN%d ges: hold!\r\n",gs.ges_record[i].add_time,i);
+#endif
+#if(HOLD_GES==1)
             hold_flag++;
+#endif
 //          res=GES_LEVEL2_HOLD;
 //          return res;
         }
@@ -563,12 +771,13 @@ uint8_t Ges_Analysis(void)
     //有新的手势
     if (chn)
     {
+#if(HOLD_GES==1)
         if (hold_flag)
         {
             res=GES_LEVEL2_HOLD;
             return res;
         }
-
+#endif
         if ((chn&(1<<GES_CHN_DOWN_LEFT))&&(chn&(1<<GES_CHN_DOWN_RIGHT)))
         {
             if(gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_APPROACH &&
@@ -756,6 +965,196 @@ uint8_t Ges_Analysis(void)
     
     return res;
 }
+
+//对某一帧进行手势分析
+//返回：         在此帧中具有的手势类型
+uint8_t Ges_DynamicAnalysis(void)
+{
+    uint8_t i,basic_ges,res,chn,hold_flag;
+    uint16_t index;
+    
+    res=GES_NULL;
+    chn=0;
+    hold_flag=0;
+
+    if(gs.ges_dynamic_sample_size<=3)
+        return res;
+
+    //标准化手势数组
+    Ges_DynamicNormalize();
+
+    for (i=0;i<GES_CHN_NUM;i++)
+    {
+//      basic_ges=Ges_Peak_Find(gs.ges_sample_array[i],i,&index);
+//      basic_ges=Ges_Edge_Find(gs.ges_sample_array[i],i,&index);
+        basic_ges=Ges_Wave_DynamicSearch(i,&index);
+        if (basic_ges==GES_LEVEL1_APPROACH)
+        {
+            gs.ges_record[i].ges=basic_ges;
+            chn|=(1<<i);
+#if (LOG_ENABLE)
+            LOG_DEBUG("                                                 tick: %lld, CHN%d ges: approach!\r\n",gs.ges_record[i].add_time,i);
+#endif
+        }
+        else if (basic_ges==GES_LEVEL1_LEAVE)
+        {
+            gs.ges_record[i].ges=basic_ges;
+            chn|=(1<<i);
+#if (LOG_ENABLE)
+            LOG_DEBUG("                                                 tick: %lld, CHN%d ges: leave!\r\n",gs.ges_record[i].add_time,i);
+#endif
+        }
+        else if (basic_ges==GES_LEVEL1_FULL)
+        {
+            gs.ges_record[i].ges=basic_ges;
+            chn|=(1<<i);
+#if (LOG_ENABLE)
+            LOG_DEBUG("                                                 tick: %lld, CHN%d ges: full!\r\n",gs.ges_record[i].add_time,i);
+#endif
+        }
+        else if (basic_ges==GES_LEVEL1_HOLD)
+        {
+            gs.ges_record[i].ges=basic_ges;
+            chn|=(1<<i);
+#if (LOG_ENABLE)
+            LOG_DEBUG("                                                 tick: %lld, CHN%d ges: hold!\r\n",gs.ges_record[i].add_time,i);
+#endif
+#if(HOLD_GES==1)
+            hold_flag++;
+#endif
+//          res=GES_LEVEL2_HOLD;
+//          return res;
+        }
+    }
+    
+    //有新的手势
+    if (chn)
+    {
+#if(HOLD_GES==1)
+        if (hold_flag)
+        {
+            res=GES_LEVEL2_HOLD;
+            return res;
+        }
+#endif
+        if ((chn&(1<<GES_CHN_DOWN_LEFT))&&(chn&(1<<GES_CHN_DOWN_RIGHT)))
+        {
+            if(gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_APPROACH &&
+                gs.ges_record[GES_CHN_DOWN_RIGHT].ges==GES_LEVEL1_APPROACH)
+            {
+                res=GES_LEVEL2_APPROACH;
+                return res;
+            }
+            else if(gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_LEAVE &&
+                gs.ges_record[GES_CHN_DOWN_RIGHT].ges==GES_LEVEL1_LEAVE)
+            {
+                res=GES_LEVEL2_LEAVE;
+                return res;
+            }
+        }
+
+        if (chn&(1<<GES_CHN_UP))
+            //重置last_ges_record
+            gs.last_ges_record[GES_CHN_UP]=gs.ges_record[GES_CHN_UP];
+        if (chn&(1<<GES_CHN_DOWN_LEFT))
+            //重置last_ges_record
+            gs.last_ges_record[GES_CHN_DOWN_LEFT]=gs.ges_record[GES_CHN_DOWN_LEFT];
+        if (chn&(1<<GES_CHN_DOWN_RIGHT))
+            //重置last_ges_record
+            gs.last_ges_record[GES_CHN_DOWN_RIGHT]=gs.ges_record[GES_CHN_DOWN_RIGHT];
+        
+        uint8_t left_up,left_right,right_up;
+        //left_up=Ges_Wave_Lead(GES_CHN_DOWN_LEFT,GES_CHN_UP);
+        left_right=Ges_Wave_Lead(GES_CHN_DOWN_LEFT,GES_CHN_DOWN_RIGHT);
+        //right_up=Ges_Wave_Lead(GES_CHN_DOWN_RIGHT,GES_CHN_UP);
+#if 0
+        //从左到右
+        if ((left_up==GES_CHN_DOWN_LEFT)&&(right_up==GES_CHN_UP))
+        {
+            res=GES_LEVEL2_RIGHT;
+            return res;
+        }
+        //从右到左
+        if ((left_up==GES_CHN_UP)&&(right_up==GES_CHN_DOWN_RIGHT))
+        {
+            res=GES_LEVEL2_LEFT;
+            return res;
+        }
+        //从上到下
+        if ((left_up==GES_CHN_UP)||(right_up==GES_CHN_UP))
+        {
+            res=GES_LEVEL2_DOWN;
+            return res;
+        }
+        //从下到上
+        if ((left_up==GES_CHN_DOWN_LEFT)||(right_up==GES_CHN_DOWN_RIGHT))
+        {
+            res=GES_LEVEL2_UP;
+            return res;
+        }
+#endif
+        //从左到右
+        if (left_right==GES_CHN_DOWN_LEFT)
+        {
+            res=GES_LEVEL2_RIGHT;
+            return res;
+        }
+        //从右到左
+        if (left_right==GES_CHN_DOWN_RIGHT)
+        {
+            res=GES_LEVEL2_LEFT;
+            return res;
+        }
+    }
+
+    return res;
+}
+
+#if(COMB_GES==1)
+void Ges_Comb(uint8_t ges)
+{
+    LOG_DEBUG("                                               ----Ges_Comb----\r\n");
+
+    uint64_t tick=Systick_Get();
+
+    if(tick>comb_ges.start_ges_time+MULTIGES_DISTANCE_MIN)
+    {
+        LOG_DEBUG("                                               combination geste tick time lease %d ms, reset.\r\n",MULTIGES_DISTANCE_MIN);
+        memset(&comb_ges, 0, sizeof(gs_comb_struct));
+    }
+
+    if(comb_ges.gesid==0)//the first ges of combination
+        comb_ges.start_ges_time = tick;
+
+    if(comb_ges.gesid<3)
+    {
+        comb_ges.ges[comb_ges.gesid] = ges;
+    }
+
+    LOG_DEBUG("                                               ----gesid=%d %x %x %x----\r\n",comb_ges.gesid,comb_ges.ges[0],comb_ges.ges[1],comb_ges.ges[2]);
+    comb_ges.gesid++;
+
+    if(comb_ges.ges[0]==GES_LEVEL2_LEFT&&
+        comb_ges.ges[1]==GES_LEVEL2_RIGHT&&
+        comb_ges.ges[2]==GES_LEVEL2_LEFT)
+    {
+        LOG_DEBUG("                                               ----left----\r\n");
+        memset(&comb_ges, 0, sizeof(gs_comb_struct));
+        HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
+        led_counter=LED_FLASH_DELAY;
+    }
+    if(comb_ges.ges[0]==GES_LEVEL2_RIGHT&&
+        comb_ges.ges[1]==GES_LEVEL2_LEFT&&
+        comb_ges.ges[2]==GES_LEVEL2_RIGHT)
+    {
+        LOG_DEBUG("                                               ----right----\r\n");
+        memset(&comb_ges, 0, sizeof(gs_comb_struct));
+        HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
+        led_counter=LED_FLASH_DELAY;
+    }
+}
+#endif
+
 #if(!CALIB_OBO)
 //手势基准定标，采用平均值定标
 void Ges_Calib(uint8_t firstboot)
@@ -844,15 +1243,45 @@ void Ges_Normalize(void)
     }
 
 #if (LOG_ENABLE)
-    for (j=0;j<gs.sample_size;j++)
+    //for (j=0;j<gs.sample_size;j++)
     {
-        LOG_DEBUG(" %5d %5d %5d\r\n",
-            gs.ges_sample_array[1][j],gs.ges_sample_array[2][j],gs.ges_sample_array[0][j]);
+        //LOG_DEBUG(" %5d %5d %5d\r\n",
+    //        gs.ges_sample_array[1][j],gs.ges_sample_array[2][j],gs.ges_sample_array[0][j]);
     }
-    LOG_DEBUG("[%5d %5d %5d]sample[%d]\r\n",gs.sample_base_last[1],gs.sample_base_last[2],gs.sample_base_last[0],gs.sample_size);
+    LOG_DEBUG("                                         [%5d %5d %5d]sample[%d]\r\n",gs.sample_base_last[1],gs.sample_base_last[2],gs.sample_base_last[0],gs.sample_size);
 #endif
 }
 #endif
+
+
+//归一化采样数组
+void Ges_DynamicNormalize(void)
+{
+    uint8_t i,j;
+    for (i=0;i<GES_CHN_NUM;i++)
+    {
+        for (j=0;j<gs.ges_dynamic_sample_size;j++)
+        {
+        
+            if (gs.ges_dynamic_sample_array[i][j]>=gs.sample_base_last[i]) {
+                gs.ges_dynamic_sample_array[i][j]=gs.ges_dynamic_sample_array[i][j]-gs.sample_base_last[i];
+            }
+            else {
+                gs.ges_dynamic_sample_array[i][j]=0;
+                //gs.ges_sample_array[i][j]=gs.sample_base_last[i]-gs.ges_sample_array[i][j];
+            }
+        }
+    }
+
+#if (LOG_ENABLE)
+    for (j=0;j<gs.ges_dynamic_sample_size;j++)
+    {
+        LOG_DEBUG("ges[%d]:[ %5d %5d %5d]\r\n",j,
+            gs.ges_dynamic_sample_array[1][j],gs.ges_dynamic_sample_array[2][j],gs.ges_dynamic_sample_array[0][j]);
+    }
+    LOG_DEBUG("                                         [%5d %5d %5d] DynamicNormalize sample[%d]\r\n",gs.sample_base_last[1],gs.sample_base_last[2],gs.sample_base_last[0],gs.ges_dynamic_sample_size);
+#endif
+}
 
 #if(CALIB_OBO)
 //归一化采样数组
@@ -958,7 +1387,7 @@ NORMALIZE:
 //打印相关手势信息
 void Ges_Log(void)
 {
-#if (LOG_ENABLE)
+#if 0//(LOG_ENABLE)
     LOG_DEBUG("this ges-->up: %lld/%d, down_left: %lld/%d, down_right: %lld/%d!\r\n",
                 gs.ges_record[GES_CHN_UP].add_time,gs.ges_record[GES_CHN_UP].ges,
                 gs.ges_record[GES_CHN_DOWN_LEFT].add_time,gs.ges_record[GES_CHN_DOWN_LEFT].ges,
@@ -1004,9 +1433,9 @@ void Ges_Log(void)
 
 //主任务
 void App_Task(void)
+#if 0
 {
     //static uint8_t calib_num=0;
-
     static uint8_t firstboot=1;
     /*
     if (gs.sample_start_flag==1)
@@ -1056,7 +1485,7 @@ void App_Task(void)
             }
 #endif
 #if (!LOG_ENABLE)
-            LOG_DEBUG("sample[%d]\r\n",gs.sample_size);
+            LOG_DEBUG("sample[%d] %x[13L 14R 15H 17A 18LE]\r\n",gs.sample_size,gs.last_ges);
 #endif
             res=Ges_Analysis();
             if (res)//else return to 10 samples
@@ -1091,7 +1520,6 @@ void App_Task(void)
                     gs.last_ges_time=tick;
                     return;
                 }
-                    
 
                 //有效手势更新
                 if (tick>gs.last_ges_time+GES_DISTANCE_MIN)
@@ -1102,6 +1530,7 @@ void App_Task(void)
                 }
                 else//无效手势，间隔过短
                 {
+                    #if 0//实现连续手势，取消间隔700ms手势过滤
                     //连续触发接近或者离开手势
                     if((gs.last_ges == GES_LEVEL2_LEAVE && res == GES_LEVEL2_LEAVE) ||
                         (gs.last_ges == GES_LEVEL2_APPROACH && res == GES_LEVEL2_APPROACH))
@@ -1122,13 +1551,22 @@ void App_Task(void)
                             gs.last_ges_time=tick;
                         }
                     }
+                    #else
+                        gs.last_ges=res;
+                        gs.last_ges_time=tick;
+                        if(!(gs.last_ges == GES_LEVEL2_HOLD && res == GES_LEVEL2_LEAVE))
+                        {
+                            LOG_DEBUG("                                                 tick time lease %d ms\r\n",GES_DISTANCE_MIN);
+                        //    return;
+                        }
+                    #endif
                 }
 
                 if (res==GES_LEVEL2_UP)
                 {
                     HAL_GPIO_WritePin(LED_UP_GPIO_Port, LED_UP_Pin, GPIO_PIN_RESET);
                     led_counter=LED_FLASH_DELAY;
-                    LOG_DEBUG("                         Ges: UP!\r\n");
+                    LOG_DEBUG("                                                 Ges: UP!\r\n");
                     Ges_Log();
                     //开SW2
                     //HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_SET);
@@ -1137,29 +1575,40 @@ void App_Task(void)
                 {
                     HAL_GPIO_WritePin(LED_DOWN_GPIO_Port, LED_DOWN_Pin, GPIO_PIN_RESET);
                     led_counter=LED_FLASH_DELAY;
-                    LOG_DEBUG("                         Ges: DOWN!\r\n");
+                    LOG_DEBUG("                                                 Ges: DOWN!\r\n");
                     Ges_Log();
                     //关SW2
                     //HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_RESET);
                 }
                 else if (res==GES_LEVEL2_LEFT)
                 {
+#if(COMB_GES==0)
                     HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
                     led_counter=LED_FLASH_DELAY;
-                    LOG_DEBUG("                         Ges: LEFT!\r\n");
+#endif
+                    LOG_DEBUG("                                                 Ges: LEFT!\r\n");
+#if(COMB_GES==1)
+                    Ges_Comb(GES_LEVEL2_LEFT);
+#endif
                     Ges_Log();
                     //关SW1
                     //HAL_GPIO_WritePin(SW1_GPIO_Port, SW1_Pin, GPIO_PIN_RESET);
                 }
                 else if (res==GES_LEVEL2_RIGHT)
                 {
+#if(COMB_GES==0)
                     HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
                     led_counter=LED_FLASH_DELAY;
-                    LOG_DEBUG("                         Ges: RIGHT!\r\n");
+#endif
+                    LOG_DEBUG("                                                 Ges: RIGHT!\r\n");
+#if(COMB_GES==1)
+                    Ges_Comb(GES_LEVEL2_RIGHT);
+#endif
                     Ges_Log();
                     //开SW1
                     //HAL_GPIO_WritePin(SW1_GPIO_Port, SW1_Pin, GPIO_PIN_SET);
                 }
+#if(HOLD_GES==1)
                 else if (res==GES_LEVEL2_HOLD)
                 {
                     static uint8_t sw_state=0;
@@ -1223,6 +1672,7 @@ void App_Task(void)
                         gs.hold_counter=0;
                     }
                 }
+#endif
                 else if (res==GES_LEVEL2_DCLK)
                 {
                     HAL_GPIO_WritePin(LED_DCLK_GPIO_Port, LED_DCLK_Pin, GPIO_PIN_RESET);
@@ -1269,6 +1719,292 @@ void App_Task(void)
         }
     }
 }
+#else
+{
+    uint16_t ps[3];
+    uint8_t res;
+    //static uint8_t calib_num=0;
+    static uint8_t firstboot=true;
+
+    memset(ps,0,sizeof(ps));
+
+    getSensorDataByHostout(ps);
+
+    if(!ps[0]&&!ps[1]&&!ps[2])
+    {
+        LOG_DEBUG(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n");
+        return;
+    }
+
+    res=Ges_Add_Sample(ps);
+    //一次数组填充完毕
+    if (res==1)
+    {
+#if (LOG_ENABLE)
+        LOG_DEBUG("                                     sample[%d]\r\n",gs.sample_size);
+#endif
+        //第一次采样数据作为定标用
+        //if (!calib_num)
+        //if(GES_SAMPLE_ARRAY_NUM_S==gs.sample_size)
+        if(0==gs.hold_counter)
+        {
+            Ges_Calib(firstboot);
+            firstboot = false;
+            //calib_num++;
+            //return;
+        }
+    }
+
+#if (!LOG_ENABLE)
+    LOG_DEBUG("sample[%d] %x[13L 14R 15H 17A 18LE]\r\n",gs.sample_size,gs.last_ges);
+#endif
+
+    if(firstboot)
+        return;
+
+    res = Ges_Detect_Sample(ps);
+    if(!res)//当前手势过程不完整，继续采样
+        return;
+
+    res=Ges_DynamicAnalysis();
+    if (res)//else return to 10 samples
+    {
+        /*
+        //当前是short采样，改变sample_size继续采样
+        if (gs.sample_size==GES_SAMPLE_ARRAY_NUM_S)
+        {
+            gs.sample_size=GES_SAMPLE_ARRAY_NUM_L;
+            gs.sample_size_raw=GES_SAMPLE_RAW_ARRAY_NUM_L;
+            gs.ges_sample_raw_cur=GES_SAMPLE_ARRAY_NUM_S;
+            return;
+        }*/
+
+        uint64_t tick=Systick_Get();
+        
+        //上次是HOLD手势,此次不是HOLD且不为空，避免误触发,但是hold之后，要允许leave和approach
+        if ((gs.last_ges==GES_LEVEL2_HOLD)&&(res!=GES_LEVEL2_HOLD)&&
+            (res!=GES_LEVEL2_APPROACH)&&(res!=GES_LEVEL2_LEAVE))
+        {
+            LOG_DEBUG("######IGNORE [%x] after GES_LEVEL2_HOLD#######\r\n",res);
+            gs.last_ges=GES_NULL;
+            gs.last_ges_time=tick;
+            return;
+        }
+
+        //上次是APPROACH or LEAVE手势,此次是LEFT or RIGHT，避免误触发
+        if (((gs.last_ges==GES_LEVEL2_APPROACH) || (gs.last_ges==GES_LEVEL2_LEAVE)) && 
+            ((res==GES_LEVEL2_LEFT)||(res==GES_LEVEL2_RIGHT)))
+        {
+            LOG_DEBUG("######IGNORE [%x] after [%s]#######\r\n",res,(gs.last_ges==GES_LEVEL2_APPROACH)?"APPROACH":"LEAVE");
+            gs.last_ges=GES_NULL;
+            gs.last_ges_time=tick;
+            return;
+        }
+
+        //有效手势更新
+        if (tick>gs.last_ges_time+GES_DISTANCE_MIN)
+        {
+            //if(!gs.hold_saveself)
+                gs.last_ges=res;
+            gs.last_ges_time=tick;
+        }
+        else//无效手势，间隔过短
+        {
+            #if 0//实现连续手势，取消间隔700ms手势过滤
+            //连续触发接近或者离开手势
+            if((gs.last_ges == GES_LEVEL2_LEAVE && res == GES_LEVEL2_LEAVE) ||
+                (gs.last_ges == GES_LEVEL2_APPROACH && res == GES_LEVEL2_APPROACH))
+            {
+                gs.last_ges=res;
+                gs.last_ges_time=tick;
+            }
+            else
+            {
+                if(!(gs.last_ges == GES_LEVEL2_HOLD && res == GES_LEVEL2_LEAVE))
+                {
+                    LOG_DEBUG("tick time lease %d ms\r\n",GES_DISTANCE_MIN);
+                    return;
+                }
+                else
+                {
+                    gs.last_ges=res;
+                    gs.last_ges_time=tick;
+                }
+            }
+            #else
+                gs.last_ges=res;
+                gs.last_ges_time=tick;
+                if(!(gs.last_ges == GES_LEVEL2_HOLD && res == GES_LEVEL2_LEAVE))
+                {
+                    LOG_DEBUG("                                                 tick time lease %d ms, and go on.\r\n",GES_DISTANCE_MIN);
+                //    return;
+                }
+            #endif
+        }
+
+        if (res==GES_LEVEL2_UP)
+        {
+            HAL_GPIO_WritePin(LED_UP_GPIO_Port, LED_UP_Pin, GPIO_PIN_RESET);
+            led_counter=LED_FLASH_DELAY;
+            LOG_DEBUG("                                                 Ges: UP!\r\n");
+            Ges_Log();
+            //开SW2
+            //HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_SET);
+        }
+        else if (res==GES_LEVEL2_DOWN)
+        {
+            HAL_GPIO_WritePin(LED_DOWN_GPIO_Port, LED_DOWN_Pin, GPIO_PIN_RESET);
+            led_counter=LED_FLASH_DELAY;
+            LOG_DEBUG("                                                 Ges: DOWN!\r\n");
+            Ges_Log();
+            //关SW2
+            //HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_RESET);
+        }
+        else if (res==GES_LEVEL2_LEFT)
+        {
+#if(COMB_GES==0)
+            HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
+            led_counter=LED_FLASH_DELAY;
+#endif
+            LOG_DEBUG("                                                 Ges: LEFT!\r\n");
+#if(COMB_GES==1)
+            Ges_Comb(GES_LEVEL2_LEFT);
+#endif
+            Ges_Log();
+        }
+        else if (res==GES_LEVEL2_RIGHT)
+        {
+#if(COMB_GES==0)
+            HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
+            led_counter=LED_FLASH_DELAY;
+#endif
+            LOG_DEBUG("                                                 Ges: RIGHT!\r\n");
+#if(COMB_GES==1)
+            Ges_Comb(GES_LEVEL2_RIGHT);
+#endif
+            Ges_Log();
+            //开SW1
+            //HAL_GPIO_WritePin(SW1_GPIO_Port, SW1_Pin, GPIO_PIN_SET);
+        }
+#if(HOLD_GES==1)
+        else if (res==GES_LEVEL2_HOLD)
+        {
+            static uint8_t sw_state=0;
+            
+//                  gs.hold_counter++;
+//                  if (gs.hold_counter==0)
+//                  {
+//                      HAL_GPIO_WritePin(LED_HOLD_GPIO_Port, LED_HOLD_Pin, GPIO_PIN_SET);
+//                      led_counter=LED_FLASH_DELAY;
+//                      LOG_DEBUG("Ges: HOLD!\n");
+//                      Ges_Log();
+//                      if (!sw_state)
+//                      {
+//                          HAL_GPIO_WritePin(SW1_GPIO_Port, SW1_Pin, GPIO_PIN_SET);
+//                          HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_SET);
+//                          sw_state=1;
+//                      }
+//                      else
+//                      {
+//                          HAL_GPIO_WritePin(SW1_GPIO_Port, SW1_Pin, GPIO_PIN_RESET);
+//                          HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_RESET);
+//                          sw_state=0;
+//                      }
+//                  }
+            //if (gs.hold_counter<SAMPLE_HOLD_COUNT)
+            //{
+                gs.hold_counter++;
+                if (gs.hold_counter==SAMPLE_HOLD_COUNT)
+                {
+                    //HAL_GPIO_WritePin(LED_HOLD_GPIO_Port, LED_HOLD_Pin, GPIO_PIN_RESET);
+                    HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
+                    HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
+                    HAL_GPIO_WritePin(LED_UP_GPIO_Port, LED_UP_Pin, GPIO_PIN_RESET);
+                    HAL_GPIO_WritePin(LED_DOWN_GPIO_Port, LED_DOWN_Pin, GPIO_PIN_RESET);
+                    led_counter=LED_FLASH_DELAY;
+                    LOG_DEBUG("                         Ges: HOLD!\r\n");
+                    Ges_Log();
+                    if (!sw_state)
+                    {
+                        //HAL_GPIO_WritePin(SW1_GPIO_Port, SW1_Pin, GPIO_PIN_SET);
+                        //HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_SET);
+                        sw_state=1;
+                    }
+                    else
+                    {
+                        //HAL_GPIO_WritePin(SW1_GPIO_Port, SW1_Pin, GPIO_PIN_RESET);
+                        //HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_RESET);
+                        sw_state=0;
+                    }
+                }
+            //}
+
+            if(gs.hold_counter>5)
+            {
+                if (gs.sample_size==GES_SAMPLE_ARRAY_NUM_L)
+                {
+                    gs.sample_size=GES_SAMPLE_ARRAY_NUM_S;
+                    gs.sample_size_raw=GES_SAMPLE_RAW_ARRAY_NUM_S;
+                }
+                gs.last_ges = GES_NULL;
+                gs.hold_counter=0;
+            }
+        }
+#endif
+        else if (res==GES_LEVEL2_DCLK)
+        {
+            HAL_GPIO_WritePin(LED_DCLK_GPIO_Port, LED_DCLK_Pin, GPIO_PIN_RESET);
+            led_counter=LED_FLASH_DELAY;
+            LOG_DEBUG("                         Ges: DCLK!\r\n");
+            Ges_Log();
+        }
+        else if (res==GES_LEVEL2_APPROACH)
+        {
+            if(gs.approach_counter)
+            {
+                LOG_DEBUG("                         Ges: APPROACH!\r\n");
+                HAL_GPIO_WritePin(LED_UP_GPIO_Port, LED_UP_Pin, GPIO_PIN_RESET);
+                led_counter=100;
+                Ges_Log();
+            }
+            gs.approach_counter++;
+        }
+        else if (res==GES_LEVEL2_LEAVE)
+        {
+            LOG_DEBUG("                         Ges: LEAVE!\r\n");
+            HAL_GPIO_WritePin(LED_DOWN_GPIO_Port, LED_DOWN_Pin, GPIO_PIN_RESET);
+            led_counter=100;
+            Ges_Log();
+        }
+
+        //准备接受下一手势动作
+        if (gs.sample_size==GES_SAMPLE_ARRAY_NUM_L)
+        {
+            gs.sample_size=GES_SAMPLE_ARRAY_NUM_S;
+            gs.sample_size_raw=GES_SAMPLE_RAW_ARRAY_NUM_S;
+        }
+    }
+    else
+    {
+        LOG_DEBUG("Ges Analysis fail.\r\n");
+
+        //当前是long采样，改变sample_size继续采样
+        if (gs.sample_size==GES_SAMPLE_ARRAY_NUM_L)
+        {
+            gs.sample_size=GES_SAMPLE_ARRAY_NUM_S;
+            gs.sample_size_raw=GES_SAMPLE_RAW_ARRAY_NUM_S;
+            return;
+        }
+        gs.last_ges = GES_NULL;
+        gs.hold_counter=0;
+        gs.approach_counter=0;
+    }
+#if (LOG_ENABLE)
+    LOG_DEBUG("\r\n\n");
+#endif
+    //}
+}
+#endif
 
 //系统时钟自加
 void Systick_Inc(void)

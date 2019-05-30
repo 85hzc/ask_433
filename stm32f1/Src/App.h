@@ -32,6 +32,7 @@
 #define GES_TIME_DIF_MIN            10              //手势时间差的最小值，10ms
 #define GES_TIME_DIF_MAX            1000            //手势时间差的最大值，1000ms
 #define GES_DISTANCE_MIN            700             //相邻手势的最小值，500ms
+#define MULTIGES_DISTANCE_MIN       2500            //组合相邻手势的最小值，2.5s
 
 //手势类型
 #define GES_NULL                    0x00            //无
@@ -73,22 +74,28 @@ typedef struct
 
 typedef struct
 {
-    uint8_t sample_start_flag;                                              //采样开始标志
-    uint8_t sample_ready_flag;                                              //采样完成标志
-    uint32_t sample_counter;                                                //采样开始计数器
-    uint32_t sample_frequency;                                              //采样频率
+    //uint8_t sample_start_flag;                                              //采样开始标志
+    //uint8_t sample_ready_flag;                                              //采样完成标志
+    //uint32_t sample_counter;                                                //采样开始计数器
+    //uint32_t sample_frequency;                                              //采样频率
     uint16_t sample_size;                                                   //采样数组元素个数
     uint16_t sample_size_raw;                                               //采样raw数组元素个数
     
     uint16_t sample_base[GES_CHN_NUM];                                      //每路的基准
-    uint16_t sample_base_last[GES_CHN_NUM];                                 //每路的基准
+    uint16_t sample_base_last[GES_CHN_NUM];                                 //上一周期每路的基准
     uint16_t sample_down_limit[GES_CHN_NUM];                                //每路的触发下限，低于此值则不算接近
     uint16_t sample_up_limit[GES_CHN_NUM];                                  //每路的触发上限，高于此值则记录触发
     
     uint16_t ges_sample_raw_array[GES_CHN_NUM][GES_SAMPLE_RAW_ARRAY_NUM_L]; //手势采样原始数组
     uint16_t ges_sample_array[GES_CHN_NUM][GES_SAMPLE_ARRAY_NUM_L];         //手势采样数组
     uint16_t ges_sample_raw_cur;                                            //手势raw数组当前元素
-    
+
+    //uint16_t ges_dynamic_sample_raw_array[GES_CHN_NUM][GES_SAMPLE_RAW_ARRAY_NUM_L]; //手势采样原始数组
+    uint16_t ges_dynamic_sample_array[GES_CHN_NUM][GES_SAMPLE_ARRAY_NUM_L];         //手势采样数组
+    uint16_t ges_dynamic_sample_raw_cur;                                            //手势raw数组当前元素
+
+    uint8_t  ges_dynamic_sample_size;
+
     uint16_t ges_sample_Calib_array[GES_CHN_NUM][GES_SAMPLE_ARRAY_NUM_L];           //手势采样数组
     
     uint64_t frame_start_tick;                                              //当前帧采样的起始时间
@@ -108,12 +115,23 @@ typedef struct
 //  uint16_t led_flash_counter;
 }gs_struct;
 
+#if(COMB_GES==1)
+typedef struct
+{
+    uint8_t ges[3];
+    uint8_t gesid;
+    uint64_t start_ges_time;
+
+    //uint64_t last_ges_time;
+}gs_comb_struct;
+#endif
+
 void App_Var_Init(void);
 void App_Init(void);
 void LED_Tick_Check(void);
 uint8_t Ges_Add_Sample(uint16_t *ps);
-void Ges_Tick_Check(void);
-void Ges_It_Handle(void);
+//void Ges_Tick_Check(void);
+//void Ges_It_Handle(void);
 //uint8_t Ges_Peak_Find(uint16_t *ps,uint8_t chn,uint16_t *pindex);
 //uint8_t Ges_Edge_Find(uint16_t *ps,uint8_t chn,uint16_t *pindex);
 uint8_t Ges_Wave_Search(uint8_t chn,uint16_t *pindex);
@@ -121,6 +139,7 @@ uint8_t Ges_Wave_Lead(uint8_t chn1,uint8_t chn2);
 uint8_t Ges_Analysis(void);
 void Ges_Calib(uint8_t firstboot);
 void Ges_Normalize(void);
+void Ges_DynamicNormalize(void);
 void Ges_Log(void);
 //uint8_t Ges_SampleSize_Switch(void);
 void App_Task(void);
