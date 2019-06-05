@@ -3,17 +3,19 @@
 
 #include "main.h"
 
-#define LED_FLASH_DELAY             300             //LED指示的点亮状态延续时间，200ms
+#define LED_FLASH_DELAY             300             //LED指示的点亮状态延续时间，300ms
+#define LED_HOLD_FLASH_DELAY        100             //LED指示的点亮状态延续时间，100ms
+
 #define SAMPLE_FREQUENCY_DEF        10              //手势采样频率，10ms
 #define SAMPLE_DOWN_LIMIT_DEF       0x000A          //采样阈值下限
 #define SAMPLE_UP_LIMIT_DEF         0x0020          //采样触发阈值
-#define SAMPLE_HOLD_LIMIT_DEF       0x0040          //hold的触发阈值
+#define SAMPLE_HOLD_LIMIT_DEF       0x0020//0x0040  //hold的触发阈值
 #define SAMPLE_HOLD_END_SHIFT       GES_SAMPLE_ARRAY_NUM_S  //从采样数组末尾起10个作为检测基准
-#define SAMPLE_HOLD_COUNT           2               //最多3个HOLD的count再次发送一次HOLD
+#define SAMPLE_HOLD_COUNT           3               //最多3个HOLD的count再次发送一次HOLD
 #define SAMPLE_HOLD_LIST_NUM        10              //hold数组的最大元素个数
 //#define SAMPLE_HOLD_START
 
-#define GES_CHN_NUM                 3               //手势采样的通道数，3
+#define GES_CHN_NUM                 2               //手势采样的通道数，3
 #define GES_CHN_UP                  2               //上通道
 #define GES_CHN_DOWN_LEFT           1               //下左通道
 #define GES_CHN_DOWN_RIGHT          0               //下右通道
@@ -31,8 +33,11 @@
                                                     
 #define GES_TIME_DIF_MIN            10              //手势时间差的最小值，10ms
 #define GES_TIME_DIF_MAX            1000            //手势时间差的最大值，1000ms
-#define GES_DISTANCE_MIN            700             //相邻手势的最小值，500ms
-#define MULTIGES_DISTANCE_MIN       2500            //组合相邻手势的最小值，2.5s
+#define GES_DISTANCE_MIN            700             //相邻手势的最小值，700ms
+#define MULTIGES_DISTANCE_MIN       2000            //组合相邻手势的最小值，2.5s
+
+#define GES_TREND_CLEARUP_MIN       1000             //相邻手势的最小值，1000ms
+
 
 //手势类型
 #define GES_NULL                    0x00            //无
@@ -54,7 +59,7 @@
 
 #define CALIB_OBO                   0
 
-#define SECTION_NUM                 4
+#define SECTION_NUM                 3
 
 typedef struct
 {
@@ -93,9 +98,9 @@ typedef struct
     //uint16_t ges_dynamic_sample_raw_array[GES_CHN_NUM][GES_SAMPLE_RAW_ARRAY_NUM_L]; //手势采样原始数组
     uint16_t ges_dynamic_sample_array[GES_CHN_NUM][GES_SAMPLE_ARRAY_NUM_L];         //手势采样数组
     uint16_t ges_dynamic_sample_raw_cur;                                            //手势raw数组当前元素
-
     uint8_t  ges_dynamic_sample_size;
-
+    uint8_t  ges_dynamic_start;
+    
     uint16_t ges_sample_Calib_array[GES_CHN_NUM][GES_SAMPLE_ARRAY_NUM_L];           //手势采样数组
     
     uint64_t frame_start_tick;                                              //当前帧采样的起始时间
@@ -109,8 +114,10 @@ typedef struct
     uint64_t last_ges_time;
 
     uint8_t approach_counter;
-
+    uint8_t leave_counter;
     uint8_t hold_counter;
+    uint8_t hold_flag;
+    uint8_t analy_fail_counter;
     uint16_t hold_list[SAMPLE_HOLD_LIST_NUM];
 //  uint16_t led_flash_counter;
 }gs_struct;
