@@ -21,12 +21,15 @@
 extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
 
-static uint32_t tickstart;
-uint64_t sys_tick=0;                                //系统tick计数
+extern TIM_HandleTypeDef htim3;
+extern uint32_t          turn_off;
+uint16_t                 brightness = 500;
+static uint32_t          tickstart;
+uint64_t                 sys_tick=0;          //系统tick计数
 gs_struct gs={0};
 uint16_t led_counter=0;
 //uint16_t led
-uint8_t led_flag=0;
+
 gs_comb_struct comb_ges;
 
 void init_counter(void)
@@ -35,6 +38,7 @@ void init_counter(void)
     gs.hold_counter=0;
     gs.approach_counter=0;
     gs.leave_counter=0;
+    gs.new_hold_AorL_size = GES_SAMPLE_RAW_ARRAY_NUM_L;
 }
 
 //变量初始化
@@ -46,6 +50,8 @@ void App_Var_Init(void)
     //gs.sample_frequency=SAMPLE_FREQUENCY_DEF;
     gs.sample_size=GES_SAMPLE_ARRAY_NUM_S;
     gs.sample_size_raw=GES_SAMPLE_RAW_ARRAY_NUM_S;
+    gs.new_hold_AorL_size = GES_SAMPLE_RAW_ARRAY_NUM_L;
+
     for (uint8_t i=0;i<GES_CHN_NUM;i++)
     {
         gs.sample_down_limit[i]=SAMPLE_DOWN_LIMIT_DEF;
@@ -160,7 +166,7 @@ uint8_t Ges_Add_Sample(uint16_t *ps)
 //        1-->数组手势已完毕
 uint8_t Ges_Detect_Sample(uint16_t *ps)
 {
-    uint8_t i,j,k;
+    uint8_t i,j,k,new_hold_AorL_size;
     uint32_t sum;
     uint16_t ges_dynamic_sample_raw_cur_temp;
 
@@ -198,9 +204,9 @@ uint8_t Ges_Detect_Sample(uint16_t *ps)
 
         gs.ges_dynamic_sample_size++; //can be the last array index[24]
         gs.ges_dynamic_sample_raw_cur++;
-        if (gs.ges_dynamic_sample_raw_cur>=GES_SAMPLE_RAW_ARRAY_NUM_L)
+        if (gs.ges_dynamic_sample_raw_cur>=gs.new_hold_AorL_size)
         {
-            LOG_DEBUG("sample array overflow!  hold  approach  leave.\r\n");
+            LOG_DEBUG("sample array overflow!  HOLD/AP/LE size[%d].\r\n", gs.new_hold_AorL_size);
             gs.ges_dynamic_start = 0;
             gs.ges_sample_raw_cur=0;            //基准值计算数组此时重新开始取值
             return 1;
@@ -452,7 +458,6 @@ uint8_t Ges_Trend_DynamicFind(uint8_t chn)
     return GES_NULL;
 }
 
-
 uint8_t Ges_Hold_Judge(uint8_t chn)
 {
     uint8_t i,j,res=0;
@@ -487,6 +492,160 @@ uint8_t Ges_Hold_Judge(uint8_t chn)
 
     LOG_DEBUG("Ges_Hold_Judge fail %d.\r\n",res);
     return res;
+}
+
+uint8_t Ges_Hold_Height_Judge()
+{
+    uint8_t chn;
+    uint8_t i,res=0;
+    uint64_t total[2]=0;
+    uint32_t tt1[2]=0;
+
+    for(chn=0;chn<2;chn++)
+    {
+        for(i=0;i<GES_SAMPLE_ARRAY_NUM_L;i++)
+        {
+            total[chn] += gs.ges_dynamic_sample_array[chn][i];
+        }
+        tt1[chn] = total[chn]/GES_SAMPLE_ARRAY_NUM_L;
+        LOG_DEBUG("Ges_Hold_Height_Judge ch%d[%d].\r\n",chn,tt1[chn]);
+    }
+
+    if(tt1[0]+tt1[1]<200)
+    {
+        LOG_DEBUG("Ges_Hold_Height_Judge too low!\r\n");
+        return 0;
+    }
+
+    if(!gs.hold_height_start)
+        gs.hold_height_start = tt1[0]+tt1[1];
+    else if(!gs.hold_height_stop)
+        gs.hold_height_stop = tt1[0]+tt1[1];
+    else
+    {
+        gs.hold_height_start = gs.hold_height_stop;
+        gs.hold_height_stop = tt1[0]+tt1[1];
+    }
+    
+    LOG_DEBUG("gs.hold_flag[%d]!\r\n",gs.hold_flag);
+
+    if(gs.hold_flag)
+    {
+        if(gs.hold_height_start<gs.hold_height_stop)
+        {
+
+            LOG_DEBUG("Ges_Hold_Height_Judge approach[%d]!\r\n",gs.hold_height_stop-gs.hold_height_start);
+
+            for(i=0;i<gs.hold_height_stop-gs.hold_height_start;i++)
+            {
+                brightness++;
+                if(brightness>1000)
+                {
+                    return 1;
+                }
+                __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, (uint32_t)brightness);
+            }
+        }
+        else
+        {
+            LOG_DEBUG("Ges_Hold_Height_Judge leave[%d]!\r\n",gs.hold_height_start-gs.hold_height_stop);
+
+            for(i=0;i<gs.hold_height_start-gs.hold_height_stop;i++)
+            {
+                brightness--;
+                if(brightness<10)
+                {
+                    return 1;
+                }
+                __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, (uint32_t)brightness);
+            }
+        }
+        //turn_off = 1;
+    }
+
+    return 1;
+}
+
+
+
+uint8_t Ges_Hold_Height_Valid_Judge()
+{
+    uint8_t chn;
+    uint8_t i,res=0;
+    uint64_t total[2]=0;
+    uint32_t tt1[2]=0;
+
+    for(chn=0;chn<2;chn++)
+    {
+        for(i=0;i<GES_SAMPLE_ARRAY_NUM_L;i++)
+        {
+            total[chn] += gs.ges_dynamic_sample_array[chn][i];
+        }
+        tt1[chn] = total[chn]/GES_SAMPLE_ARRAY_NUM_L;
+        LOG_DEBUG("Ges_Hold_Height_Judge ch%d[%d].\r\n",chn,tt1[chn]);
+    }
+
+    if(tt1[0]+tt1[1]<250)
+    {
+        LOG_DEBUG("Ges_Hold_Height_Judge < 250 too low!\r\n");
+        return 0;
+    }
+
+    return 1;
+}
+
+
+uint8_t Ges_Hold_Height_AorL_Judge()
+{
+    uint8_t chn;
+    uint8_t i,res=0;
+    uint64_t total[2]=0;
+    uint32_t tt1[2]=0;
+
+    for(chn=0;chn<2;chn++)
+    {
+        for(i=0;i<GES_SAMPLE_ARRAY_NUM_S;i++)
+        {
+            total[chn] += gs.ges_dynamic_sample_array[chn][i];
+        }
+        tt1[chn] = total[chn]/GES_SAMPLE_ARRAY_NUM_S;
+        LOG_DEBUG("Ges_Hold_Height_AorL_Judge ch%d[%d].\r\n",chn,tt1[chn]);
+    }
+
+    if(!gs.hold_height_start)
+        gs.hold_height_start = tt1[0]+tt1[1];
+    else if(!gs.hold_height_stop)
+        gs.hold_height_stop = tt1[0]+tt1[1];
+    else
+    {
+        gs.hold_height_start = gs.hold_height_stop;
+        gs.hold_height_stop = tt1[0]+tt1[1];
+    }
+    LOG_DEBUG("stop-start[%d]!\r\n",gs.hold_height_stop-gs.hold_height_start);
+
+    if(gs.hold_height_start<gs.hold_height_stop-10)
+    {
+        LOG_DEBUG("Approach!\r\n");
+        brightness+=20;
+        if(brightness>1000)
+        {
+            return 1;
+        }
+        __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, (uint32_t)brightness);
+    }
+    else if(gs.hold_height_start-10>gs.hold_height_stop)
+    {
+        LOG_DEBUG("Leave!\r\n");
+        brightness-=20;
+        if(brightness<100)
+        {
+            return 1;
+        }
+        __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, (uint32_t)brightness);
+    }
+    //turn_off = 1;
+
+    return 1;
 }
 
 //对某一帧进行波形寻找
@@ -662,7 +821,7 @@ uint8_t Ges_Wave_DynamicSearch(uint8_t chn,uint16_t *pindex)
     uint16_t i,res;
 //  uint32_t sum;
     uint8_t rise_flag = 0;
-    uint8_t wave_flag=0, hold_section_times;
+    uint8_t wave_flag=0,hold_flag=1, hold_section_times;
     res=GES_NULL;
     
     //初始化
@@ -671,17 +830,17 @@ uint8_t Ges_Wave_DynamicSearch(uint8_t chn,uint16_t *pindex)
     gs.wave[chn].peak_index=GES_INVALID_INDEX;
 
     hold_section_times = gs.ges_dynamic_sample_size/2;
-
+/*
     if(gs.ges_dynamic_sample_size==GES_SAMPLE_ARRAY_NUM_L)
     {
         wave_flag = Ges_Hold_Judge(chn);
     }
-
+*/
     //求峰值、上升沿、下降沿及峰值、上升沿、下降沿位置和平均值
     for (i=0,gs.wave[chn].peak_value=0;i<gs.ges_dynamic_sample_size;i++)
     {
-        //if ((i>=hold_section_times)&&(gs.ges_dynamic_sample_array[chn][i]<SAMPLE_HOLD_LIMIT_DEF))
-        //    hold_flag=0;
+        if ((i>=hold_section_times)&&(gs.ges_dynamic_sample_array[chn][i]<SAMPLE_HOLD_LIMIT_DEF))
+            hold_flag=0;
 
         if ((gs.ges_dynamic_sample_array[chn][i]>gs.wave[chn].peak_value)&&
             (gs.ges_dynamic_sample_array[chn][i]>=gs.sample_up_limit[chn]))
@@ -720,15 +879,15 @@ uint8_t Ges_Wave_DynamicSearch(uint8_t chn,uint16_t *pindex)
         }
     }
 
-    if ((gs.ges_dynamic_sample_size==GES_SAMPLE_ARRAY_NUM_L)&&(wave_flag==0))
+    if ((gs.ges_dynamic_sample_size==gs.new_hold_AorL_size/*32*/)&&(hold_flag))
     {
         LOG_DEBUG("                                                 after a hold Judge.\r\n");
-
+/*
         if(gs.hold_flag)
         {
             res = Ges_Trend_DynamicFind(chn);
         }
-
+*/
         if(GES_NULL==res)
             res=GES_LEVEL1_HOLD;
 /*
@@ -759,7 +918,7 @@ uint8_t Ges_Wave_DynamicSearch(uint8_t chn,uint16_t *pindex)
             {
                 res = Ges_Trend_DynamicFind(chn);
             }
-            else if(2==wave_flag && GES_NULL==res)
+            else if(/*2==wave_flag && */GES_NULL==res)
             {
                 res = GES_LEVEL1_FULL;
             }
@@ -1129,12 +1288,16 @@ uint8_t Ges_DynamicAnalysis(void)
                 ((gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_APPROACH&&gs.ges_record[GES_CHN_DOWN_RIGHT].ges==GES_LEVEL1_LEAVE)||
                 (gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_LEAVE&&gs.ges_record[GES_CHN_DOWN_RIGHT].ges==GES_LEVEL1_APPROACH))))
 #else
-        if ((hold_flag>=2) || (((gs.approach_counter==0)&&(gs.leave_counter==0))&&
+/*
+        if ((hold_flag>=2) || 
+            (((gs.approach_counter==0)&&(gs.leave_counter==0))&&
             ((hold_flag && !full_flag) || 
                 (((gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_APPROACH&&
                         gs.ges_record[GES_CHN_DOWN_RIGHT].ges==GES_LEVEL1_LEAVE)||
                     (gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_LEAVE&&
                         gs.ges_record[GES_CHN_DOWN_RIGHT].ges==GES_LEVEL1_APPROACH))))))
+*/
+        if (hold_flag>=2)
 #endif
         {
             res=GES_LEVEL2_HOLD;
@@ -1932,7 +2095,7 @@ void App_Task(void)
         //第一次采样数据作为定标用
         //if (!calib_num)
         //if(GES_SAMPLE_ARRAY_NUM_S==gs.sample_size)
-        if(0==gs.hold_counter && gs.ges_dynamic_start==false)
+        if(0==gs.hold_flag && gs.ges_dynamic_start==false)
         {
 #if (LOG_ENABLE)
             LOG_DEBUG("                                       Ges_Calib sample[%d]\r\n",gs.sample_size);
@@ -2074,42 +2237,50 @@ void App_Task(void)
 #if(HOLD_GES==1)
         else if (res==GES_LEVEL2_HOLD)
         {
-            //static uint8_t sw_state=0;
-
+            LOG_DEBUG("                         gs.hold_counter:%d,pwm:%d\r\n",gs.hold_counter,brightness/10);
             gs.hold_counter++;
             if (gs.hold_counter==SAMPLE_HOLD_COUNT)
             {
-                //HAL_GPIO_WritePin(LED_HOLD_GPIO_Port, LED_HOLD_Pin, GPIO_PIN_RESET);
-                HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
-                HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
-                HAL_GPIO_WritePin(LED_UP_GPIO_Port, LED_UP_Pin, GPIO_PIN_RESET);
-                HAL_GPIO_WritePin(LED_DOWN_GPIO_Port, LED_DOWN_Pin, GPIO_PIN_RESET);
-                led_counter=LED_HOLD_FLASH_DELAY;
-                LOG_DEBUG("                         Ges: HOLD!\r\n");
-                Ges_Log();
-                gs.hold_flag = 1;
-                /*
-                if (!sw_state)
+
+                gs.hold_flag = Ges_Hold_Height_Valid_Judge();
+                if(gs.hold_flag)
                 {
-                    sw_state=1;
+                    HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
+                    HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
+                    HAL_GPIO_WritePin(LED_UP_GPIO_Port, LED_UP_Pin, GPIO_PIN_RESET);
+                    HAL_GPIO_WritePin(LED_DOWN_GPIO_Port, LED_DOWN_Pin, GPIO_PIN_RESET);
+                    led_counter=LED_HOLD_FLASH_DELAY;
+                    //Ges_Hold_Height_Judge();
+                    LOG_DEBUG("                         Ges: HOLD!\r\n");
+                    Ges_Log();
+                    //gs.hold_flag = 1;
+                    gs.new_hold_AorL_size = GES_SAMPLE_RAW_ARRAY_NUM_S;
                 }
                 else
                 {
-                    sw_state=0;
-                }*/
+                    gs.hold_counter -= 1;
+                }
             }
-/*
-            if(gs.hold_counter>5)
+
+            if(gs.hold_flag)
             {
+                Ges_Hold_Height_AorL_Judge();
+            }
+
+#if 0
+            if(gs.hold_counter>4)
+            {
+            /*
                 if (gs.sample_size==GES_SAMPLE_ARRAY_NUM_L)
                 {
                     gs.sample_size=GES_SAMPLE_ARRAY_NUM_S;
                     gs.sample_size_raw=GES_SAMPLE_RAW_ARRAY_NUM_S;
-                }
+                }*/
                 gs.last_ges = GES_NULL;
-                gs.hold_counter=0;
+                gs.hold_counter = 0;
+                //gs.hold_flag = 0;
             }
-*/
+#endif
         }
 #endif
 /*

@@ -11,7 +11,7 @@
 #define SAMPLE_UP_LIMIT_DEF         0x0020          //采样触发阈值
 #define SAMPLE_HOLD_LIMIT_DEF       0x0020//0x0040  //hold的触发阈值
 #define SAMPLE_HOLD_END_SHIFT       GES_SAMPLE_ARRAY_NUM_S  //从采样数组末尾起10个作为检测基准
-#define SAMPLE_HOLD_COUNT           3               //最多3个HOLD的count再次发送一次HOLD
+#define SAMPLE_HOLD_COUNT           2               //最多3个HOLD的count再次发送一次HOLD
 #define SAMPLE_HOLD_LIST_NUM        10              //hold数组的最大元素个数
 //#define SAMPLE_HOLD_START
 
@@ -23,7 +23,7 @@
 
 #define GES_SAMPLE_AVE_NUM          1               //用以平均的数据大小：1
 #define GES_SAMPLE_ARRAY_NUM_S      8               //手势采样的短数组大小：8
-#define GES_SAMPLE_ARRAY_NUM_L      24              //手势采样的长数组大小：24
+#define GES_SAMPLE_ARRAY_NUM_L      32              //手势采样的长数组大小：24
 #define GES_SAMPLE_ARRAY_FULL       (GES_SAMPLE_ARRAY_NUM_L)//手势采样的长数组大小：24
 
 #define GES_SAMPLE_RAW_ARRAY_NUM_S  (GES_SAMPLE_ARRAY_NUM_S*GES_SAMPLE_AVE_NUM)
@@ -113,6 +113,9 @@ typedef struct
     uint8_t last_ges;
     uint64_t last_ges_time;
 
+    uint16_t hold_height_start;
+    uint16_t hold_height_stop;
+    uint8_t  new_hold_AorL_size;
     uint8_t approach_counter;
     uint8_t leave_counter;
     uint8_t hold_counter;
