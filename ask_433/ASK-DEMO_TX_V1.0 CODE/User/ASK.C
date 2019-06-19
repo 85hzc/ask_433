@@ -1,87 +1,89 @@
 /*********************************************************
-//ËµÃ÷£ºASKÎŞÏß±àÂëÂë³ÌĞò£¬Ä£ÄâEV1527±àÂë£¬×îĞ¡Âö¿íÎª400us¡£
-//µ¥Æ¬»ú£ºSTM8S003F3P6
-//¾§Õñ£ºÄÚ²¿16Mhz
-//×÷Õß£ºÉÙ¿­Í¬Ñ§£¬2168916131@qq.com
-//Ê±¼ä£º20170708
+//è¯´æ˜ï¼šASKæ— çº¿ç¼–ç ç ç¨‹åºï¼Œæ¨¡æ‹ŸEV1527ç¼–ç ï¼Œæœ€å°è„‰å®½ä¸º400usã€‚
+//å•ç‰‡æœºï¼šSTM8S003F3P6
+//æ™¶æŒ¯ï¼šå†…éƒ¨16Mhz
+//ä½œè€…ï¼šå°‘å‡¯åŒå­¦ï¼Œ2168916131@qq.com
+//æ—¶é—´ï¼š20170708
 ***********************************************************/
-#include"ask.h"
+#include"ASK.h"
 
 unsigned char Ask_send_buf[3]={0};
 extern unsigned char stm8s_id[12];
 
+unsigned char SelfAddr[2]={0, 0};
+
 void rf_delay_long()
-{//Êµ²â1.2ms
-	unsigned char i, j;
-	for(i=0;i<167;i++)
-	{
-	 	for(j=0;j<21;j++)
-			;
-	}
+{//å®æµ‹1.2ms
+    unsigned char i, j;
+    for(i=0;i<167;i++)
+    {
+        for(j=0;j<21;j++)
+            ;
+    }
 }
 
 void rf_delay_short()
-{	//Êµ²â396~404us
-	unsigned char i, j;
-	for(i=0;i<55;i++)
-	{
-	 	for(j=0;j<21;j++)
-			;
-	}
+{	//å®æµ‹396~404us
+    unsigned char i, j;
+    for(i=0;i<55;i++)
+    {
+        for(j=0;j<21;j++)
+            ;
+    }
 }
 
 unsigned long gRfDelay = 0;
 void rf_delay_15ms()
 {
-	gRfDelay = GetTimer();
-	while(SpanTime(gRfDelay) < 15)
-	{
-		;
-	} 
+    gRfDelay = GetTimer();
+    while(SpanTime(gRfDelay) < 15)
+    {
+        ;
+    } 
 }
 
 void send_one()
 {
-	ASK=1;
-	rf_delay_long();
-	ASK=0;
-	rf_delay_short();
+    ASK=1;
+    rf_delay_long();
+    ASK=0;
+    rf_delay_short();
 }
 
 void send_zero()
 {
-	ASK=1;
-	rf_delay_short();
-	ASK=0;
-	rf_delay_long();
+    ASK=1;
+    rf_delay_short();
+    ASK=0;
+    rf_delay_long();
 }
 
 void send_byte(unsigned char da)
 {
-	unsigned char i;
-	for(i=8;i>0;i--)
-	{
-	 	if(da & 0x80)
-		{
-			send_one();
-		}
-		else
-		{
-		 	send_zero();
-		}
-		da = da<<1;
-	}
+    unsigned char i;
+    for(i=8;i>0;i--)
+    {
+        if(da & 0x80)
+        {
+            send_one();
+        }
+        else
+        {
+            send_zero();
+        }
+        da = da<<1;
+    }
 }
 
 void ask_send(unsigned char datt[], unsigned char len)
 {
-	 unsigned char i;
-	 for(i=0;i<len;i++)
-	 {
-		send_byte(datt[i]);
-	 }
-	 send_one();
-	 rf_delay_15ms();
+     unsigned char i;
+     for(i=0;i<len;i++)
+     {
+        send_byte(datt[i]);
+     }
+     send_one();
+     rf_delay_15ms();
 }
 
 void Ask_IO_Init()
@@ -94,25 +96,19 @@ void Ask_process()
 {
   unsigned char i;
   unsigned char key_value=0;
-  
+
   Ask_IO_Init();
-  
+  ReadSelfAddr();
+
   while(1)
   {
     key_value=key_scan();
     if(key_value != 0)
     {
-      for(i=0; i<3; i++)
-      {
-        Ask_send_buf[i]=stm8s_id[1+i];
-      }
-      //Ask_send_buf[2] = (Ask_send_buf[2]&0xf0)| key_value;
+
+      Ask_send_buf[0]=SelfAddr[0];
+      Ask_send_buf[1]=SelfAddr[1];
       Ask_send_buf[2] = key_value;
-      /*
-      for(i=0; i<3; i++)
-      {
-        Uart_Sendbyte(Ask_send_buf[i]);
-      }*/
 
       Uart_Sendbyte(Ask_send_buf[2]);
       ask_send(Ask_send_buf, 3);
@@ -122,5 +118,35 @@ void Ask_process()
       Led_off_all();
       delay_ms(10);
     }
-  } 
+  }
 }
+
+///////////////////è¯»å–IDå‡½æ•°///////////////////////
+void ReadSelfAddr()
+{
+  SelfAddr[0]= EEPROM_Byte_Read(EE_ADDR0);
+  SelfAddr[1]= EEPROM_Byte_Read(EE_ADDR1);
+  
+  Uart_Sendbyte(SelfAddr[0]);
+  Uart_Sendbyte(SelfAddr[1]);  
+}
+
+///////////////////æ¸…é™¤å¯¹ç å‡½æ•°///////////////////////
+void Write_Coder(unsigned char a,unsigned char b)
+{
+  EEPROM_EREASE();
+  delay_ms(1);
+  Uart_Sendbyte(3);
+
+  Uart_Sendbyte(a);
+  Uart_Sendbyte(b);
+  
+  EEPROM_Byte_Write(EE_ADDR0, a);
+  delay_ms(1);
+  EEPROM_Byte_Write(EE_ADDR1, b);
+  
+  Uart_Sendbyte(a);
+  Uart_Sendbyte(b);
+}
+
+

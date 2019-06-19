@@ -25,7 +25,7 @@ if not "%~1" == "" goto debugFile
 
 @echo on 
 
-"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\Project\settings\tx.Debug.general.xcl" --backend -f "E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\Project\settings\tx.Debug.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\Project\settings\tx.Debug.general.xcl" --backend -f "E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\Project\settings\tx.Debug.driver.xcl" 
 
 @echo off 
 goto end 
@@ -34,7 +34,7 @@ goto end
 
 @echo on 
 
-"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\Project\settings\tx.Debug.general.xcl" "--debug_file=%~1" --backend -f "E:\433无线方案\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\Project\settings\tx.Debug.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\Project\settings\tx.Debug.general.xcl" "--debug_file=%~1" --backend -f "E:\github\ask_433\ASK-DEMO_TX_V1.0 CODE\Project\settings\tx.Debug.driver.xcl" 
 
 @echo off 
 :end

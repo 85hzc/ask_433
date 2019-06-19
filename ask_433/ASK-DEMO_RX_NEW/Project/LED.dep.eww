@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <workspace>
-  <project>
-    <path>$WS_DIR$\LED.ewp</path>
-  </project>
-  <batchBuild/>
+    <project>
+        <path>$WS_DIR$\LED_rx.ewp</path>
+    </project>
+    <project>
+        <path>$WS_DIR$\..\..\ASK-DEMO_TX_V1.0 CODE\Project\LED_tx.ewp</path>
+    </project>
+    <batchBuild />
 </workspace>
-
-

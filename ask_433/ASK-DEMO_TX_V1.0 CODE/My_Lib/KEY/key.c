@@ -147,6 +147,5 @@ unsigned char key_scan()
       Led_on(8);
     }
   }
-
   return key_value;
 }

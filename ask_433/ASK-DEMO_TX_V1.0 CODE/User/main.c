@@ -9,34 +9,59 @@
 //定义CPU内部时钟
 #define  SYS_CLOCK    16
 
+extern unsigned char SelfAddr[2];
+
 void CLOCK_Config(u8 SYS_CLK);
 void All_Congfig(void);
 void Pwrup_Indicate();
 
 unsigned char table[]={"I like study high technology !\n"};
-unsigned char stm8s_id[12]={0};
+//unsigned char stm8s_id[12]={0};
 int main(void)
-{     
-  //unsigned char i;    
+{
+  unsigned char code[PCODE_NUM];
+  unsigned char i;
   All_Congfig();        //所有的基本配置，除了ASK的
   __enable_interrupt(); //开总中断
   Pwrup_Indicate();     //开机指示
-  //Uart_Sendbyte(0xaa);
+  Uart_Sendbyte(1);
+
+  I2C_Init();
+  memset(code, 0, sizeof(code));
+  FM24C_ReadData(code);
+  Uart_Sendbyte(code[0]);
+  Uart_Sendbyte(code[1]);
+  Uart_Sendbyte(2);
+  ReadSelfAddr();
+
+  if(!((code[0]==SelfAddr[0]) &&
+     (code[1]==SelfAddr[1]))&&code[0]&&code[1])
+  {
+      Write_Coder(code[0], code[1]);
+      for(i=0;i<5;i++)
+      {
+        Led_on(1);
+        delay_ms(300);
+        Led_off(1);
+        delay_ms(300);
+      }
+  }
+
   Ask_process();
-  
+
   while(1)
   {
     Led_on(1);
-    delay_ms(500);
+    delay_ms(200);
     Led_off(1);
-    delay_ms(500);
-  }        
+    delay_ms(200);
+  }
 }
 
 void All_Congfig(void)
 {
-    CLOCK_Config(SYS_CLOCK);//系统时钟初始化  
-    Led_Init();  
+    CLOCK_Config(SYS_CLOCK);//系统时钟初始化
+    Led_Init();
     Key_Init();
     Uart_Init(16, 9600);
     Tim4_Init();
@@ -65,11 +90,12 @@ void CLOCK_Config(u8 SYS_CLK)
 void Pwrup_Indicate()
 {
   unsigned char i;
+  /*
   for(i=0; i<12; i++)
   {
     stm8s_id[i]=*((unsigned char *)0x4865+i);
     Uart_Sendbyte(stm8s_id[i]);
-  }
+  }*/
   //00 14 00 0C 0A 47 37 30 33 30 30 37
   //00 15 00 01 0A 47 37 30 33 30 30 37 
   //打印出来发现第1、2、3个字节不一样，其他都一样。

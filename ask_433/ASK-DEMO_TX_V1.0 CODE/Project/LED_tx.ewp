@@ -1619,6 +1619,9 @@
             <name>$PROJ_DIR$\..\My_Lib\EEPROM\eeprom.c</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\User\fm24.c</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\My_Lib\KEY\key.c</name>
         </file>
         <file>

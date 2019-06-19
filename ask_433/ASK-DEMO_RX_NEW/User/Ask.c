@@ -29,29 +29,48 @@ unsigned char SelfAddr[2]={0, 0};
 ///////////////////ASK初始化函数///////////////////////
 void Ask_Init()
 {
-  PD_DDR_DDR4=0;        //KEY1输入
-  PD_CR1_C14=0;         //悬浮输入
-  PD_CR2_C24=0;         //禁止外部中断
+  PD_DDR_DDR3=0;        //KEY1输入
+  PD_CR1_C13=0;         //悬浮输入
+  PD_CR2_C23=0;         //禁止外部中断
 }
 ///////////////////ASK处理函数///////////////////////
 void Ask_process()
 {
-  unsigned char key_value=0;
+  unsigned char key_value=0,i;
   Ask_Init();   //ASK初始化
-  ReadSelfAddr();       //读eeprom里存储的ID
+  ReadSelfAddr();   //读eeprom里存储的ID
+  
   while(1)
   {
+
     ProcessRecv();      //处理接收函数
+    
     key_value=key_scan();
     if(key_value==0x01)
-    {//对码
+    {
+        //对码
       Led_on(1);
       Learn_Sender();   
       Led_off_all();
     }
     else if(key_value==0x02)
-    {//删除对码
+    {
+        //删除对码
       Dele_Sender();
+      
+      for(i=0; i<5; i++)
+      {//删码完成，跑马灯指示
+        Led_on(1);
+        //Led_on(2);
+        //Led_off(3);
+        //Led_off(4);
+        delay_ms(100);
+        Led_off(1);
+        //Led_off(2);
+        //Led_on(3);
+        //Led_on(4);
+        delay_ms(100);
+      }
     }
   }
 }
@@ -154,6 +173,7 @@ void ProcessRecv()
   unsigned char i,j;
   unsigned char p=0;
   unsigned char temp;
+  
   Recieve();
 
   if(rx_data_ok)
@@ -164,7 +184,7 @@ void ProcessRecv()
       temp=0;
       for(j=i;j<(i+8);j++)
       {
-	temp += (recvbyte[j]<<(7-(j-i)));
+        temp += (recvbyte[j]<<(7-(j-i)));
       }
       Recv_data[p++]=temp;
       //UART0_TX(temp);
@@ -172,11 +192,13 @@ void ProcessRecv()
     Uart_Sendbyte(Recv_data[0]);
     Uart_Sendbyte(Recv_data[1]);
     Uart_Sendbyte(Recv_data[2]);
+    Uart_Sendbyte(SelfAddr[0]);
+    Uart_Sendbyte(SelfAddr[1]);
     ProcessOut();
   }
   else 
-  {	
-			
+  {
+
   }
 }
 
@@ -191,13 +213,13 @@ void Learn_Sender()
   rx_data_ok = 0;
   while(1)
   {//5秒钟对码时间
-    //WDT_CountClear();				
+    //WDT_CountClear();
     Recieve();
     if(rx_data_ok)
     {
-	rx_data_ok = 0;
+        rx_data_ok = 0;
 
-	EEPROM_EREASE();
+        EEPROM_EREASE();
         for(i=0;i<RECV_BIT_NUMBER;i=i+8)
         {//融合
           temp=0;
@@ -213,73 +235,98 @@ void Learn_Sender()
         EEPROM_Byte_Write(EE_ADDR0, Recv_data[0]);
         delay_ms(1);
         EEPROM_Byte_Write(EE_ADDR1, Recv_data[1]);
-	
-        ReadSelfAddr();	
+
+        ReadSelfAddr();
         for(i=0; i<10; i++)
         {//对码完成，跑马灯指示
           Led_on(1);
-          Led_on(2);
-          Led_off(3);
-          Led_off(4);
+          //Led_on(2);
+          //Led_off(3);
+          //Led_off(4);
           delay_ms(100);
           Led_off(1);
-          Led_off(2);
-          Led_on(3);
-          Led_on(4);
+          //Led_off(2);
+          //Led_on(3);
+          //Led_on(4);
           delay_ms(100);
         }
-	//EX1 = 1;
-	return;
+        //EX1 = 1;
+        return;
     }
     if(SpanTime(LearnDelay) > 5000)
-	return;
+        return;
   }
 }
+
 ///////////////////读取ID函数///////////////////////
 void ReadSelfAddr()
 {
   SelfAddr[0]= EEPROM_Byte_Read(EE_ADDR0);
   SelfAddr[1]= EEPROM_Byte_Read(EE_ADDR1);
+  
+  Uart_Sendbyte(SelfAddr[0]);
+  Uart_Sendbyte(SelfAddr[1]);  
 }
+
 ///////////////////清除对码函数///////////////////////
 void Dele_Sender()
 {
   EEPROM_Byte_Write(EE_ADDR0, 0x00);
-  EEPROM_Byte_Write(EE_ADDR0, 0x00);
-  ReadSelfAddr();	
+  EEPROM_Byte_Write(EE_ADDR1, 0x00);
+  ReadSelfAddr();
 }
 ///////////////////输出处理函数///////////////////////
 void ProcessOut()
-{	
+{
   if((Recv_data[0]==SelfAddr[0])&&(Recv_data[1]==SelfAddr[1]))
   {//匹配ID
     switch(Recv_data[2]&0x0f)
     {
-	case 0x01:Led_on(1);
-                  delay_ms(100);
-                  Led_off(1);
-                  delay_ms(100);
-                  break;
-	case 0x02:Led_on(2);
-                  delay_ms(100);
-                  Led_off(2);
-                  delay_ms(100);
-                  break;
-	case 0x04:Led_on(3);
-                  delay_ms(100);
-                  Led_off(3);
-                  delay_ms(100);
-                  break;
-	case 0x08: Led_on(4);
-                   delay_ms(100);
-                   Led_off(4);
-                   delay_ms(100);
-                   break;
+        case 0x01:
+            Led_on(1);
+            delay_ms(100);
+            Led_off(1);
+            delay_ms(100);
+            break;
+        case 0x02:
+            Led_on(2);
+            delay_ms(100);
+            Led_off(2);
+            delay_ms(100);
+            break;
+        case 0x04:
+            Led_on(3);
+            delay_ms(100);
+            Led_off(3);
+            delay_ms(100);
+            break;
+        case 0x08:
+            Led_on(4);
+            delay_ms(100);
+            Led_off(4);
+            delay_ms(100);
+            break;
         default:
-		break;
+            break;
     }
   }
-	
+}
+///////////////////清除对码函数///////////////////////
+void Write_Coder(unsigned char a,unsigned char b)
+{
+  EEPROM_EREASE();
+  delay_ms(1);
+  Uart_Sendbyte(3);
+
+  Uart_Sendbyte(a);
+  Uart_Sendbyte(b);
+  
+  EEPROM_Byte_Write(EE_ADDR0, a);
+  delay_ms(1);
+  EEPROM_Byte_Write(EE_ADDR1, b);
+  
+  Uart_Sendbyte(a);
+  Uart_Sendbyte(b);
 }
 
 

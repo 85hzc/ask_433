@@ -11,6 +11,8 @@
 //定义CPU内部时钟
 #define  SYS_CLOCK    16
 
+extern unsigned char SelfAddr[2];
+
 void CLOCK_Config(u8 SYS_CLK);
 void All_Congfig(void);
 void Pwrup_Indicate();
@@ -19,13 +21,44 @@ unsigned char table[]={"I like study high technology !\n"};
 
 int main(void)
 {
-  //unsigned char i;
+  unsigned char code[PCODE_NUM];
+  unsigned char i;
   All_Congfig();        //所有的基本配置，除了ASK的
   __enable_interrupt(); //开总中断
   Pwrup_Indicate();     //开机指示
-  Uart_Sendbyte(0xaa);
+  Uart_Sendbyte(1);
+
+  I2C_Init();
+  /*
+  //FM24C_Reset();
+  delay_ms(500);
+  code[0] = 0xA;
+  code[1] = 0xB;
+  FM24C_WriteData(code);
+  delay_ms(500);
+*/
+  memset(code, 0, sizeof(code));
+  FM24C_ReadData(code);
+  Uart_Sendbyte(code[0]);
+  Uart_Sendbyte(code[1]);
+  Uart_Sendbyte(2);
+  ReadSelfAddr();
+
+  if(!((code[0]==SelfAddr[0]) &&
+     (code[1]==SelfAddr[1]))&&code[0]&&code[1])
+  {
+      Write_Coder(code[0], code[1]);
+      for(i=0;i<5;i++)
+      {
+        Led_on(1);
+        delay_ms(300);
+        Led_off(1);
+        delay_ms(300);
+      }
+  }
+
   Ask_process();
-  
+
   while(1)
   {
     Led_on(1);

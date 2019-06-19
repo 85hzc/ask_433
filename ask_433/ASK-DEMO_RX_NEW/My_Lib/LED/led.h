@@ -4,7 +4,7 @@
 //#define  LEDPort  GPIOA
 //#define  LEDPin   (1 << 2) 
 
-#define         LED_L1    PD_ODR_ODR2
+#define         LED_L1    PC_ODR_ODR6
 
 void Led_Init(void);
 void Led_on(unsigned char m);
