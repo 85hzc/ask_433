@@ -3,8 +3,5 @@
     <project>
         <path>$WS_DIR$\LED_rx.ewp</path>
     </project>
-    <project>
-        <path>$WS_DIR$\..\..\ASK-DEMO_TX_V1.0 CODE\Project\LED_tx.ewp</path>
-    </project>
     <batchBuild />
 </workspace>

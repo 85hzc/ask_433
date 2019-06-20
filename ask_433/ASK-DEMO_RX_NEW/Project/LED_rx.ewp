@@ -1628,6 +1628,9 @@
             <name>$PROJ_DIR$\..\My_Lib\LED\led.c</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\User\pwm.c</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\My_Lib\TIME\time.c</name>
         </file>
         <file>

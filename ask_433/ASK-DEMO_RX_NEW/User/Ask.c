@@ -12,8 +12,8 @@
 extern unsigned char timer_4_count;
 extern unsigned char timer_4_countover;
 
-unsigned char in_bit = 0;       
-unsigned char rx_start = 0;     
+unsigned char in_bit = 0;
+unsigned char rx_start = 0;
 unsigned char rx_data_ok = 0;
 
 unsigned char recvbit[4];
@@ -23,7 +23,7 @@ unsigned char recvbyte[40];
 unsigned char recvbytecount = 0;
 unsigned char Recv_data[5];
 
-unsigned char in_bit_n = 0;       
+unsigned char in_bit_n = 0;
 
 unsigned char SelfAddr[2]={0, 0};
 ///////////////////ASK初始化函数///////////////////////
@@ -50,12 +50,12 @@ void Ask_process()
     {
         //对码
       Led_on(1);
-      Learn_Sender();   
+      Learn_Sender();
       Led_off_all();
     }
     else if(key_value==0x02)
     {
-        //删除对码
+      //删除对码
       Dele_Sender();
       
       for(i=0; i<5; i++)
@@ -79,7 +79,7 @@ void Recieve()
 {
   //一进来就先把引脚的状态读取了，然后判断跟前面的是否一样，不一样的时候才进行后续运算
   in_bit_n = inport;	//inport是ASK模块的数据脚
-  if(in_bit == in_bit_n)	
+  if(in_bit == in_bit_n)
   {
     return;
   }
@@ -91,7 +91,7 @@ void Recieve()
 	return;	
   }
   // 接收4 次电平变化，才能确定1 bit
-  if((timer_4_count > min_time_l)&&(timer_4_count < max_time_l)) 
+  if((timer_4_count > min_time_l)&&(timer_4_count < max_time_l))
   {	//窄脉冲,4~14,就是200us~700us
     if(in_bit) //高电平,现在为高电平，其实之前是低电平的
     {
@@ -142,7 +142,7 @@ void Recieve()
     {
 	RecieveError();
 	return;
-    }		
+    }
   }
   recvbytecount++;	 	//接收到的字节数加1。
   recvbitcount = 0;		//
@@ -280,6 +280,8 @@ void ProcessOut()
 {
   if((Recv_data[0]==SelfAddr[0])&&(Recv_data[1]==SelfAddr[1]))
   {//匹配ID
+
+    Set_Pwm(50);//0-256
     switch(Recv_data[2]&0x0f)
     {
         case 0x01:

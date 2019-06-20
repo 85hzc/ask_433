@@ -73,8 +73,10 @@ void All_Congfig(void)
     CLOCK_Config(SYS_CLOCK);//系统时钟初始化
     Led_Init();
     Key_Init();
+    Pwm_Init();
     Uart_Init(16, 9600);
     Tim4_Init();
+    Tim1_Init();
 }
 
 
