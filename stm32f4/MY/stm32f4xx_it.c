@@ -123,6 +123,7 @@ void SysTick_Handler(void)
 {
     TimingDelay_Decrement();
     gclk();
+    SysTickInc();
 }
 
 /******************************************************************************/

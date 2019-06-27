@@ -320,7 +320,7 @@ void MBI_ScanCycle(void)
     gclk_pluse = 0;
 }
 
-uint8_t MBI_SdiInput(void)
+uint8_t MBI_SdiInput(uint8_t type)
 {
     uint32_t sck_cnt,mask;
     uint16_t i,j,k,line;
@@ -351,15 +351,24 @@ uint8_t MBI_SdiInput(void)
                             }
                         }
 
-#if 1
-                        if((sdi_data & mask)&&(i>7)&&
-                            ((i==15)||(i==8)||(line==1)||(line==8)||(i-line==7)||(i+line==16)))
-#else
-                        if(sdi_data & mask)
-#endif
-                            SDI_PIN_H
-                        else
-                            SDI_PIN_L
+                        switch(type%2)
+                        {
+                            case 0:
+                                if((sdi_data & mask)&&(i>7)&&
+                                    ((i==15)||(i==8)||(line==1)||(line==8)||(i-line==7)||(i+line==16)))
+                                    SDI_PIN_H
+                                else
+                                    SDI_PIN_L
+                                    break;
+
+                            case 1:
+                                    SDI_PIN_L
+                                    break;
+
+                            default:
+                                    SDI_PIN_L
+                                    break;
+                        }
 
                         delay(1);
                         DCLK_PIN_H
@@ -522,7 +531,7 @@ void MBI5153()
 
 }
 
-void cycleScan(void)
+void cycleScan(uint8_t type)
 {
     uint32_t sck_cnt,mask;
     uint16_t i,j,k,line;
@@ -544,7 +553,7 @@ void cycleScan(void)
     }
     else
     {
-        isVsync = MBI_SdiInput();
+        isVsync = MBI_SdiInput(type);
     }
 
 }

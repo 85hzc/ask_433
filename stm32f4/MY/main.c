@@ -30,23 +30,25 @@
 
 uint8_t circuit=0;
 extern volatile uint8_t pluse_enable;
+extern uint64_t systick;
 
 int main(void)
 {
     uint8_t key_flag = 0;   //按键标志
-    
+    uint64_t systime;
+
     SystemInit();
-    
+
     Delay_Init();       //延时函数初始化
     //LED_Init();           //LED初始化
     KEY_Init();         //按键IO口初始化
     Usart_Config(); // USART初始化函数
     MBI_GPIO_Init();//初始化MBI驱动pin
-    
+
     printf("system start.\r\n");
-    
+
     SystemCoreClockUpdate();
-    
+
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//系统中断优先级分组2
 #if(TWO_TIMER_PULSE==1)
     //Pulse_output(100,129);//1KHZ,8000个
@@ -72,21 +74,11 @@ int main(void)
 #endif
 #endif
 
-    //printf("befor reset\r\n");
-    //Delay_ms(5000);
-    ///soft_reset();
-    //printf("after reset\r\n");
-    //Delay_ms(5000);
-    //MBI_Init();
     printf("after mbi init\r\n");
-    //Delay_ms(2000);
-    //printf("mbi init reset\r\n");
-    //circuit++;
 
-    //vsync();
     //MBI5153();
     pluse_enable = 0;
-
+    systime = systick;
     while (1)
     {
 
@@ -97,7 +89,12 @@ int main(void)
 #if 0
         MBI5153();
 #else
-        cycleScan();
+        if(systick - systime>500000)//500ms
+        {
+            key_flag++;
+            systime = systick;
+        }
+        cycleScan(key_flag);
 #endif
         //printf("circuit:%d\r\n",circuit%16);
         //circuit++;

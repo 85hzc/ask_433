@@ -14,6 +14,7 @@
 #include "gpio.h"
 #include "mbi5153.h"
 
+uint64_t systick=0;
 static u32 TimingDelay;  //计数变量
 volatile uint32_t gclk_pluse = 0xff;
 volatile uint16_t gclk_auto = 0;
@@ -128,4 +129,8 @@ void gclk(void)
 }
 #endif
 
+void SysTickInc(void)
+{
+    systick++;
+}
 
