@@ -36,8 +36,10 @@
 #define GES_DISTANCE_MIN            700             //相邻手势的最小值，700ms
 #define MULTIGES_DISTANCE_MIN       2000            //组合相邻手势的最小值，2.5s
 
-#define GES_TREND_CLEARUP_MIN       1000             //相邻手势的最小值，1000ms
+#define GES_TREND_CLEARUP_MIN       1000            //相邻手势的最小值，1000ms
 
+#define POSITIVE                    1               //手势数据监测值大于基准值
+#define NEGATIVE                    2               //手势数据监测值小于基准值
 
 //手势类型
 #define GES_NULL                    0x00            //无
@@ -58,7 +60,6 @@
 #define GES_INVALID_INDEX           0xFFFF          //无效坐标索引值
 
 #define CALIB_OBO                   0
-
 #define SECTION_NUM                 3
 
 typedef struct
@@ -113,6 +114,7 @@ typedef struct
     uint8_t last_ges;
     uint64_t last_ges_time;
 
+    uint8_t sample_mode;
     uint16_t hold_height_start;
     uint16_t hold_height_stop;
     uint8_t  new_hold_AorL_size;
@@ -120,6 +122,7 @@ typedef struct
     uint8_t leave_counter;
     uint8_t hold_counter;
     uint8_t hold_flag;
+    //uint8_t calib_force;
     uint8_t analy_fail_counter;
     uint16_t hold_list[SAMPLE_HOLD_LIST_NUM];
 //  uint16_t led_flash_counter;

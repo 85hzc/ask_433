@@ -41,7 +41,7 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define SENSOR3             1
+#define SENSOR3             0
 
 #define LED_DCLK_Pin        GPIO_PIN_4
 #define LED_DCLK_GPIO_Port  GPIOA
@@ -95,7 +95,7 @@
 /* USER CODE BEGIN Private defines */
 #define DEBUG_ENABLE        1                   //debug输出开启
 #define SYS_FREQUENCY       32000000            //32MHz主频
-#define LOG_ENABLE          1                   //使能输出记录
+#define LOG_ENABLE          0                   //使能输出记录
 
 #define HWI2C               0
 #define HOLD_GES            1

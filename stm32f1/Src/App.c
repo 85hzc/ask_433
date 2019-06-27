@@ -34,7 +34,7 @@ gs_comb_struct comb_ges;
 
 void init_counter(void)
 {
-    gs.hold_flag=0;
+    gs.hold_flag=false;
     gs.hold_counter=0;
     gs.approach_counter=0;
     gs.leave_counter=0;
@@ -116,6 +116,42 @@ void LED_Tick_Check(void)
     }
 }
 
+//检测start开始标志
+uint8_t Ges_Start_Detect(uint16_t *ps)
+{
+    if((ps[0]>gs.sample_base_last[0] && (ps[0]-gs.sample_base_last[0]>SAMPLE_DOWN_LIMIT_DEF)) || 
+        (ps[1]>gs.sample_base_last[1] && (ps[1]-gs.sample_base_last[1]>SAMPLE_DOWN_LIMIT_DEF)))
+    {
+        gs.sample_mode = POSITIVE;
+        return true;
+    }
+    else if((ps[0]<gs.sample_base_last[0] && (gs.sample_base_last[0]-ps[0]>SAMPLE_DOWN_LIMIT_DEF)) || 
+        (ps[1]<gs.sample_base_last[1] && (gs.sample_base_last[1]-ps[1]>SAMPLE_DOWN_LIMIT_DEF)))
+    {
+        gs.sample_mode = NEGATIVE;
+        return true;
+    }
+    return false;
+}
+
+//检测stop开始标志
+uint8_t Ges_Stop_Detect(uint16_t *ps)
+{
+    if((ps[0]>gs.sample_base_last[0] && (ps[0]-gs.sample_base_last[0]<SAMPLE_DOWN_LIMIT_DEF)) || 
+        (ps[1]>gs.sample_base_last[1] && (ps[1]-gs.sample_base_last[1]<SAMPLE_DOWN_LIMIT_DEF)))
+    {
+        gs.sample_mode = POSITIVE;
+        return true;
+    }
+    else if((ps[0]<gs.sample_base_last[0] && (gs.sample_base_last[0]-ps[0]<SAMPLE_DOWN_LIMIT_DEF)) || 
+        (ps[1]<gs.sample_base_last[1] && (gs.sample_base_last[1]-ps[1]<SAMPLE_DOWN_LIMIT_DEF)))
+    {
+        gs.sample_mode = NEGATIVE;
+        return true;
+    }
+    return false;
+}
+
 //加入一次采样值
 //输入：     ps->读取的采样值数组
 //返回：     0-->数组未填充完毕
@@ -124,17 +160,15 @@ uint8_t Ges_Add_Sample(uint16_t *ps)
 {
     uint8_t i,j,k;
     uint32_t sum;
-    uint16_t ges_sample_raw_cur_temp;
+    uint8_t ges_sample_raw_cur_temp;
 
-//  res=gs.ges_cur;
-//  ges_flag=0;
     for (i=0;i<GES_CHN_NUM;i++)
-    {   
+    {
         ges_sample_raw_cur_temp=gs.ges_sample_raw_cur;
         gs.ges_sample_raw_array[i][ges_sample_raw_cur_temp]=ps[i];
         ges_sample_raw_cur_temp++;
         //raw数组已填充完毕
-        if (ges_sample_raw_cur_temp>=gs.sample_size_raw)
+        if (ges_sample_raw_cur_temp==8)
         {
             for (k=0;k<gs.sample_size;k++)
             {
@@ -144,12 +178,13 @@ uint8_t Ges_Add_Sample(uint16_t *ps)
                 }
                 gs.ges_sample_array[i][k]=(uint16_t)(sum/GES_SAMPLE_AVE_NUM);
             }
-        }       
+            //LOG_DEBUG("Ges_Add_Sample ch[%d].\r\n",i);
+        }
     }
     //在每一帧的开始记录时间
     if (gs.ges_sample_raw_cur==0)
         gs.frame_start_tick=Systick_Get();
-    
+
     gs.ges_sample_raw_cur++;
     if (gs.ges_sample_raw_cur>=gs.sample_size_raw)
     {
@@ -171,23 +206,15 @@ uint8_t Ges_Detect_Sample(uint16_t *ps)
     uint16_t ges_dynamic_sample_raw_cur_temp;
 
 
-    if(!gs.ges_dynamic_start && 
-        ((ps[0]-gs.sample_base_last[0]>SAMPLE_DOWN_LIMIT_DEF) ||
-        (ps[1]-gs.sample_base_last[1]>SAMPLE_DOWN_LIMIT_DEF)))
+    if(!gs.ges_dynamic_start && Ges_Start_Detect(ps))
     {
         LOG_DEBUG("ges start.\r\n");
-        gs.ges_sample_raw_cur=0; //基准值数组复位
-
+        //gs.ges_sample_raw_cur = 0; //基准值数组复位
         gs.ges_dynamic_start = true;
         gs.ges_dynamic_sample_size = 0;
         gs.ges_dynamic_sample_raw_cur = 0;
         //gs.sample_size = GES_SAMPLE_ARRAY_NUM_L;
         //gs.sample_size_raw = GES_SAMPLE_RAW_ARRAY_NUM_L;
-
-        //hold_time = 
-    }
-    else
-    {
     }
 
     if(gs.ges_dynamic_start)
@@ -207,23 +234,18 @@ uint8_t Ges_Detect_Sample(uint16_t *ps)
         if (gs.ges_dynamic_sample_raw_cur>=gs.new_hold_AorL_size)
         {
             LOG_DEBUG("sample array overflow!  HOLD/AP/LE size[%d].\r\n", gs.new_hold_AorL_size);
-            gs.ges_dynamic_start = 0;
-            gs.ges_sample_raw_cur=0;            //基准值计算数组此时重新开始取值
+            gs.ges_dynamic_start = false;
+            //gs.ges_sample_raw_cur=0;            //基准值计算数组此时重新开始取值
             return 1;
         }
 
-        if(gs.ges_dynamic_start &&
-            (ps[0]-gs.sample_base_last[0]<SAMPLE_DOWN_LIMIT_DEF) &&
-            (ps[1]-gs.sample_base_last[1]<SAMPLE_DOWN_LIMIT_DEF) &&
-            (ps[2]-gs.sample_base_last[2]<SAMPLE_DOWN_LIMIT_DEF))
+        if(gs.ges_dynamic_start && Ges_Stop_Detect(ps))
         {
             LOG_DEBUG("ges stop.\r\n");
-
             LOG_DEBUG("hold_flag=0.\r\n");
-            gs.hold_flag = 0;
-
+            gs.hold_flag = false;
             gs.ges_sample_raw_cur=0;            //基准值计算数组此时重新开始取值
-            gs.ges_dynamic_start = 0;
+            gs.ges_dynamic_start = false;
             return 1;
         }
     }
@@ -625,23 +647,99 @@ uint8_t Ges_Hold_Height_AorL_Judge()
 
     if(gs.hold_height_start<gs.hold_height_stop-10)
     {
-        LOG_DEBUG("Approach!\r\n");
-        brightness+=20;
-        if(brightness>1000)
+        if(gs.sample_mode==POSITIVE)
         {
-            return 1;
+            LOG_DEBUG("Approach!\r\n");
+#if(SENSOR3)
+            brightness+=20;
+            if(brightness>1000)
+            {
+                brightness = 1000;
+                //return 1;
+            }
+#else
+            brightness-=20;
+            if(brightness<100)
+            {
+                brightness = 100;
+                //return 1;
+            }
+#endif
+        }
+        else if(gs.sample_mode==NEGATIVE)
+        {
+            LOG_DEBUG("Leave!\r\n");
+#if(SENSOR3)
+                brightness-=20;
+                if(brightness<100)
+                {
+                    brightness = 100;
+                    //return 1;
+                }
+#else
+                brightness+=20;
+                if(brightness>1000)
+                {
+                    brightness = 1000;
+                    //return 1;
+                }
+#endif
         }
         __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, (uint32_t)brightness);
     }
     else if(gs.hold_height_start-10>gs.hold_height_stop)
     {
-        LOG_DEBUG("Leave!\r\n");
-        brightness-=20;
-        if(brightness<100)
+        if(gs.sample_mode==POSITIVE)
         {
-            return 1;
+            LOG_DEBUG("Leave!\r\n");
+#if(SENSOR3)
+            brightness-=20;
+            if(brightness<100)
+            {
+                brightness = 100;
+                //return 1;
+            }
+#else
+            brightness+=20;
+            if(brightness>1000)
+            {
+                brightness = 1000;
+                //return 1;
+            }
+#endif
+        }
+        else if(gs.sample_mode==NEGATIVE)
+        {
+            LOG_DEBUG("Approach!\r\n");
+#if(SENSOR3)
+            brightness+=20;
+            if(brightness>1000)
+            {
+                brightness = 1000;
+                //return 1;
+            }
+#else
+            brightness-=20;
+            if(brightness<100)
+            {
+                brightness = 100;
+                //return 1;
+            }
+#endif
         }
         __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, (uint32_t)brightness);
+    }
+    else
+    {
+        LOG_DEBUG("Stop wave!\r\n");
+        LOG_DEBUG("TO ReCalib base value!\r\n");
+        Ges_Calib(false);
+        gs.sample_mode = 0;
+        //gs.calib_force = true;
+        //gs.hold_flag = 0;
+        //gs.hold_counter = 0;
+        //gs.ges_sample_raw_cur=0;            //基准值计算数组此时重新开始取值
+        gs.ges_dynamic_start = false;    
     }
     //turn_off = 1;
 
@@ -1279,7 +1377,7 @@ uint8_t Ges_DynamicAnalysis(void)
     //有新的手势
     if (chn==0x3)
     {
-        LOG_DEBUG("                           hold %d,full %d,apC %d,leC %d\r\n",hold_flag,full_flag,gs.approach_counter,gs.leave_counter);
+        LOG_DEBUG("                                                 hold %d,full %d,apC %d,leC %d\r\n",hold_flag,full_flag,gs.approach_counter,gs.leave_counter);
 
 #if(HOLD_GES==1)
 #if 0//有hold的chn，均判定hold
@@ -1504,6 +1602,7 @@ void Ges_Calib(uint8_t firstboot)
     uint8_t i;
     uint16_t j,delta;
     uint32_t sum;
+
 #if 1
     if(gs.sample_size == GES_SAMPLE_ARRAY_NUM_S)
     {
@@ -1514,7 +1613,7 @@ void Ges_Calib(uint8_t firstboot)
             {
                 sum+=gs.ges_sample_array[i][j];
             }
-            delta=(uint16_t)(sum/gs.sample_size);
+            delta=(uint16_t)(sum/GES_SAMPLE_ARRAY_NUM_S);
             //delta=(uint16_t)(sum>>3);
 
             if(firstboot)
@@ -1525,10 +1624,10 @@ void Ges_Calib(uint8_t firstboot)
             gs.sample_base[i]=delta;
             //gs.sample_down_limit[i]=SAMPLE_DOWN_LIMIT_DEF+delta;
             //gs.sample_up_limit[i]=SAMPLE_UP_LIMIT_DEF+delta;
-#if (LOG_ENABLE)
+//#if (LOG_ENABLE)
             //LOG_DEBUG("CHN %d-> base: %d,down_limit: %d,up limit: %d\r\n",i,gs.sample_base[i],gs.sample_down_limit[i],gs.sample_up_limit[i]);
-            LOG_DEBUG("                                       CHN %d-> base: %d %d\r\n",i,gs.sample_base_last[i],gs.sample_base[i]);
-#endif
+            LOG_DEBUG("                                       CHN%d: cur[%d] new[%d]\r\n",i,gs.sample_base_last[i],gs.sample_base[i]);
+//#endif
         }
     }
 #else
@@ -1607,20 +1706,24 @@ void Ges_DynamicNormalize(void)
         
             if (gs.ges_dynamic_sample_array[i][j]>=gs.sample_base_last[i]) {
                 gs.ges_dynamic_sample_array[i][j]=gs.ges_dynamic_sample_array[i][j]-gs.sample_base_last[i];
+                gs.sample_mode = POSITIVE;
             }
             else {
-                gs.ges_dynamic_sample_array[i][j]=0;
-                //gs.ges_sample_array[i][j]=gs.sample_base_last[i]-gs.ges_sample_array[i][j];
+                //gs.ges_dynamic_sample_array[i][j]=0;
+                gs.ges_dynamic_sample_array[i][j]=gs.sample_base_last[i]-gs.ges_dynamic_sample_array[i][j];
+                gs.sample_mode = NEGATIVE;
             }
         }
     }
 
 #if (LOG_ENABLE)
+/*
     for (j=0;j<gs.ges_dynamic_sample_size;j++)
     {
         LOG_DEBUG("                                            ges[%d]:[ %5d  %5d]\r\n",j,
             gs.ges_dynamic_sample_array[1][j],gs.ges_dynamic_sample_array[0][j]);
     }
+*/
     LOG_DEBUG("                                            [%5d  %5d] DynamicNormalize sample[%d]\r\n",
         gs.sample_base_last[1],gs.sample_base_last[0],gs.ges_dynamic_sample_size);
 #endif
@@ -2083,7 +2186,9 @@ void App_Task(void)
     //一次数组填充完毕
     if (res==1)
     {
-
+#if (LOG_ENABLE)
+        LOG_DEBUG("                                       Ges_Calib sample[%d]\r\n",gs.sample_size);
+#endif
         if (gs.hold_flag && 
             (gs.frame_start_tick>gs.last_ges_time+GES_TREND_CLEARUP_MIN))
         {
@@ -2095,22 +2200,16 @@ void App_Task(void)
         //第一次采样数据作为定标用
         //if (!calib_num)
         //if(GES_SAMPLE_ARRAY_NUM_S==gs.sample_size)
-        if(0==gs.hold_flag && gs.ges_dynamic_start==false)
+        if((/*0==gs.hold_flag && */gs.ges_dynamic_start==false) /*|| gs.calib_force*/)
         {
-#if (LOG_ENABLE)
-            LOG_DEBUG("                                       Ges_Calib sample[%d]\r\n",gs.sample_size);
-#endif
             Ges_Calib(firstboot);
             firstboot = false;
+            //gs.calib_force = false;
             //calib_num++;
             //return;
         }
     }
-
-#if (!LOG_ENABLE)
-    //LOG_DEBUG("sample[%d] %x[13L 14R 15H 17A 18LE]\r\n",gs.sample_size,gs.last_ges);
-#endif
-
+    
     if(firstboot)
         return;
 
@@ -2237,7 +2336,8 @@ void App_Task(void)
 #if(HOLD_GES==1)
         else if (res==GES_LEVEL2_HOLD)
         {
-            LOG_DEBUG("                         gs.hold_counter:%d,pwm:%d\r\n",gs.hold_counter,brightness/10);
+            LOG_DEBUG("                                hold_flag:%d,hold_counter:%d,pwm:%d\r\n",
+                                                        gs.hold_flag,gs.hold_counter,brightness/10);
             gs.hold_counter++;
             if (gs.hold_counter==SAMPLE_HOLD_COUNT)
             {
@@ -2255,6 +2355,8 @@ void App_Task(void)
                     Ges_Log();
                     //gs.hold_flag = 1;
                     gs.new_hold_AorL_size = GES_SAMPLE_RAW_ARRAY_NUM_S;
+                    Ges_Calib(false);
+                    return;//the firse hold do not goto AorL Judge
                 }
                 else
                 {
@@ -2267,10 +2369,9 @@ void App_Task(void)
                 Ges_Hold_Height_AorL_Judge();
             }
 
-#if 0
-            if(gs.hold_counter>4)
+            if(gs.hold_counter>50)
             {
-            /*
+                /*
                 if (gs.sample_size==GES_SAMPLE_ARRAY_NUM_L)
                 {
                     gs.sample_size=GES_SAMPLE_ARRAY_NUM_S;
@@ -2280,7 +2381,6 @@ void App_Task(void)
                 gs.hold_counter = 0;
                 //gs.hold_flag = 0;
             }
-#endif
         }
 #endif
 /*

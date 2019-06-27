@@ -187,22 +187,22 @@ int16_t Si115xInitLongRangeProx(  )
 
     retval += Si115xParamSet( SI115x_PARAM_ADCSENS0, 0x03);
 #else
-    retval += Si115xParamSet( SI115x_PARAM_CH_LIST, 0x07);
+    retval += Si115xParamSet( SI115x_PARAM_CH_LIST, 0x03);
 
     retval += Si115xParamSet( SI115x_PARAM_LED1_A, 0x3f);
     retval += Si115xParamSet( SI115x_PARAM_LED2_A, 0x3f);
-    retval += Si115xParamSet( SI115x_PARAM_LED3_A, 0x3f);
+    //retval += Si115xParamSet( SI115x_PARAM_LED3_A, 0x3f);
 
     retval += Si115xParamSet( SI115x_PARAM_ADCCONFIG0, 0x62);
     retval += Si115xParamSet( SI115x_PARAM_MEASCONFIG0, 0x01);
     retval += Si115xParamSet( SI115x_PARAM_ADCCONFIG1, 0x62);
     retval += Si115xParamSet( SI115x_PARAM_MEASCONFIG1, 0x02);
-    retval += Si115xParamSet( SI115x_PARAM_ADCCONFIG2, 0x62);
-    retval += Si115xParamSet( SI115x_PARAM_MEASCONFIG2, 0x04);
+    //retval += Si115xParamSet( SI115x_PARAM_ADCCONFIG2, 0x62);
+    //retval += Si115xParamSet( SI115x_PARAM_MEASCONFIG2, 0x04);
 
     retval += Si115xParamSet( SI115x_PARAM_ADCSENS0, 0x03);
     retval += Si115xParamSet( SI115x_PARAM_ADCSENS1, 0x03);
-    retval += Si115xParamSet( SI115x_PARAM_ADCSENS2, 0x03);
+    //retval += Si115xParamSet( SI115x_PARAM_ADCSENS2, 0x03);
 #endif
     //retval += Si115xWriteToRegister( SI115x_REG_IRQ_ENABLE, 0x07, 1);
 
@@ -296,9 +296,9 @@ void getSensorDataByHostout(uint16_t *ps)
     LOG_DEBUG(" %5d %5d [%5d %5d]\r\n",
                         ps[1]/*,ps[2]*/,ps[0],
                         //gs.sample_base_last[1],gs.sample_base_last[2],gs.sample_base_last[0],
-                        ps[1]<=gs.sample_base_last[1]?0:ps[1]-gs.sample_base_last[1],
+                        ps[1]<=gs.sample_base_last[1]?gs.sample_base_last[1]-ps[1]:ps[1]-gs.sample_base_last[1],
                         /*ps[2]<=gs.sample_base_last[2]?0:ps[2]-gs.sample_base_last[2],*/
-                        ps[0]<=gs.sample_base_last[0]?0:ps[0]-gs.sample_base_last[0]);
+                        ps[0]<=gs.sample_base_last[0]?gs.sample_base_last[0]-ps[0]:ps[0]-gs.sample_base_last[0]);
                         //ps[1]<=gs.sample_base[1]?gs.sample_base[1]-ps[1]:ps[1]-gs.sample_base[1],
                         //ps[2]<=gs.sample_base[2]?gs.sample_base[2]-ps[2]:ps[2]-gs.sample_base[2],
                         //ps[0]<=gs.sample_base[0]?gs.sample_base[0]-ps[0]:ps[0]-gs.sample_base[0]);
@@ -315,18 +315,20 @@ void getSensorDataByHostout(uint16_t *ps)
          256*Si115xReadFromRegister(SI115x_REG_HOSTOUT0);
     CH2_PS = Si115xReadFromRegister (SI115x_REG_HOSTOUT3) +
          256*Si115xReadFromRegister(SI115x_REG_HOSTOUT2);
-    CH3_PS = Si115xReadFromRegister (SI115x_REG_HOSTOUT5) +
-         256*Si115xReadFromRegister(SI115x_REG_HOSTOUT4);
+    //CH3_PS = Si115xReadFromRegister (SI115x_REG_HOSTOUT5) +
+    //     256*Si115xReadFromRegister(SI115x_REG_HOSTOUT4);
 
     ps[0] = CH1_PS;
     ps[1] = CH2_PS;
-    ps[2] = CH3_PS;
+    //ps[2] = CH3_PS;
 
     //#if (LOG_ENABLE)
         //LOG_DEBUG("%5d  %5d  %5d\r\n",CH2_PS<=gs.sample_base[1]?0:CH2_PS-gs.sample_base[1],
         //                    CH3_PS<=gs.sample_base[2]?0:CH3_PS-gs.sample_base[2],
         //                    CH1_PS<=gs.sample_base[0]?0:CH1_PS-gs.sample_base[0]);
-        LOG_DEBUG("%5d  %5d  %5d\r\n",CH2_PS,CH3_PS,CH1_PS);
+        LOG_DEBUG(" %5d %5d [%5d %5d]\r\n",CH2_PS,/*CH3_PS,*/CH1_PS,
+                        ps[1]<=gs.sample_base_last[1]?gs.sample_base_last[1]-ps[1]:ps[1]-gs.sample_base_last[1],
+                        ps[0]<=gs.sample_base_last[0]?gs.sample_base_last[0]-ps[0]:ps[0]-gs.sample_base_last[0]);
     //#endif
 #endif
 }
