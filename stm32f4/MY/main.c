@@ -29,13 +29,66 @@
 #include "mbi5153.h"
 
 uint8_t circuit=0;
+uint64_t systime;
+uint64_t systime1;
 extern volatile uint8_t pluse_enable;
 extern uint64_t systick;
+
+void display_X()
+{
+    static uint8_t key_flag = 0;   //按键标志
+
+    if(systick - systime>500000)//500ms
+    {
+        key_flag++;
+        systime = systick;
+    }
+    cycleScan_X(key_flag);
+}
+
+//extern uint8_t chnFlag[16];//8-15 channel
+extern uint8_t chnFlagPos[16][SECS];//1-8
+void display_Sink()
+{
+    int number;
+
+    if(systick - systime>300000)//300ms
+    {
+        number = (systick-systime)%8+8;//8-15
+        systime = systick;
+
+        //printf("rand chn:%d\r\n", number);
+        for(int j=0;j<SECS;j++)
+        {
+            if(chnFlagPos[number][j]==0)
+            {
+                chnFlagPos[number][j] = 1;
+                break;
+            }
+        }
+    }
+    cycleScan_Sink();
+    
+    if(systick - systime1>100000)//100ms
+    {
+        for(int i=8;i<16;i++)
+        {
+            for(int j=0;j<SECS;j++)
+            {
+                if(chnFlagPos[i][j]>0 && chnFlagPos[i][j]<11)
+                    chnFlagPos[i][j]++;
+                else
+                    chnFlagPos[i][j] = 0;
+                //printf("Pos[%d]:%d\r\n", i,chnFlagPos[i]);
+            }
+        }
+        systime1 = systick;
+    }
+}
 
 int main(void)
 {
     uint8_t key_flag = 0;   //按键标志
-    uint64_t systime;
 
     SystemInit();
 
@@ -79,6 +132,7 @@ int main(void)
     //MBI5153();
     pluse_enable = 0;
     systime = systick;
+    systime1 = systick;
     while (1)
     {
 
@@ -89,12 +143,9 @@ int main(void)
 #if 0
         MBI5153();
 #else
-        if(systick - systime>500000)//500ms
-        {
-            key_flag++;
-            systime = systick;
-        }
-        cycleScan(key_flag);
+
+        //display_X();
+        display_Sink();
 #endif
         //printf("circuit:%d\r\n",circuit%16);
         //circuit++;

@@ -320,11 +320,11 @@ void MBI_ScanCycle(void)
     gclk_pluse = 0;
 }
 
-uint8_t MBI_SdiInput(uint8_t type)
+uint8_t MBI_SdiInput_X(uint8_t type)
 {
     uint32_t sck_cnt,mask;
     uint16_t i,j,k,line;
-    static uint8_t  currentLine=1,CurrentCh=0;
+    static uint8_t  currentLine=1,currentCh=0;
 
     //写入16*2*16数据
     for(line = 1; line <= SCAN_LINE; line++)//扫描行数
@@ -333,9 +333,9 @@ uint8_t MBI_SdiInput(uint8_t type)
         for(i = 0; i < 16; i++)//每个MBI5153有16个通道
         {
 
-            if(currentLine==line && CurrentCh==i)
+            if(currentLine==line && currentCh==i)
             {
-            //printf("L %d  C %d\r\n",currentLine,CurrentCh);
+                //printf("L %d  C %d\r\n",currentLine,currentCh);
                 delay(1);
                 for(j = 0; j < MBI5153_SIZE; j++)//级联IC数量
                 {
@@ -380,28 +380,97 @@ uint8_t MBI_SdiInput(uint8_t type)
                 SDI_PIN_L
                 delay(1);
 
-                if(CurrentCh==15 && currentLine==8)
+                if(currentCh==15 && currentLine==8)
                 {
                     //vsync();
-                    CurrentCh = 0;
+                    currentCh = 0;
                     currentLine = 1;
                     return 1;
                 }
-                else if(CurrentCh==15)
+                else if(currentCh==15)
                 {
-                    CurrentCh = 0;
+                    currentCh = 0;
                     currentLine++;
                 }
                 else
                 {
-                    CurrentCh++;
+                    currentCh++;
                 }
                 delay(100);
                 return 0;
             }
         }
     }
+}
 
+//uint8_t chnFlag[16];//8-15 channel
+uint8_t chnFlagPos[16][SECS];//1-8
+uint8_t MBI_SdiInput_Sink()
+{
+    uint32_t sck_cnt,mask;
+    uint16_t i,j,k,l,line;
+    static uint8_t  currentLine=1,currentCh=0;
+
+    //写入16*2*16数据
+    for(line = 1; line <= SCAN_LINE; line++)//扫描行数
+    {
+        for(i = 0; i < 16; i++)//每个MBI5153有16个通道
+        {
+            if(currentLine==line && currentCh==i)
+            {
+                //printf("L %d  C %d\r\n",currentLine,currentCh);
+                delay(1);
+                for(j = 0; j < MBI5153_SIZE; j++)//级联IC数量
+                {
+                    for(k = 0; k < 16; k++)
+                    {
+                        mask = 0x8000 >> k;
+
+                        if(j == MBI5153_SIZE-1)
+                        {
+                            if(k == 15)
+                            {
+                                LE_PIN_H
+                            }
+                        }
+
+                        for(l=0;l<SECS;l++)//支持连续的流水灯段
+                        {
+                            if((sdi_data & mask)&&
+                                ((chnFlagPos[i][l]-1==line)||(chnFlagPos[i][l]-2==line)||(chnFlagPos[i][l]==line)))
+                                SDI_PIN_H
+                        }
+                        delay(1);
+                        DCLK_PIN_H
+                        delay(1);
+                        DCLK_PIN_L
+                    }
+                }
+                LE_PIN_L
+                SDI_PIN_L
+                delay(1);
+
+                if(currentCh==15 && currentLine==8)
+                {
+                    //vsync();
+                    currentCh = 0;
+                    currentLine = 1;
+                    return 1;
+                }
+                else if(currentCh==15)
+                {
+                    currentCh = 0;
+                    currentLine++;
+                }
+                else
+                {
+                    currentCh++;
+                }
+                delay(100);
+                return 0;
+            }
+        }
+    }
 }
 
 #endif
@@ -531,7 +600,7 @@ void MBI5153()
 
 }
 
-void cycleScan(uint8_t type)
+void cycleScan_X(uint8_t type)
 {
     uint32_t sck_cnt,mask;
     uint16_t i,j,k,line;
@@ -553,8 +622,33 @@ void cycleScan(uint8_t type)
     }
     else
     {
-        isVsync = MBI_SdiInput(type);
+        isVsync = MBI_SdiInput_X(type);
     }
+}
 
+void cycleScan_Sink()
+{
+    uint32_t sck_cnt,mask;
+    uint16_t i,j,k,line;
+    static uint8_t  isVsync = 1;
+
+    if(isVsync)
+        vsync();
+
+    MBI_ScanCycle();
+    if(isVsync)
+    {
+        MBI_cycleScanRegConfig();
+        for(i=0;i<7;i++)
+        {
+            MBI_ScanCycle();
+            delay(135);
+        }
+        isVsync = 0;
+    }
+    else
+    {
+        isVsync = MBI_SdiInput_Sink();
+    }
 }
 
