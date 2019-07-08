@@ -30,7 +30,7 @@ extern uint8_t gclk_num;
 //unsigned short sdi_data[16]={1<<0,1<<1,1<<2,1<<3,1<<4,1<<5,1<<6,1<<7,\
 //                          1<<8,1<<9,1<<10,1<<11,1<<12,1<<13,1<<14,1<<15};
 
-unsigned short sdi_data=0x3ff;
+unsigned short sdi_data=0xffff;//3ff
 
 void soft_reset(void)
 {
@@ -351,11 +351,11 @@ uint8_t MBI_SdiInput_X(uint8_t type)
                             }
                         }
 
-                        switch(type%2)
+                        switch(0/*type%2*/)
                         {
                             case 0:
-                                if((sdi_data & mask)&&(i>7)&&
-                                    ((i==15)||(i==8)||(line==1)||(line==8)||(i-line==7)||(i+line==16)))
+                                if((sdi_data & mask)/*&&(i>7)&&
+                                    ((i==15)||(i==8)||(line==1)||(line==8)||(i-line==7)||(i+line==16))*/)
                                     SDI_PIN_H
                                 else
                                     SDI_PIN_L

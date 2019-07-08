@@ -437,7 +437,7 @@ void Drv_PWM_Proc(void)
     {
       turn_off = 0;
       brightness_old = brightness;
-      LOG_DEBUG("                                                 brightness_old %d\r\n",brightness_old);
+      LOG_DEBUG("                                       brightness_old %d\r\n",brightness_old);
       __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, (uint32_t)brightness_old);
     }
   }

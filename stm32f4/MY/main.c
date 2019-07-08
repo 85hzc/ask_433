@@ -52,9 +52,9 @@ void display_Sink()
 {
     int number;
 
-    if(systick - systime>300000)//300ms
+    if(systick - systime>100000)//300ms
     {
-        number = (systick-systime)%8+8;//8-15
+        number = (systick-systime)%16;//8-15
         systime = systick;
 
         //printf("rand chn:%d\r\n", number);
@@ -69,9 +69,9 @@ void display_Sink()
     }
     cycleScan_Sink();
     
-    if(systick - systime1>100000)//100ms
+    if(systick - systime1>50000)//100ms
     {
-        for(int i=8;i<16;i++)
+        for(int i=0;i<16;i++)
         {
             for(int j=0;j<SECS;j++)
             {

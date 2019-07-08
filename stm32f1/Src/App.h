@@ -36,7 +36,7 @@
 #define GES_DISTANCE_MIN            700             //相邻手势的最小值，700ms
 #define MULTIGES_DISTANCE_MIN       2000            //组合相邻手势的最小值，2.5s
 
-#define GES_TREND_CLEARUP_MIN       1000            //相邻手势的最小值，1000ms
+#define GES_TREND_CLEARUP_MIN       300            //相邻手势的最小值，1000ms
 
 #define POSITIVE                    1               //手势数据监测值大于基准值
 #define NEGATIVE                    2               //手势数据监测值小于基准值
@@ -151,6 +151,7 @@ uint8_t Ges_Wave_Search(uint8_t chn,uint16_t *pindex);
 uint8_t Ges_Wave_Lead(uint8_t chn1,uint8_t chn2);
 uint8_t Ges_Analysis(void);
 void Ges_Calib(uint8_t firstboot);
+void Ges_DynamicCalib();
 void Ges_Normalize(void);
 void Ges_DynamicNormalize(void);
 void Ges_Log(void);

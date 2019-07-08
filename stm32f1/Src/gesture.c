@@ -292,7 +292,6 @@ void getSensorDataByHostout(uint16_t *ps)
     //LOG_DEBUG("%5d  %5d  %5d\r\n",ps[1]<=gs.sample_base[1]?0:ps[1]-gs.sample_base[1],
     //                    ps[2]<=gs.sample_base[2]?0:ps[2]-gs.sample_base[2],
     //                    ps[0]<=gs.sample_base[0]?0:ps[0]-gs.sample_base[0]);
-#if 1
     LOG_DEBUG(" %5d %5d [%5d %5d]\r\n",
                         ps[1]/*,ps[2]*/,ps[0],
                         //gs.sample_base_last[1],gs.sample_base_last[2],gs.sample_base_last[0],
@@ -302,8 +301,6 @@ void getSensorDataByHostout(uint16_t *ps)
                         //ps[1]<=gs.sample_base[1]?gs.sample_base[1]-ps[1]:ps[1]-gs.sample_base[1],
                         //ps[2]<=gs.sample_base[2]?gs.sample_base[2]-ps[2]:ps[2]-gs.sample_base[2],
                         //ps[0]<=gs.sample_base[0]?gs.sample_base[0]-ps[0]:ps[0]-gs.sample_base[0]);
-#endif
-    //LOG_DEBUG("%5d  %5d  %5d  ", ps[1],ps[2],ps[0]);
 #endif
 #else
     I2C_SCL_PIN = SCL3_Pin;
@@ -322,14 +319,14 @@ void getSensorDataByHostout(uint16_t *ps)
     ps[1] = CH2_PS;
     //ps[2] = CH3_PS;
 
-    //#if (LOG_ENABLE)
-        //LOG_DEBUG("%5d  %5d  %5d\r\n",CH2_PS<=gs.sample_base[1]?0:CH2_PS-gs.sample_base[1],
-        //                    CH3_PS<=gs.sample_base[2]?0:CH3_PS-gs.sample_base[2],
-        //                    CH1_PS<=gs.sample_base[0]?0:CH1_PS-gs.sample_base[0]);
-        LOG_DEBUG(" %5d %5d [%5d %5d]\r\n",CH2_PS,/*CH3_PS,*/CH1_PS,
-                        ps[1]<=gs.sample_base_last[1]?gs.sample_base_last[1]-ps[1]:ps[1]-gs.sample_base_last[1],
-                        ps[0]<=gs.sample_base_last[0]?gs.sample_base_last[0]-ps[0]:ps[0]-gs.sample_base_last[0]);
-    //#endif
+#if (LOG_ENABLE)
+    //LOG_DEBUG("%5d  %5d  %5d\r\n",CH2_PS<=gs.sample_base[1]?0:CH2_PS-gs.sample_base[1],
+    //                    CH3_PS<=gs.sample_base[2]?0:CH3_PS-gs.sample_base[2],
+    //                    CH1_PS<=gs.sample_base[0]?0:CH1_PS-gs.sample_base[0]);
+    LOG_DEBUG(" %5d %5d [%5d %5d]\r\n",CH2_PS,/*CH3_PS,*/CH1_PS,
+                    ps[1]<=gs.sample_base_last[1]?gs.sample_base_last[1]-ps[1]:ps[1]-gs.sample_base_last[1],
+                    ps[0]<=gs.sample_base_last[0]?gs.sample_base_last[0]-ps[0]:ps[0]-gs.sample_base_last[0]);
+#endif
 #endif
 }
 
