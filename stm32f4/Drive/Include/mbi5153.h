@@ -13,7 +13,7 @@
 
 
 #define MBI5153_SIZE                                1
-#define SCAN_LINE                                   8
+#define SCAN_LINE                                   16
 
 #define SCAN_LINE_1                                 0x0
 #define SCAN_LINE_2                                 0x1

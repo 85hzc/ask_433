@@ -52,7 +52,7 @@ void display_Sink()
 {
     int number;
 
-    if(systick - systime>100000)//300ms
+    if(systick - systime>100000)//100ms
     {
         number = (systick-systime)%16;//8-15
         systime = systick;
@@ -69,13 +69,13 @@ void display_Sink()
     }
     cycleScan_Sink();
     
-    if(systick - systime1>50000)//100ms
+    if(systick - systime1>50000)//50ms
     {
         for(int i=0;i<16;i++)
         {
             for(int j=0;j<SECS;j++)
             {
-                if(chnFlagPos[i][j]>0 && chnFlagPos[i][j]<11)
+                if(chnFlagPos[i][j]>0 && chnFlagPos[i][j]<SCAN_LINE+3)
                     chnFlagPos[i][j]++;
                 else
                     chnFlagPos[i][j] = 0;

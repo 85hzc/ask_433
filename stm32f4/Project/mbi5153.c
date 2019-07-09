@@ -30,7 +30,7 @@ extern uint8_t gclk_num;
 //unsigned short sdi_data[16]={1<<0,1<<1,1<<2,1<<3,1<<4,1<<5,1<<6,1<<7,\
 //                          1<<8,1<<9,1<<10,1<<11,1<<12,1<<13,1<<14,1<<15};
 
-unsigned short sdi_data=0xffff;//3ff
+unsigned short sdi_data=0xffff;
 
 void soft_reset(void)
 {
@@ -299,7 +299,7 @@ void MBI_ScanCycle(void)
 
     delay(1);
 
-    if(ii%8==0)
+    if(ii%SCAN_LINE==0)
     {
         AG_DIN_PIN_H
     }
@@ -308,7 +308,7 @@ void MBI_ScanCycle(void)
     AG_CLK_PIN_H
     delay(1);
 
-    if(ii%8==0)
+    if(ii%SCAN_LINE==0)
     {
         AG_DIN_PIN_L
     }
@@ -351,11 +351,11 @@ uint8_t MBI_SdiInput_X(uint8_t type)
                             }
                         }
 
-                        switch(0/*type%2*/)
+                        switch(type%2)
                         {
                             case 0:
-                                if((sdi_data & mask)/*&&(i>7)&&
-                                    ((i==15)||(i==8)||(line==1)||(line==8)||(i-line==7)||(i+line==16))*/)
+                                if((sdi_data & mask)&&(i>7)&&
+                                    ((i==15)||(i==0)||(line==1)||(line==16)||(i-line==0)||(i+line==16)))
                                     SDI_PIN_H
                                 else
                                     SDI_PIN_L
@@ -597,7 +597,6 @@ void MBI5153()
 
 #endif
     //pluse_enable = 1;
-
 }
 
 void cycleScan_X(uint8_t type)
@@ -613,7 +612,7 @@ void cycleScan_X(uint8_t type)
     if(isVsync)
     {
         MBI_cycleScanRegConfig();
-        for(i=0;i<7;i++)
+        for(i=0;i<SCAN_LINE-1;i++)
         {
             MBI_ScanCycle();
             delay(135);
