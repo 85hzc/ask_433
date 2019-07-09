@@ -6,27 +6,25 @@
 
 /*---------------------- GPIO配置宏 ------------------------*/
 
-#define LED_LEFT_Pin        GPIO_PIN_1
-#define LED_LEFT_GPIO_Port  GPIOB
-#define LED_DOWN_Pin        GPIO_PIN_0
-#define LED_DOWN_GPIO_Port  GPIOB
-#define LED_UP_Pin          GPIO_PIN_6
+#define LED_LEFT_Pin        GPIO_PIN_0
+#define LED_LEFT_GPIO_Port  GPIOA
+#define LED_DOWN_Pin        GPIO_PIN_6
+#define LED_DOWN_GPIO_Port  GPIOA
+#define LED_UP_Pin          GPIO_PIN_1
 #define LED_UP_GPIO_Port    GPIOA
 #define LED_RIGHT_Pin       GPIO_PIN_7
 #define LED_RIGHT_GPIO_Port GPIOA
 
-//#define LED1_Pin GPIO_PIN_12
-//#define LED1_GPIO_Port GPIOB
-
 #define INT_Pin             GPIO_PIN_5
-#define INT_GPIO_Port       GPIOB
+#define INT_GPIO_Port       GPIOA
 /*
 #define USART1_GPIO_Port    GPIOA
 #define USART1_TX_Pin       GPIO_PIN_9
 #define USART1_RX_Pin       GPIO_PIN_10
 */
-#define SCL_GPIO_Port       GPIOB
-#define SDA_GPIO_Port       GPIOB
+
+#define SCL_GPIO_Port       GPIOC
+#define SDA_GPIO_Port       GPIOC
 #define SCL1_Pin            GPIO_PIN_10
 #define SDA1_Pin            GPIO_PIN_11
 #define SCL2_Pin            GPIO_PIN_8
@@ -37,14 +35,14 @@
 
 
 #define DCLK_PIN          GPIO_PIN_5             // MBI dclk 引脚
-#define GCLK_PIN          GPIO_PIN_9             // MBI gclk 引脚
+#define GCLK_PIN          GPIO_PIN_1             // MBI gclk 引脚
 #define LE_PIN            GPIO_PIN_7             // MBI LE 引脚
 #define SDI_PIN           GPIO_PIN_8             // MBI SDI 引脚
 #define MBI_PORT          GPIOB                  // MBI驱动 GPIO端口
 
-#define AG_OE_PIN         GPIO_PIN_1             // AG OE 引脚
-#define AG_CLK_PIN        GPIO_PIN_2             // AG Clk 引脚
-#define AG_DIN_PIN        GPIO_PIN_3             // AG Din 引脚
+#define AG_OE_PIN         GPIO_PIN_2             // AG OE 引脚
+#define AG_CLK_PIN        GPIO_PIN_3             // AG Clk 引脚
+#define AG_DIN_PIN        GPIO_PIN_4             // AG Din 引脚
 
 
 /*---------------------- GPIO控制宏 ------------------------*/

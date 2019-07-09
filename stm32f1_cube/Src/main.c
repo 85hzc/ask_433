@@ -45,17 +45,15 @@ static uint32_t          tickstart;
 uint32_t                 turn_off;
 
 /* Private variables ---------------------------------------------------------*/
-UART_HandleTypeDef       huart1;
+UART_HandleTypeDef       huart1, huart2;
 //TIM_HandleTypeDef      htim1;
 TIM_HandleTypeDef        htim3;
 
 extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
 
-extern uint64_t          systick;
-
-uint64_t systime;
-uint64_t systime1;
+uint64_t systime = 0;
+uint64_t systime1 = 0;
 
 
 /* USER CODE BEGIN PV */
@@ -69,6 +67,7 @@ void SystemClock_Config(void);
 void Error_Handler(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_USART2_UART_Init(void);
 static void MX_TIM3_Init(void);
 //static void MX_TIM1_Init(void);
 void Drv_PWM_Init(void);
@@ -86,10 +85,10 @@ void display_X(void)
 {
     static uint8_t key_flag = 0;   //°´¼ü±êÖ¾
 
-    if(systick - systime>500000)//500ms
+    if(HAL_GetTick() - systime>500000)//500ms
     {
         key_flag++;
-        systime = systick;
+        systime = HAL_GetTick();
     }
     cycleScan_X(key_flag);
 }
@@ -100,12 +99,12 @@ void display_Sink(void)
 {
     int number;
 
-    if(systick - systime>100000)//300ms
+    if(HAL_GetTick() - systime>100000)//300ms
     {
-        number = (systick-systime)%16;//8-15
-        systime = systick;
+        number = (HAL_GetTick()-systime)%16;//8-15
+        systime = HAL_GetTick();
 
-        //printf("rand chn:%d\r\n", number);
+        printf("rand chn:%d\r\n", number);
         for(int j=0;j<SECS;j++)
         {
             if(chnFlagPos[number][j]==0)
@@ -117,7 +116,7 @@ void display_Sink(void)
     }
     cycleScan_Sink();
     
-    if(systick - systime1>50000)//100ms
+    if(HAL_GetTick() - systime1>50000)//100ms
     {
         for(int i=0;i<16;i++)
         {
@@ -130,7 +129,7 @@ void display_Sink(void)
                 //printf("Pos[%d]:%d\r\n", i,chnFlagPos[i]);
             }
         }
-        systime1 = systick;
+        systime1 = HAL_GetTick();
     }
 }
 
@@ -154,25 +153,21 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
-  //MX_TIM1_Init();//for pwm schedule
-  MX_TIM3_Init();//for pwm schedule
+  MX_USART2_UART_Init();
+  //MX_TIM3_Init();//for pwm schedule
 
   printf("system start.\r\n");
 
   /* USER CODE BEGIN 2 */
-  Drv_PWM_Init();
-  turn_off = 1;
+  //Drv_PWM_Init();
 
-  //DEMO_Init();
-  /* USER CODE END 2 */
-
-  printf("after mbi init\r\n");
+  printf("after mbi init hclk:%d\r\n",HAL_RCC_GetHCLKFreq());
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    Drv_PWM_Proc();
+    //Drv_PWM_Proc();
 
     //display_X();
     display_Sink();
@@ -201,7 +196,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSICalibrationValue = 16;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL8;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -223,7 +218,7 @@ void SystemClock_Config(void)
 
     /**Configure the Systick interrupt time 
     */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/(1000*500));
 
     /**Configure the Systick 
     */
@@ -249,25 +244,35 @@ static void MX_USART1_UART_Init(void)
   {
     Error_Handler();
   }
-
 }
 
-void init_pwmIO()
+/* USART1 init function */
+static void MX_USART2_UART_Init(void)
 {
-    GPIO_InitTypeDef GPIO_InitStruct;//GPIOç»“æž„ä½?
+
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 9600;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+void init_tim3PWMIO()
+{
+    GPIO_InitTypeDef GPIO_InitStruct;
     
-    GPIO_InitStruct.Mode=GPIO_MODE_AF_PP;//å¤ç”¨æŽ¨æŒ½è¾“å‡º
+    GPIO_InitStruct.Mode=GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pin=GPIO_PIN_6;//PA6
-    GPIO_InitStruct.Pull=GPIO_PULLUP;
-    GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_MEDIUM;//ç¿»è½¬é€Ÿåº¦=10MHZ
-    //GPIO_InitStruct.Alternate = GPIO_AF2_TIM1;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);//TIM3é€šé“1IOå?
-    /*
-    GPIO_InitStruct.Mode=GPIO_MODE_AF_PP;//å¤ç”¨æŽ¨æŒ½è¾“å‡º
-    GPIO_InitStruct.Pin=GPIO_PIN_0|GPIO_PIN_1;//PB0
-    GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_LOW;//ç¿»è½¬é€Ÿåº¦=10MHZ
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);//TIM3é€šé“3IOå?
-    */
+    GPIO_InitStruct.Pull=GPIO_NOPULL;
+    GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_MEDIUM;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }
 
 /** Configure pins as 
@@ -291,13 +296,13 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   //HAL_GPIO_WritePin(GPIOA, LED_DCLK_Pin|LED_HOLD_Pin, GPIO_PIN_RESET);
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, SCL1_Pin|SDA1_Pin|SCL2_Pin|SDA2_Pin|SCL3_Pin|SDA3_Pin, GPIO_PIN_RESET);
+  //HAL_GPIO_WritePin(GPIOB, SCL1_Pin|SDA1_Pin|SCL2_Pin|SDA2_Pin|SCL3_Pin|SDA3_Pin, GPIO_PIN_RESET);
 
-
+#if 0
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, LED_DOWN_Pin|LED_RIGHT_Pin, GPIO_PIN_SET);
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LED_LEFT_Pin|LED_UP_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOA, LED_LEFT_Pin|LED_UP_Pin, GPIO_PIN_SET);
 
 
   /*Configure GPIO pins : LED_LEFT_Pin LED_DOWN_Pin LED_UP_Pin LED_RIGHT_Pin 
@@ -305,7 +310,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pin = LED_LEFT_Pin|LED_UP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : INT_Pin */
   GPIO_InitStruct.Pin = INT_Pin;
@@ -318,12 +323,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+#endif
 
-  init_pwmIO();
-
-
+  //init_tim3PWMIO();
   MBI_GPIO_Init();//³õÊ¼»¯MBIÇý¶¯pin
-
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
@@ -413,6 +416,8 @@ void Drv_PWM_Proc(void)
   }
 }
 #endif
+
+#if 0
 /*****************************************************************************
 *    function:
 *        void SHT_set_scl_state(uint8_t flag)
@@ -492,17 +497,8 @@ void I2C_init(void)
 
     I2C_set_sda_state(1);
     I2C_set_scl_state(1);
-
-//    I2C_SCL_OUTPUT();
-//    I2C_SCL_DIGIT();
-//    I2C_SCL_NOPULL();
-//    I2C_SCL_1();
-//    I2C_SDA_OUTPUT();
-//    I2C_SDA_DIGIT();
-//    I2C_SDA_NOPULL();
-//    I2C_SDA_1();
 }
-
+#endif
 
 /* USER CODE BEGIN 4 */
 int fputc(int ch, FILE *f)

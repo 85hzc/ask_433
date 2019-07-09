@@ -172,8 +172,8 @@ void SysTick_Handler(void)
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
 
+  TimingDelay_Decrement();
   gclk();
-  SysTickInc();
   
   /* USER CODE BEGIN SysTick_IRQn 1 */
   //Ges_Tick_Check();
