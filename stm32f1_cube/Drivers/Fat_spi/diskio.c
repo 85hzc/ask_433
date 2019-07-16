@@ -12,7 +12,7 @@
 /* Inidialize a Drive                                                    */
 
 DSTATUS disk_initialize (
-	BYTE drv				/* Physical drive nmuber (0..) */
+    BYTE drv                /* Physical drive nmuber (0..) */
 )
 {
     u8 state;
@@ -43,7 +43,7 @@ DSTATUS disk_initialize (
 /* Return Disk Status                                                    */
 
 DSTATUS disk_status (
-	BYTE drv		/* Physical drive nmuber (0..) */
+    BYTE drv        /* Physical drive nmuber (0..) */
 )
 {
     if(drv)
@@ -65,13 +65,13 @@ DSTATUS disk_status (
 /* Read Sector(s)                                                        */
 
 DRESULT disk_read (
-	BYTE drv,		/* Physical drive nmuber (0..) */
-	BYTE *buff,		/* Data buffer to store read data */
-	DWORD sector,	/* Sector address (LBA) */
-	BYTE count		/* Number of sectors to read (1..255) */
+    BYTE drv,       /* Physical drive nmuber (0..) */
+    BYTE *buff,     /* Data buffer to store read data */
+    DWORD sector,   /* Sector address (LBA) */
+    BYTE count      /* Number of sectors to read (1..255) */
 )
 {
-	u8 res=0;
+    u8 res=0;
     if (drv || !count)
     {    
         return RES_PARERR;  //仅支持单磁盘操作，count不能等于0，否则返回参数错误
@@ -82,7 +82,7 @@ DRESULT disk_read (
    // }
 
     
-	
+    
     if(count==1)            //1个sector的读操作      
     {                                                
         res = SD_ReadSingleBlock(sector, buff);      
@@ -91,7 +91,7 @@ DRESULT disk_read (
     {                                                
         res = SD_ReadMultiBlock(sector, buff, count);
     }                                                
-	/*
+    /*
     do                           
     {                                          
         if(SD_ReadSingleBlock(sector, buff)!=0)
@@ -120,19 +120,19 @@ DRESULT disk_read (
 
 #if _READONLY == 0
 DRESULT disk_write (
-	BYTE drv,			/* Physical drive nmuber (0..) */
-	const BYTE *buff,	        /* Data to be written */
-	DWORD sector,		/* Sector address (LBA) */
-	BYTE count			/* Number of sectors to write (1..255) */
+    BYTE drv,           /* Physical drive nmuber (0..) */
+    const BYTE *buff,           /* Data to be written */
+    DWORD sector,       /* Sector address (LBA) */
+    BYTE count          /* Number of sectors to write (1..255) */
 )
 {
-	u8 res;
+    u8 res;
 
     if (drv || !count)
     {    
         return RES_PARERR;  //仅支持单磁盘操作，count不能等于0，否则返回参数错误
     }
-	/*
+    /*
     if(!SD_DET())
     {
         return RES_NOTRDY;  //没有检测到SD卡，报NOT READY错误
@@ -165,9 +165,9 @@ DRESULT disk_write (
 /* Miscellaneous Functions                                               */
 
 DRESULT disk_ioctl (
-	BYTE drv,		/* Physical drive nmuber (0..) */
-	BYTE ctrl,		/* Control code */
-	void *buff		/* Buffer to send/receive control data */
+    BYTE drv,       /* Physical drive nmuber (0..) */
+    BYTE ctrl,      /* Control code */
+    void *buff      /* Buffer to send/receive control data */
 )
 {
     DRESULT res;
@@ -222,6 +222,6 @@ DWORD get_fattime (void)
     return 0;
 }
 
-//得到文件Calendar格式的建立日期,是DWORD get_fattime (void) 逆变换							
+//得到文件Calendar格式的建立日期,是DWORD get_fattime (void) 逆变换                           
 
 
