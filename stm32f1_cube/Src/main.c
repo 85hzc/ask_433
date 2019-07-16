@@ -32,6 +32,7 @@
   */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "stm32f1xx.h"
 #include "stm32f1xx_hal.h"
 #include "gpio.h"
 #include "mbi5153.h"
@@ -43,11 +44,14 @@
 
 static uint32_t          tickstart;
 uint32_t                 turn_off;
-
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef       huart1, huart2;
+DMA_HandleTypeDef        hdma_usart1_rx, hdma_usart2_rx;
+USART_RECEIVETYPE        UsartType;
+
 //TIM_HandleTypeDef      htim1;
 TIM_HandleTypeDef        htim3;
+SPI_HandleTypeDef        hspi1;
 
 extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
@@ -66,6 +70,7 @@ uint64_t systime1 = 0;
 void SystemClock_Config(void);
 void Error_Handler(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM3_Init(void);
@@ -133,6 +138,26 @@ void display_Sink(void)
     }
 }
 
+void MX_SPI1_Init(void)
+{
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;//主模式
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;//全双工
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;//数据位为8位
+  hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;//CPOL=0,low
+  hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;//CPHA为数据线的第一个变化沿
+  hspi1.Init.NSS = SPI_NSS_SOFT;//软件控制NSS
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;//2分频，32M/2=16MHz
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;//最高位先发送
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;//TIMODE模式关闭
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;//CRC关闭
+  hspi1.Init.CRCPolynomial = 7;//默认值，无效
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)//初始化
+  {
+    Error_Handler();
+  }
+}
+
 /* USER CODE END 0 */
 
 int main(void)
@@ -150,19 +175,32 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();  //systick 1ms
 
+  //Delay_Init();
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   //MX_TIM3_Init();//for pwm schedule
 
-  printf("system start.\r\n");
 
+  SPI_Configuration();    //SPI初始化
+
+  printf("system start.\r\n");
   /* USER CODE BEGIN 2 */
   //Drv_PWM_Init();
 
+#if 1
+    HAL_UART_Receive_DMA(&huart1, UsartType.RX_pData, RX_LEN);
+    __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+#else
+    HAL_UART_Receive_IT(&huart1, rxData, 5);
+#endif
+
   printf("after mbi init hclk:%d\r\n",HAL_RCC_GetHCLKFreq());
 
+  SD_Init();
+  //test();           //测试函数
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -175,6 +213,12 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
+
+    if(UsartType.RX_flag)
+    {
+        UsartType.RX_flag = 0;
+        HAL_UART_Transmit(&huart1, UsartType.RX_pData, UsartType.RX_Size, 0xffff);
+    }
 
   }
   /* USER CODE END 3 */
@@ -332,6 +376,25 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 }
+
+/** 
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void) 
+{
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+  /* DMA1_Channel6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
+
+}
+
 #if 1
 /* TIM3 init function */
 static void MX_TIM3_Init(void)
@@ -506,6 +569,22 @@ int fputc(int ch, FILE *f)
 {
     HAL_UART_Transmit(&DEBUG_UART, (uint8_t *)&ch,1, 0xFFFF);
     return ch;
+}
+
+void UsartReceive_IDLE(UART_HandleTypeDef *huart)
+{
+    uint32_t temp;
+
+    if((__HAL_UART_GET_FLAG(huart,UART_FLAG_IDLE) != RESET))
+    {
+        __HAL_UART_CLEAR_IDLEFLAG(huart);
+        HAL_UART_DMAStop(huart);
+        temp = huart->hdmarx->Instance->CNDTR;
+        UsartType.RX_Size = RX_LEN - temp;
+        UsartType.RX_flag = 1;
+        HAL_UART_Receive_DMA(huart, UsartType.RX_pData, RX_LEN);
+    }
+
 }
 
 /* USER CODE END 4 */

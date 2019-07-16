@@ -29,7 +29,7 @@ void delay_ns(uint32_t time)
         __ASM("nop");
     //}
 }
-
+/*
 //  函数：延时初始化
 //  说明：配置 SysTick 为1ms中断，并启动定时器
 //
@@ -37,7 +37,7 @@ void Delay_Init(void)
 {
     SysTick_Config(SystemCoreClock / (1000*1000));  //配置SysTick时钟为1ms(1000) 1us(1000*1000)中断
 }
-
+*/
 //  函数：计时函数
 //  说明：在 SysTick 中断服务函数里被调用
 //

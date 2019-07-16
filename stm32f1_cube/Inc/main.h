@@ -51,6 +51,21 @@
 #define COMB_GES            1
 
 
+typedef uint32_t  			u32;
+typedef uint16_t 			u16;
+typedef uint8_t  			u8;
+
+#define RX_LEN 				1024
+
+typedef struct
+{
+    uint8_t RX_flag:1;          //IDLE receive flag
+    uint16_t RX_Size;           //receive length
+    uint8_t RX_pData[RX_LEN];   //DMA receive buffer
+}USART_RECEIVETYPE;
+
+
+
 #if DEBUG_ENABLE
 #define LOG_DEBUG(format, args...)    do { \
                                         printf(format, ##args);\

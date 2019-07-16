@@ -35,6 +35,8 @@
 #include "stm32f1xx.h"
 #include "stm32f1xx_it.h"
 
+extern UART_HandleTypeDef       huart1, huart2;
+
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -201,6 +203,34 @@ void EXTI9_5_IRQHandler(void)
   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
 
   /* USER CODE END EXTI9_5_IRQn 1 */
+}
+
+/*******************************************************************************
+* Function Name  : USART1_IRQHandler
+* Description    : This function handles USART1 global interrupt request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void USART1_IRQHandler(void)
+{
+    UsartReceive_IDLE(&huart1);
+    HAL_UART_IRQHandler(&huart1);
+    //printf("1\r\n");
+}
+
+/*******************************************************************************
+* Function Name  : USART2_IRQHandler
+* Description    : This function handles USART2 global interrupt request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void USART2_IRQHandler(void)
+{
+    UsartReceive_IDLE(&huart2);
+    HAL_UART_IRQHandler(&huart2);
+    //printf("2\r\n");
 }
 
 /* USER CODE BEGIN 1 */
