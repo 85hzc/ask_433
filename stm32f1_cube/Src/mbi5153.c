@@ -221,10 +221,7 @@ void reg3_config(void)
 #ifdef SCAN_SUPPORT
 void MBI_ScanDisplay(void)
 {
-    unsigned int sck_cnt;
-    uint8_t i,j,din_cnt;
     static uint8_t ii = 0;
-    //uint8_t din=0x00, mask;
 
     delay(1);
 #if(TIMER==0)
@@ -289,13 +286,9 @@ void MBI_ScanDisplay(void)
 
 void MBI_ScanCycle(void)
 {
-    unsigned int sck_cnt;
-    uint8_t i,j,din_cnt;
     static uint8_t ii = 0;
-    //uint8_t din=0x00, mask;
 
     delay(1);
-
     if(ii%8==0)
     {
         AG_DIN_PIN_H
@@ -319,7 +312,7 @@ void MBI_ScanCycle(void)
 
 uint8_t MBI_SdiInput_X(uint8_t type)
 {
-    uint32_t sck_cnt,mask;
+    uint32_t mask;
     uint16_t i,j,k,line;
     static uint8_t  currentLine=1,currentCh=0;
 
@@ -404,7 +397,7 @@ uint8_t MBI_SdiInput_X(uint8_t type)
 uint8_t chnFlagPos[16][SECS];//1-8
 uint8_t MBI_SdiInput_Sink()
 {
-    uint32_t sck_cnt,mask;
+    uint32_t mask;
     uint16_t i,j,k,l,line;
     static uint8_t  currentLine=1,currentCh=0;
 
@@ -517,7 +510,6 @@ void MBI_cycleScanRegConfig(void)
 
 void MBI5153()
 {
-    unsigned int sck_cnt;
     unsigned short i,j,k,line;
     //unsigned short red1,green1,blue1,red2,green2,blue2;
     unsigned int mask;
@@ -599,8 +591,7 @@ void MBI5153()
 
 void cycleScan_X(uint8_t type)
 {
-    uint32_t sck_cnt,mask;
-    uint16_t i,j,k,line;
+    uint16_t i;
     static uint8_t  isVsync = 1;
 
     if(isVsync)
@@ -625,8 +616,7 @@ void cycleScan_X(uint8_t type)
 
 void cycleScan_Sink(void)
 {
-    uint32_t sck_cnt,mask;
-    uint16_t i,j,k,line;
+    uint16_t i;
     static uint8_t  isVsync = 1;
 
     if(isVsync)

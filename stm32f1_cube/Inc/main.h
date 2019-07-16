@@ -50,12 +50,15 @@
 #define HOLD_GES            1
 #define COMB_GES            1
 
+typedef volatile uint32_t  	vu32;
+typedef volatile uint16_t 	vu16;
+typedef volatile uint8_t  	vu8;
 
-typedef uint32_t  			u32;
-typedef uint16_t 			u16;
-typedef uint8_t  			u8;
+typedef uint32_t            u32;
+typedef uint16_t            u16;
+typedef uint8_t             u8;
 
-#define RX_LEN 				1024
+#define RX_LEN              1024
 
 typedef struct
 {
