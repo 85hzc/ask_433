@@ -13,6 +13,7 @@
 #include "delay.h"
 #include "gpio.h"
 #include "mbi5153.h"
+#include "main.h"
 
 static uint32_t TimingDelay;  //计数变量
 volatile uint32_t gclk_pluse = 0xff;
@@ -105,6 +106,7 @@ void gclk(void)
 #else
 void gclk(void)
 {
+#if(PROJECTOR_MBI5153==1)
     if(gclk_pluse<129&&pluse_enable)
     {
         GCLK_PIN_H
@@ -125,6 +127,7 @@ void gclk(void)
         gclk_pluse++;
         GCLK_PIN_L
     }
+#endif
 }
 #endif
 

@@ -508,7 +508,7 @@ void MBI_cycleScanRegConfig(void)
 */
 }
 
-void MBI5153()
+void MBI5153_play()
 {
     unsigned short i,j,k,line;
     //unsigned short red1,green1,blue1,red2,green2,blue2;
