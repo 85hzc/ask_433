@@ -182,13 +182,14 @@ int main(void)
     MX_DMA_Init();
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
-    //MX_TIM3_Init();//for pwm schedule
+    MX_TIM3_Init();//for IR INT
 
-
+    /* Initialize IR state */
+    Drv_IR_Init();
+  
     SPI_Configuration();    //SPI≥ı ºªØ
 
     printf("system start.\r\n");
-    /* USER CODE BEGIN 2 */
     //Drv_PWM_Init();
 
 #if 1
@@ -198,14 +199,12 @@ int main(void)
     HAL_UART_Receive_IT(&huart1, rxData, 5);
 #endif
 
-    printf("after mbi init hclk:%d\r\n",HAL_RCC_GetHCLKFreq());
+    printf("system init hclk:%d\r\n",HAL_RCC_GetHCLKFreq());
 
     SD_Init();
     //test();           //≤‚ ‘∫Ø ˝
-    /* Infinite loop */
-    /* USER CODE BEGIN WHILE */
 
-#if(PROJECTOR_OSRAM==1)
+#if(PROJECTOR_OSRAM)
     I2C_init();
     eplos_config();
 #endif
@@ -213,27 +212,23 @@ int main(void)
     while (1)
     {
         //Drv_PWM_Proc();
-#if(PROJECTOR_MBI5153==1)
+#if(PROJECTOR_MBI5153)
 
         //display_X();
         display_Sink();
-#elif(PROJECTOR_OSRAM==1)
+#elif(PROJECTOR_OSRAM)
+        printf("OSRAM_play\r\n");
 
         OSRAM_play();
+        Delay_ms(500);
 #endif
-        /* USER CODE END WHILE */
-
-        /* USER CODE BEGIN 3 */
 
         if(UsartType.RX_flag)
         {
             UsartType.RX_flag = 0;
             HAL_UART_Transmit(&huart1, UsartType.RX_pData, UsartType.RX_Size, 0xffff);
         }
-
     }
-    /* USER CODE END 3 */
-
 }
 
 /** System Clock Configuration
@@ -273,7 +268,7 @@ void SystemClock_Config(void)
 
     /**Configure the Systick interrupt time 
     */
-    HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/(1000*500));
+    HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/(1000*800));
 
     /**Configure the Systick 
     */
@@ -345,6 +340,7 @@ static void MX_GPIO_Init(void)
     /* GPIO Ports Clock Enable */
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOD_CLK_ENABLE();
     //__HAL_RCC_TIM1_CLK_ENABLE();
     __HAL_RCC_TIM3_CLK_ENABLE();
 
@@ -405,6 +401,7 @@ static void MX_DMA_Init(void)
 }
 
 #if 1
+#if 0
 /* TIM3 init function */
 static void MX_TIM3_Init(void)
 {
@@ -468,6 +465,43 @@ static void MX_TIM3_Init(void)
         Error_Handler();
     }
 }
+#else
+/* TIM3 init function */
+static void MX_TIM3_Init(void)
+{
+
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_IC_InitTypeDef sConfigIC;
+
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 799;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 0xffffffff;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  //htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_IC_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+}
+#endif
 
 void Drv_PWM_Init(void)
 {

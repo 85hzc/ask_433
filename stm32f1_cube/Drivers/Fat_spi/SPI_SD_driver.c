@@ -33,6 +33,7 @@ void SPI_Configuration(void)
     //SPI_InitTypeDef  SPI_InitStructure;
     GPIO_InitTypeDef GPIO_InitStructure;
 
+#if 0
     //SPI1 Periph clock enable 
     __HAL_RCC_SPI1_CLK_ENABLE();
     //__HAL_RCC_GPIOA_CLK_ENABLE()
@@ -50,14 +51,15 @@ void SPI_Configuration(void)
     //SPI_MISO 上拉输入模式
     GPIO_InitStructure.Pin  = GPIO_PIN_14;
     GPIO_InitStructure.Mode  = GPIO_MODE_AF_INPUT;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure); 
-/*
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
+#endif
+
     //Configure PG15 pin: SD_CS pin 
     GPIO_InitStructure.Pin = GPIO_PIN_15; 
     GPIO_InitStructure.Speed = GPIO_SPEED_HIGH; 
     GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;    //推挽输出
     HAL_GPIO_Init(GPIOD,&GPIO_InitStructure); 
-*/
+
     //////SPI模块配置//////
     //一开始SD初始化阶段，SPI时钟频率必须<400K
     SD_CS_DISABLE();

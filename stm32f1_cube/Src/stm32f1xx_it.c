@@ -35,6 +35,7 @@
 #include "stm32f1xx.h"
 #include "stm32f1xx_it.h"
 
+extern TIM_HandleTypeDef        htim3;
 extern UART_HandleTypeDef       huart1, huart2;
 
 /* USER CODE BEGIN 0 */
@@ -174,7 +175,7 @@ void SysTick_Handler(void)
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
 
-  TimingDelay_Decrement();
+  //TimingDelay_Decrement();
   gclk();
   
   /* USER CODE BEGIN SysTick_IRQn 1 */
@@ -190,6 +191,22 @@ void SysTick_Handler(void)
 /* please refer to the startup file (startup_stm32f1xx.s).                    */
 /******************************************************************************/
 
+
+/**
+* @brief This function handles TIM3 global interrupt.
+*/
+void TIM3_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM3_IRQn 0 */
+
+  /* USER CODE END TIM3_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim3);
+  /* USER CODE BEGIN TIM3_IRQn 1 */
+
+  /* USER CODE END TIM3_IRQn 1 */
+}
+
+
 /**
 * @brief This function handles EXTI line[9:5] interrupts.
 */
@@ -198,8 +215,10 @@ void EXTI9_5_IRQHandler(void)
   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
 
   //Ges_It_Handle();
+  
   /* USER CODE END EXTI9_5_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5);
+  
+  //HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5);
   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
 
   /* USER CODE END EXTI9_5_IRQn 1 */

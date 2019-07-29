@@ -10,7 +10,17 @@
 #define LED_GPIO_Port     GPIOA
 
 #define INT_Pin           GPIO_PIN_5
-#define INT_GPIO_Port     GPIOA
+#define INT_GPIO_Port     GPIOC
+
+#define IR_IN_Pin         GPIO_PIN_1
+#define IR_IN_GPIO_Port   GPIOB
+
+
+
+#define SPI1_SCK          GPIO_PIN_5
+#define SPI1_MISO         GPIO_PIN_6
+#define SPI1_MOSI         GPIO_PIN_7
+#define SPI1_PORT         GPIOB
 
 
 /////MBI GPIO

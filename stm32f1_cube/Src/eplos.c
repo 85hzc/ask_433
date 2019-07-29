@@ -105,27 +105,7 @@ void i2cmsginfo(uint8_t *tx, int txlen, uint8_t *rx, int rxlen)
     LOG_DEBUG("----------\r\n");
 }
 
-uint8_t OSRAM_I2C_Write(uint8_t* pBuffer, uint8_t DeviceAddr, uint8_t RegisterAddr, uint16_t NumByteToWrite)
-{
-  uint8_t iError = 0;
-  uint8_t array[8];
-  uint8_t stringpos;
-
-  memset(array, 0, sizeof(array));
-
-  array[0] = 0x40 | RegisterAddr;
-  for (stringpos = 0; stringpos < NumByteToWrite; stringpos++) {
-    array[stringpos + 1] = *(pBuffer + stringpos);
-  }
-
-  i2c_write(DeviceAddr, array, NumByteToWrite+1);
-
-  i2cmsginfo(array, NumByteToWrite+1, NULL, 0);
-  
-  return iError;
-}
-
-uint8_t OSRAM_I2C_Write_Block(uint8_t* pBuffer, uint8_t DeviceAddr, uint8_t RegisterAddr, uint16_t NumByteToWrite)
+uint8_t OSRAM_I2C_Write(uint8_t* pBuffer, uint8_t SlaveAddress, uint8_t RegisterAddr, uint16_t NumByteToWrite)
 {
   uint8_t iError = 0;
   uint8_t array[8];
@@ -138,22 +118,42 @@ uint8_t OSRAM_I2C_Write_Block(uint8_t* pBuffer, uint8_t DeviceAddr, uint8_t Regi
     array[stringpos + 1] = *(pBuffer + stringpos);
   }
 
-  i2c_write(DeviceAddr, array, NumByteToWrite+1);
+  i2c_write(SlaveAddress, array, NumByteToWrite+1);
+
+  i2cmsginfo(array, NumByteToWrite+1, NULL, 0);
+  
+  return iError;
+}
+
+uint8_t OSRAM_I2C_Write_Block(uint8_t* pBuffer, uint8_t SlaveAddress, uint8_t RegisterAddr, uint16_t NumByteToWrite)
+{
+  uint8_t iError = 0;
+  uint8_t array[8];
+  uint8_t stringpos;
+
+  memset(array, 0, sizeof(array));
+
+  array[0] = RegisterAddr;
+  for (stringpos = 0; stringpos < NumByteToWrite; stringpos++) {
+    array[stringpos + 1] = *(pBuffer + stringpos);
+  }
+
+  i2c_write(SlaveAddress, array, NumByteToWrite+1);
 
   i2cmsginfo(array, NumByteToWrite+1, NULL, 0);
 
   return iError;
 }
 
-uint8_t OSRAM_I2C_Read(uint8_t* pBuffer, uint8_t DeviceAddr, uint8_t RegisterAddr, uint16_t NumByteToRead)
+uint8_t OSRAM_I2C_Read(uint8_t* pBuffer, uint8_t SlaveAddress, uint8_t RegisterAddr, uint16_t NumByteToRead)
 {
   uint8_t arraytx[8] = {0};
 
   memset(pBuffer, 0, NumByteToRead);
-  arraytx[0] = 0x40 | RegisterAddr;
+  arraytx[0] = RegisterAddr;
 
-  i2c_write(DeviceAddr, arraytx, 1);
-  i2c_read(DeviceAddr, pBuffer, NumByteToRead);
+  i2c_write(SlaveAddress, arraytx, 1);
+  i2c_read(SlaveAddress, pBuffer, NumByteToRead);
 
   i2cmsginfo(arraytx, 1, pBuffer, NumByteToRead);
 
