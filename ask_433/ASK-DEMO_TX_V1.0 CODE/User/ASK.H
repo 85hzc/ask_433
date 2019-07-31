@@ -12,6 +12,6 @@ void send_byte(unsigned char da);
 void ask_send(unsigned char datt[], unsigned char len);
 void Ask_process();
 void ReadSelfAddr();
-void Write_Coder(unsigned char a,unsigned char b);
+void Write_Coder();
 
 #endif

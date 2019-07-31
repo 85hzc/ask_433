@@ -98,7 +98,7 @@ unsigned char key_scan()
     delay_ms(10);
     if(SW_K3==1)
     {
-      key_value=0x04;
+      key_value=0x03;
       Led_on(3);
     }
   }
@@ -107,7 +107,7 @@ unsigned char key_scan()
     delay_ms(10);
     if(SW_K4==1)
     {
-      key_value=0x08;
+      key_value=0x04;
       Led_on(4);
     }
   }
@@ -116,7 +116,7 @@ unsigned char key_scan()
     delay_ms(10);
     if(SW_K5==1)
     {
-      key_value=0x08<<1;
+      key_value=0x05;
       Led_on(5);
     }
   }
@@ -125,7 +125,7 @@ unsigned char key_scan()
     delay_ms(10);
     if(SW_K6==1)
     {
-      key_value=0x08<<2;
+      key_value=0x06;
       Led_on(6);
     }
   }
@@ -134,7 +134,7 @@ unsigned char key_scan()
     delay_ms(10);
     if(SW_K7==1)
     {
-      key_value=0x08<<3;
+      key_value=0x07;
       Led_on(7);
     }
   }
@@ -143,7 +143,7 @@ unsigned char key_scan()
     delay_ms(10);
     if(SW_K8==1)
     {
-      key_value=0x08<<4;
+      key_value=0x08;
       Led_on(8);
     }
   }

@@ -9,35 +9,64 @@
 //定义CPU内部时钟
 #define  SYS_CLOCK    16
 
-extern unsigned char SelfAddr[2];
+extern uint8_t fm24c_store_addr;
+extern FM24C_Data_S EE_dev_data;
 
 void CLOCK_Config(u8 SYS_CLK);
 void All_Congfig(void);
 void Pwrup_Indicate();
 
-unsigned char table[]={"I like study high technology !\n"};
-//unsigned char stm8s_id[12]={0};
+unsigned char page[FM24C_PAGE_SIZE];
+FM24C_Data_S fm24c_data;
+
 int main(void)
 {
-  unsigned char code[PCODE_NUM];
-  unsigned char i;
+  unsigned char i,j;
+
   All_Congfig();        //所有的基本配置，除了ASK的
   __enable_interrupt(); //开总中断
   Pwrup_Indicate();     //开机指示
   Uart_Sendbyte(1);
 
   I2C_Init();
-  memset(code, 0, sizeof(code));
-  FM24C_ReadData(code);
-  Uart_Sendbyte(code[0]);
-  Uart_Sendbyte(code[1]);
-  Uart_Sendbyte(2);
+
+  memset(&fm24c_data, 0, sizeof(FM24C_Data_S));
+  delay_ms(10);
+
+  fm24c_store_addr=0;
+  FM24C_ReadData(page);
+  fm24c_data.cardType = page[0];
+  fm24c_data.instNum = page[1];
+  fm24c_data.assoAddr[0] = page[2];
+  fm24c_data.assoAddr[1] = page[3];
+  
+  delay_ms(20);
+  fm24c_store_addr=0x10;
+  FM24C_ReadData(page);
+  fm24c_data.dev[0].devType = page[0];
+  fm24c_data.dev[0].devAddr = page[1];
+
+  delay_ms(20);
+  fm24c_store_addr=0x18;
+  FM24C_ReadData(page);
+
+  for(i=0;i<fm24c_data.instNum && fm24c_data.instNum<MAX_DEV_NUM;i++)
+  {
+    fm24c_store_addr=0x10*(i+1) | 0x08;
+    FM24C_ReadData(page);
+
+    for(j=0;j<8;j++)
+    {
+      fm24c_data.dev[i].keyValue[j] = page[j];
+    }
+  }
+
   ReadSelfAddr();
 
-  if(!((code[0]==SelfAddr[0]) &&
-     (code[1]==SelfAddr[1]))&&code[0]&&code[1])
+  if(!((fm24c_data.assoAddr[0]==EE_dev_data.assoAddr[0]) &&
+     (fm24c_data.assoAddr[1]==EE_dev_data.assoAddr[1]))&&fm24c_data.assoAddr[0]&&fm24c_data.assoAddr[1])
   {
-      Write_Coder(code[0], code[1]);
+      Write_Coder();
       for(i=0;i<5;i++)
       {
         Led_on(1);

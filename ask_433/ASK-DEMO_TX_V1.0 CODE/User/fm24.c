@@ -37,12 +37,12 @@ void I2C_Start(void)
     SET_SDA_OUT();
     //SET_SCL_OUT();
 
-    SDA = 1;
     SCL = 1;
+    SDA = 1;
     delay_us();
     SDA = 0;
     delay_us();
-    SCL = 0;
+    //SCL = 0;
 }
 
 //--------------------------------------------------------------
@@ -57,6 +57,7 @@ void I2C_Stop(void)
     //SET_SCL_OUT();
 
     SDA = 0; 
+    delay_us(); 
     SCL = 1; 
     delay_us(); 
     SDA = 1; 
@@ -77,31 +78,14 @@ void I2C_Stop(void)
 uint8_t I2C_waitAck(void)
 {
     uint8_t overTime = 255;
-
-/*
-    delay_us(); 
-    SET_SDA_IN();
-
-    SCL = 1; 
-    asm("nop");
-    asm("nop");
-
-    revack = (uint8_t)SDAM;
-
-    delay_us(); 
-    SCL = 0; 
-
-    SET_SDA_OUT();
-
-    delay_us(); 
-    return revack;*/
     
-    delay_us(); 
     SET_SDA_IN();
+    SDA=1;
+    delay_us(); 
     //SDA = 1;
     //delay_us();
-    //SCL = 0;
-    //delay_us();
+    SCL=0;
+    delay_us();
     SCL=1;
     delay_us();
 
@@ -117,7 +101,7 @@ uint8_t I2C_waitAck(void)
         delay_us();
     }
     SCL=0;
-    SET_SDA_OUT();
+    //SET_SDA_OUT();
 
     return 1;    
 }
@@ -128,23 +112,30 @@ uint8_t I2C_waitAck(void)
 // Parameters : bit ack:1-noack, 0-ack
 // Description : Master device send ACK to slave device.
 //--------------------------------------------------------------
-void I2C_SendACK(uint8_t ack)
+void I2C_SendACK(void)
 {
     SET_SDA_OUT();
-    if(ack == 0)
-    {
-        SDA = 0; 
-    } 
-    else
-    {
-        SDA = 1; 
-    }
 
+    SDA = 0; 
+    delay_us(); 
     SCL = 1; 
     delay_us(); 
 
     SCL = 0; 
+    delay_us();
+    SDA = 1; 
+}
+
+void I2C_SendNoACK(void)
+{
+    SET_SDA_OUT();
+
+    SDA = 1;
     delay_us(); 
+    SCL = 1;
+    delay_us(); 
+    SCL = 0;
+    delay_us();
 }
 
 //--------------------------------------------------------------
@@ -164,7 +155,6 @@ void I2C_SendByte(uint8_t sendDAT)
     for (i= 0 ; i< 8; i++) 
     {
         SCL = 0;
-        delay_us();
         if (sendDAT & 0x80) // write data
         {
             SDA = 1;
@@ -173,29 +163,12 @@ void I2C_SendByte(uint8_t sendDAT)
         {
             SDA = 0;
         }
-        sendDAT <<= 1;
+        delay_us();
         SCL = 1;
         delay_us();
+        sendDAT <<= 1;
     }
     SCL = 0; 
-
-/*
-    delay_us(); 
-    SET_SDA_IN();
-
-    SCL = 1; 
-    asm("nop");
-    asm("nop");
-
-    revack = (uint8_t)SDAM;
-
-    delay_us(); 
-    SCL = 0; 
-
-    SET_SDA_OUT();
-
-    delay_us(); 
-    return revack;*/
 }
 
 //--------------------------------------------------------------
@@ -210,18 +183,16 @@ uint8_t I2C_RecvByte()
     uint8_t i;
     uint8_t revDAT = 0;
 
-    SDA = 1; // latch the Data port befor reading
-
     SET_SDA_IN();
+
+    SDA = 1; // latch the Data port befor reading
 
     for (i=0; i<8; i++) 
     { 
         revDAT <<= 1;
-
-        SCL = 1; 
-
-        asm("nop");
-        asm("nop");
+        SCL = 0;
+        delay_us();
+        SCL = 1;
 
         if (SDAM)
         {
@@ -231,12 +202,9 @@ uint8_t I2C_RecvByte()
         {
             revDAT &= 0xfe;
         }
-        delay_us(); 
-        SCL = 0; 
-        delay_us(); 
+        delay_us();
     }
-
-    SET_SDA_OUT();
+    SCL = 0;
 
     return revDAT;
 }
@@ -268,7 +236,7 @@ uint8_t Read_24c02(uint8_t regadd)
     I2C_SendByte(FM24C_COMM_R); // Device Addr + Read (operation) 
 
     revdata = I2C_RecvByte();
-    I2C_SendACK(1);
+    I2C_SendNoACK();
     I2C_Stop();
 
     return revdata;
@@ -295,6 +263,7 @@ void FM24C_Reset()
     }
 }
 
+uint8_t fm24c_store_addr=0;
 //Read PCode from FM24C
 uint8_t FM24C_ReadData(uint8_t *pbuf)
 {
@@ -305,27 +274,27 @@ uint8_t FM24C_ReadData(uint8_t *pbuf)
     
     if(I2C_waitAck())
     {
-        I2C_SendByte(FM24C_STORE_ADDR);  
+        I2C_SendByte(fm24c_store_addr);
         if(I2C_waitAck())
         {
             I2C_Start();
             I2C_SendByte(FM24C_COMM_R);
             if(I2C_waitAck())
             {
-                for (i=0;i<PCODE_NUM-1;i++)
+                for (i=0;i<FM24C_PAGE_SIZE-1;i++)
                 {
                     pbuf[i]=I2C_RecvByte();
-                    I2C_SendACK(0);              //发送应答
+                    I2C_SendACK();              //发送应答
 //                    i++;
                 }
                 pbuf[i]=I2C_RecvByte();
-                I2C_SendACK(1);//no ack
+                I2C_SendNoACK();
                 I2C_Stop();
                 return 1;
             }
         }
     }
-     return 0;    
+    return 0;
 }
 
 //Write PCode to FM24C
@@ -338,7 +307,7 @@ uint8_t FM24C_WriteData(uint8_t *pbuf)
     
     if(I2C_waitAck())
     {
-        I2C_SendByte(FM24C_STORE_ADDR);
+        I2C_SendByte(fm24c_store_addr);
         if(I2C_waitAck())
         {
             i=0;
@@ -346,9 +315,9 @@ uint8_t FM24C_WriteData(uint8_t *pbuf)
             {
                 I2C_SendByte(pbuf[i]);
                 i++;
-            } while (I2C_waitAck()&&(i<PCODE_NUM));
+            } while (I2C_waitAck()&&(i<FM24C_PAGE_SIZE));
             I2C_Stop();
-            if (i>=PCODE_NUM)
+            if (i>=FM24C_PAGE_SIZE)
                 return 1;
         }
     }

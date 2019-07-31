@@ -11,6 +11,7 @@
 
 extern unsigned char timer_4_count;
 extern unsigned char timer_4_countover;
+extern FM24C_Data_S fm24c_data;
 
 unsigned char in_bit = 0;
 unsigned char rx_start = 0;
@@ -19,13 +20,16 @@ unsigned char rx_data_ok = 0;
 unsigned char recvbit[4];
 unsigned char recvbitcount = 0;
 
-unsigned char recvbyte[40];
+unsigned char recvbyte[64];
 unsigned char recvbytecount = 0;
 unsigned char Recv_data[5];
 
 unsigned char in_bit_n = 0;
 
-unsigned char SelfAddr[2]={0, 0};
+unsigned char pwm_duty=0;
+unsigned char instNum=0;
+FM24C_Data_S EE_dev_data;
+
 ///////////////////ASK初始化函数///////////////////////
 void Ask_Init()
 {
@@ -37,14 +41,14 @@ void Ask_Init()
 void Ask_process()
 {
   unsigned char key_value=0,i;
+
   Ask_Init();   //ASK初始化
   ReadSelfAddr();   //读eeprom里存储的ID
-  
+
   while(1)
   {
-
     ProcessRecv();      //处理接收函数
-    
+
     key_value=key_scan();
     if(key_value==0x01)
     {
@@ -57,18 +61,12 @@ void Ask_process()
     {
       //删除对码
       Dele_Sender();
-      
+
       for(i=0; i<5; i++)
       {//删码完成，跑马灯指示
         Led_on(1);
-        //Led_on(2);
-        //Led_off(3);
-        //Led_off(4);
         delay_ms(100);
         Led_off(1);
-        //Led_off(2);
-        //Led_on(3);
-        //Led_on(4);
         delay_ms(100);
       }
     }
@@ -78,74 +76,74 @@ void Ask_process()
 void Recieve()
 {
   //一进来就先把引脚的状态读取了，然后判断跟前面的是否一样，不一样的时候才进行后续运算
-  in_bit_n = inport;	//inport是ASK模块的数据脚
+  in_bit_n = inport;    //inport是ASK模块的数据脚
   if(in_bit == in_bit_n)
   {
     return;
   }
   in_bit = in_bit_n;
-  //P3_7 = in_bit;	 //把值丢给LED口
+  //P3_7 = in_bit;   //把值丢给LED口
   if(timer_4_countover)
   {//超时错误
-	RecieveError();
-	return;	
+    RecieveError();
+    return; 
   }
   // 接收4 次电平变化，才能确定1 bit
   if((timer_4_count > min_time_l)&&(timer_4_count < max_time_l))
-  {	//窄脉冲,4~14,就是200us~700us
+  { //窄脉冲,4~14,就是200us~700us
     if(in_bit) //高电平,现在为高电平，其实之前是低电平的
     {
-	recvbit[recvbitcount] = 0x00;	//低短
+      recvbit[recvbitcount] = 0x00;   //低短
     }
-    else	//低电平
+    else    //低电平
     {
-	recvbit[recvbitcount] = 0x01;	//高短
+      recvbit[recvbitcount] = 0x01;   //高短
     }
   }
   else if((timer_4_count > min_time_h)&&(timer_4_count < max_time_h))
-  {	//宽脉冲，16~60，就是800us~3000us
+  { //宽脉冲，16~60，就是800us~3000us
     if(in_bit)
     {
-	recvbit[recvbitcount] = 0x02;	 //低长
+      recvbit[recvbitcount] = 0x02;    //低长
     }
     else
     {
-	recvbit[recvbitcount] = 0x03;	//高长
+      recvbit[recvbitcount] = 0x03;   //高长
     }
   }
   else
   {//出错
-	RecieveError();
-	return;
+    RecieveError();
+    return;
   }
   timer_4_count = 0;
   timer_4_countover = 0;
 
- // 1527	
+ // 1527    
   recvbitcount++;
   if(recvbitcount < 2) 
   {
-	return;
+    return;
   }
   else
   {
     //这里判断的电平，应该是跟实际的相反的，因为只有电平变化了，才会做相应处理，不变化的话是直接退出的。
     if((recvbit[0] == 1)&&(recvbit[1] == 2))   //高短低长
     {
-	recvbyte[recvbytecount] = 0;
+      recvbyte[recvbytecount] = 0;
     }
     else if((recvbit[0] == 3)&&(recvbit[1] == 0))  //高长低短
     {
-	recvbyte[recvbytecount] = 1;
+      recvbyte[recvbytecount] = 1;
     }
     else
     {
-	RecieveError();
-	return;
+      RecieveError();
+      return;
     }
   }
-  recvbytecount++;	 	//接收到的字节数加1。
-  recvbitcount = 0;		//
+  recvbytecount++;      //接收到的字节数加1。
+  recvbitcount = 0;     //
   if(recvbytecount < RECV_BIT_NUMBER)
   {// 未接收完
     return;
@@ -162,7 +160,7 @@ void RecieveError()
 
   recvbitcount = 0;
   recvbytecount = 0;
-	
+    
   timer_4_count = 0;
   timer_4_countover = 0;
 
@@ -187,13 +185,13 @@ void ProcessRecv()
         temp += (recvbyte[j]<<(7-(j-i)));
       }
       Recv_data[p++]=temp;
-      //UART0_TX(temp);
     }
+/*
     Uart_Sendbyte(Recv_data[0]);
     Uart_Sendbyte(Recv_data[1]);
     Uart_Sendbyte(Recv_data[2]);
-    Uart_Sendbyte(SelfAddr[0]);
-    Uart_Sendbyte(SelfAddr[1]);
+    Uart_Sendbyte(Recv_data[3]);
+*/
     ProcessOut();
   }
   else 
@@ -261,74 +259,115 @@ void Learn_Sender()
 ///////////////////读取ID函数///////////////////////
 void ReadSelfAddr()
 {
-  SelfAddr[0]= EEPROM_Byte_Read(EE_ADDR0);
-  SelfAddr[1]= EEPROM_Byte_Read(EE_ADDR1);
+  uint8_t i;
   
-  Uart_Sendbyte(SelfAddr[0]);
-  Uart_Sendbyte(SelfAddr[1]);  
+  EE_dev_data.assoAddr[0]= EEPROM_Byte_Read(EE_ADDR0);
+  EE_dev_data.assoAddr[1]= EEPROM_Byte_Read(EE_ADDR1);
+  EE_dev_data.instNum = EEPROM_Byte_Read(EE_ADDR_InsNum);
+  pwm_duty = EEPROM_Byte_Read(EE_Duty);
+
+  EE_dev_data.dev[0].devType = EEPROM_Byte_Read(EE_ADDR_DevType);
+  EE_dev_data.dev[0].devAddr = EEPROM_Byte_Read(EE_ADDR_DevAddr);
+
+  for(i=0;i<8;i++)
+  {
+    EE_dev_data.dev[0].keyValue[i] = EEPROM_Byte_Read(EE_ADDR_KeyVal+i);
+  }
 }
 
 ///////////////////清除对码函数///////////////////////
 void Dele_Sender()
 {
+  uint8_t i;
   EEPROM_Byte_Write(EE_ADDR0, 0x00);
   EEPROM_Byte_Write(EE_ADDR1, 0x00);
+
+  EEPROM_Byte_Write(EE_ADDR_DevType, 0x00);
+  EEPROM_Byte_Write(EE_ADDR_DevAddr, 0x00);
+
+  for(i=0;i<8;i++)
+  {
+    EEPROM_Byte_Write(EE_ADDR_KeyVal+i, 0x00);
+  }
+  
   ReadSelfAddr();
 }
 ///////////////////输出处理函数///////////////////////
 void ProcessOut()
 {
-  if((Recv_data[0]==SelfAddr[0])&&(Recv_data[1]==SelfAddr[1]))
-  {//匹配ID
+  uint8_t key,i;
 
-    Set_Pwm(50);//0-256
-    switch(Recv_data[2]&0x0f)
+  //匹配ID和设备地址
+  if((Recv_data[0]==EE_dev_data.assoAddr[0])&&
+     (Recv_data[1]==EE_dev_data.assoAddr[1])&&
+     (Recv_data[2]==EE_dev_data.dev[0].devAddr))
+  {
+
+    //key = (Recv_data[3]>>4)&0x0f; //KEY Type
+
+    for(i=0;i<8;i++)
     {
-        case 0x01:
-            Led_on(1);
-            delay_ms(100);
-            Led_off(1);
-            delay_ms(100);
-            break;
-        case 0x02:
-            Led_on(2);
-            delay_ms(100);
-            Led_off(2);
-            delay_ms(100);
-            break;
-        case 0x04:
-            Led_on(3);
-            delay_ms(100);
-            Led_off(3);
-            delay_ms(100);
-            break;
-        case 0x08:
-            Led_on(4);
-            delay_ms(100);
-            Led_off(4);
-            delay_ms(100);
-            break;
-        default:
-            break;
+      if(Recv_data[3]==EE_dev_data.dev[0].keyValue[i])
+      {
+        switch(EE_dev_data.dev[0].keyValue[i]&0x0f)//KEY Action
+        {
+            case LIGHT_OFF:
+                Set_Pwm(0);//0-256
+                Led_on(1);
+                delay_ms(100);
+                Led_off(1);
+                delay_ms(100);
+                break;
+            case LIGHT_ON:
+                Set_Pwm(pwm_duty);//0-256
+                Led_on(2);
+                delay_ms(100);
+                Led_off(2);
+                delay_ms(100);
+                break;
+            case LIGHT_UP:
+                pwm_duty = pwm_duty>=255?255:pwm_duty++;
+                Set_Pwm(pwm_duty);//0-256
+                Led_on(3);
+                delay_ms(100);
+                Led_off(3);
+                delay_ms(100);
+                break;
+            case LIGHT_DOWN:
+                pwm_duty = pwm_duty<=10?10:pwm_duty--;
+                Set_Pwm(pwm_duty);//0-256
+                Led_on(4);
+                delay_ms(100);
+                Led_off(4);
+                delay_ms(100);
+                break;
+            default:
+                break;
+        }
+      }
     }
   }
 }
 ///////////////////清除对码函数///////////////////////
-void Write_Coder(unsigned char a,unsigned char b)
+void Write_Coder()
 {
-  EEPROM_EREASE();
-  delay_ms(1);
-  Uart_Sendbyte(3);
+  uint8_t i;
 
-  Uart_Sendbyte(a);
-  Uart_Sendbyte(b);
-  
-  EEPROM_Byte_Write(EE_ADDR0, a);
+  EEPROM_EREASE();
+
   delay_ms(1);
-  EEPROM_Byte_Write(EE_ADDR1, b);
-  
-  Uart_Sendbyte(a);
-  Uart_Sendbyte(b);
+  EEPROM_Byte_Write(EE_ADDR0, fm24c_data.assoAddr[0]);
+  delay_ms(1);
+  EEPROM_Byte_Write(EE_ADDR1, fm24c_data.assoAddr[1]);
+
+  delay_ms(1);
+  EEPROM_Byte_Write(EE_ADDR_DevAddr, fm24c_data.dev[0].devAddr);
+
+  for(i=0;i<8;i++)
+  {
+    delay_ms(1);
+    EEPROM_Byte_Write(EE_ADDR_KeyVal+i, fm24c_data.dev[0].keyValue[i]);
+  }
 }
 
 
