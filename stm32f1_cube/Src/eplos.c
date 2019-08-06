@@ -175,6 +175,8 @@ void OSRAM_play(void)
     unsigned short k,fixel;
     uint8_t        crc, mask;
 
+    printf("OSRAM_play\r\n");
+
     CRC8_calc(displayMatrix, sizeof(displayMatrix), &crc);
 
     //Ð´Èë256bitsÊý¾Ý

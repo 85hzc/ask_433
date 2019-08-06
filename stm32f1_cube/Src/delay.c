@@ -19,7 +19,7 @@
 volatile uint32_t gclk_pluse = 0xff;
 volatile uint16_t gclk_auto = 0;
 //volatile uint16_t gclk_time = 0;
-volatile uint8_t pluse_force = 1, pluse_enable = 1;
+volatile uint8_t pluse_force = 1;
 void delay_ns(uint32_t time)
 {
     //u32 tt = time;
@@ -102,7 +102,7 @@ void gclk(void)
 void gclk(void)
 {
 #if(PROJECTOR_MBI5153)
-    if(gclk_pluse<129&&pluse_enable)
+    if(gclk_pluse<129)
     {
         GCLK_PIN_H
         GCLK_PIN_H

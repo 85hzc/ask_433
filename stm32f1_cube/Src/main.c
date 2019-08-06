@@ -45,24 +45,21 @@
 static uint32_t          tickstart;
 uint32_t                 turn_off;
 /* Private variables ---------------------------------------------------------*/
-UART_HandleTypeDef       huart1, huart2;
-DMA_HandleTypeDef        hdma_usart1_rx, hdma_usart2_rx;
-USART_RECEIVETYPE        UsartType;
+UART_HandleTypeDef       huart1, huart2, huart3;
+DMA_HandleTypeDef        hdma_usart1_rx, hdma_usart2_rx, hdma_usart3_rx;
+USART_RECEIVETYPE        UsartType1, UsartType2, UsartType3;
 
 //TIM_HandleTypeDef      htim1;
-TIM_HandleTypeDef        htim3;
-SPI_HandleTypeDef        hspi1;
+TIM_HandleTypeDef        htim3,htim2;
+SPI_HandleTypeDef        hspi1,hspi2;
 
 extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
 
-uint64_t systime = 0;
-uint64_t systime1 = 0;
-
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-#define DEBUG_UART          huart1
+#define DEBUG_UART       huart2
 
 /* USER CODE END PV */
 
@@ -73,11 +70,13 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_USART3_UART_Init(void);
 static void MX_TIM3_Init(void);
-//static void MX_TIM1_Init(void);
+static void MX_TIM2_Init(void);
 void Drv_PWM_Init(void);
 void Drv_PWM_Proc(void);
 void I2C_init(void);
+void remoteControlHandle(uint8_t *key);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -85,59 +84,6 @@ void I2C_init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
-
-void display_X(void)
-{
-    static uint8_t key_flag = 0;   //按键标志
-
-    if(HAL_GetTick() - systime>500000)//500ms
-    {
-        key_flag++;
-        systime = HAL_GetTick();
-    }
-    cycleScan_X(key_flag);
-}
-
-
-extern uint8_t chnFlagPos[16][SECS];//1-8
-void display_Sink(void)
-{
-    int number;
-
-    if(HAL_GetTick() - systime>100000)//300ms
-    {
-        number = (HAL_GetTick()-systime)%16;//8-15
-        systime = HAL_GetTick();
-
-        printf("rand chn:%d\r\n", number);
-        for(int j=0;j<SECS;j++)
-        {
-            if(chnFlagPos[number][j]==0)
-            {
-                chnFlagPos[number][j] = 1;
-                break;
-            }
-        }
-    }
-    cycleScan_Sink();
-    
-    if(HAL_GetTick() - systime1>50000)//100ms
-    {
-        for(int i=0;i<16;i++)
-        {
-            for(int j=0;j<SECS;j++)
-            {
-                if(chnFlagPos[i][j]>0 && chnFlagPos[i][j]<11)
-                    chnFlagPos[i][j]++;
-                else
-                    chnFlagPos[i][j] = 0;
-                //printf("Pos[%d]:%d\r\n", i,chnFlagPos[i]);
-            }
-        }
-        systime1 = HAL_GetTick();
-    }
-}
 
 void MX_SPI1_Init(void)
 {
@@ -159,10 +105,32 @@ void MX_SPI1_Init(void)
     }
 }
 
+void MX_SPI2_Init(void)
+{
+    hspi2.Instance = SPI2;
+    hspi2.Init.Mode = SPI_MODE_MASTER;//主模式
+    hspi2.Init.Direction = SPI_DIRECTION_2LINES;//全双工
+    hspi2.Init.DataSize = SPI_DATASIZE_8BIT;//数据位为8位
+    hspi2.Init.CLKPolarity = SPI_POLARITY_HIGH;//CPOL=0,low
+    hspi2.Init.CLKPhase = SPI_PHASE_2EDGE;//CPHA为数据线的第一个变化沿
+    hspi2.Init.NSS = SPI_NSS_SOFT;//软件控制NSS
+    hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;//2分频，32M/2=16MHz
+    hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;//最高位先发送
+    hspi2.Init.TIMode = SPI_TIMODE_DISABLE;//TIMODE模式关闭
+    hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;//CRC关闭
+    hspi2.Init.CRCPolynomial = 7;//默认值，无效
+    if (HAL_SPI_Init(&hspi2) != HAL_OK)//初始化
+    {
+        Error_Handler();
+    }
+}
+
 /* USER CODE END 0 */
 
 int main(void)
 {
+    uint8_t *ptr;
+    uint8_t key[16];
 
     /* USER CODE BEGIN 1 */
 
@@ -176,34 +144,38 @@ int main(void)
     /* Configure the system clock */
     SystemClock_Config();  //systick 1ms
 
-    //Delay_Init();
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
     MX_DMA_Init();
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
-    MX_TIM3_Init();//for IR INT
-
+    MX_USART3_UART_Init();
+    //MX_TIM3_Init();//for IR INT
+#if(IR_REMOTE)
+    MX_TIM2_Init();//for IR INT
     /* Initialize IR state */
     Drv_IR_Init();
-  
+#endif
     SPI_Configuration();    //SPI初始化
 
     printf("system start.\r\n");
     //Drv_PWM_Init();
 
 #if 1
-    HAL_UART_Receive_DMA(&huart1, UsartType.RX_pData, RX_LEN);
+    HAL_UART_Receive_DMA(&huart1, UsartType1.RX_pData, RX_LEN);
     __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+
+    HAL_UART_Receive_DMA(&huart2, UsartType2.RX_pData, RX_LEN);
+    __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
 #else
     HAL_UART_Receive_IT(&huart1, rxData, 5);
 #endif
 
     printf("system init hclk:%d\r\n",HAL_RCC_GetHCLKFreq());
-
+/*
     SD_Init();
-    //test();           //测试函数
-
+    test();           //测试函数
+*/
 #if(PROJECTOR_OSRAM)
     I2C_init();
     eplos_config();
@@ -214,19 +186,40 @@ int main(void)
         //Drv_PWM_Proc();
 #if(PROJECTOR_MBI5153)
 
-        //display_X();
-        display_Sink();
+        //MBI5153_X();
+        //MBI5153_play();
+        MBI5153_Sink();
 #elif(PROJECTOR_OSRAM)
-        printf("OSRAM_play\r\n");
 
         OSRAM_play();
         Delay_ms(500);
 #endif
-
-        if(UsartType.RX_flag)
+        //wifi
+        if(UsartType1.RX_flag)
         {
-            UsartType.RX_flag = 0;
-            HAL_UART_Transmit(&huart1, UsartType.RX_pData, UsartType.RX_Size, 0xffff);
+            UsartType1.RX_flag = 0;
+            HAL_UART_Transmit(&huart2, UsartType1.RX_pData, UsartType1.RX_Size, 0xffff);
+        }
+        //debug
+        if(UsartType2.RX_flag)
+        {
+            UsartType2.RX_flag = 0;
+
+            ptr = UsartType2.RX_pData;
+
+            memset(key, 0, sizeof(key));
+
+            strcpy(key,ptr);
+            remoteControlHandle(key);
+
+            HAL_UART_Transmit(&huart2, UsartType2.RX_pData, UsartType2.RX_Size, 0xffff);
+            HAL_UART_Transmit(&huart3, UsartType2.RX_pData, UsartType2.RX_Size, 0xffff);
+        }
+        //ble
+        if(UsartType3.RX_flag)
+        {
+            UsartType3.RX_flag = 0;
+            HAL_UART_Transmit(&huart2, UsartType3.RX_pData, UsartType3.RX_Size, 0xffff);
         }
     }
 }
@@ -268,7 +261,7 @@ void SystemClock_Config(void)
 
     /**Configure the Systick interrupt time 
     */
-    HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/(1000*800));
+    HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/(1000*500));
 
     /**Configure the Systick 
     */
@@ -283,7 +276,7 @@ static void MX_USART1_UART_Init(void)
 {
 
     huart1.Instance = USART1;
-    huart1.Init.BaudRate = 115200;
+    huart1.Init.BaudRate = 9600;
     huart1.Init.WordLength = UART_WORDLENGTH_8B;
     huart1.Init.StopBits = UART_STOPBITS_1;
     huart1.Init.Parity = UART_PARITY_NONE;
@@ -301,7 +294,7 @@ static void MX_USART2_UART_Init(void)
 {
 
     huart2.Instance = USART2;
-    huart2.Init.BaudRate = 9600;
+    huart2.Init.BaudRate = 115200;
     huart2.Init.WordLength = UART_WORDLENGTH_8B;
     huart2.Init.StopBits = UART_STOPBITS_1;
     huart2.Init.Parity = UART_PARITY_NONE;
@@ -309,6 +302,24 @@ static void MX_USART2_UART_Init(void)
     huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     huart2.Init.OverSampling = UART_OVERSAMPLING_16;
     if (HAL_UART_Init(&huart2) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
+
+/* USART1 init function */
+static void MX_USART3_UART_Init(void)
+{
+
+    huart3.Instance = USART3;
+    huart3.Init.BaudRate = 9600;
+    huart3.Init.WordLength = UART_WORDLENGTH_8B;
+    huart3.Init.StopBits = UART_STOPBITS_1;
+    huart3.Init.Parity = UART_PARITY_NONE;
+    huart3.Init.Mode = UART_MODE_TX_RX;
+    huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huart3.Init.OverSampling = UART_OVERSAMPLING_16;
+    if (HAL_UART_Init(&huart3) != HAL_OK)
     {
         Error_Handler();
     }
@@ -340,9 +351,8 @@ static void MX_GPIO_Init(void)
     /* GPIO Ports Clock Enable */
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOD_CLK_ENABLE();
-    //__HAL_RCC_TIM1_CLK_ENABLE();
-    __HAL_RCC_TIM3_CLK_ENABLE();
 
     /*Configure GPIO pin Output Level */
     //HAL_GPIO_WritePin(GPIOA, LED_DCLK_Pin|LED_HOLD_Pin, GPIO_PIN_RESET);
@@ -355,20 +365,14 @@ static void MX_GPIO_Init(void)
     /*Configure GPIO pin Output Level */
     HAL_GPIO_WritePin(GPIOA, LED_LEFT_Pin|LED_UP_Pin, GPIO_PIN_SET);
 
-
-    /*Configure GPIO pins : LED_LEFT_Pin LED_DOWN_Pin LED_UP_Pin LED_RIGHT_Pin 
-                           LED1_Pin */
-    GPIO_InitStruct.Pin = LED_LEFT_Pin|LED_UP_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
     /*Configure GPIO pin : INT_Pin */
     GPIO_InitStruct.Pin = INT_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(INT_GPIO_Port, &GPIO_InitStruct);
 #endif
+
+    LED_GPIO_Init();
 
     //init_tim3PWMIO();
 #if(PROJECTOR_MBI5153)
@@ -397,10 +401,11 @@ static void MX_DMA_Init(void)
     /* DMA1_Channel6_IRQn interrupt configuration */
     HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
-
+    /* DMA1_Channel6_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
 }
 
-#if 1
 #if 0
 /* TIM3 init function */
 static void MX_TIM3_Init(void)
@@ -474,7 +479,7 @@ static void MX_TIM3_Init(void)
   TIM_IC_InitTypeDef sConfigIC;
 
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 799;
+  htim3.Init.Prescaler = 6400-1;//799
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 0xffffffff;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -499,7 +504,42 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
+}
 
+#if(IR_REMOTE)
+/* TIM2 init function */
+static void MX_TIM2_Init(void)
+{
+
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_IC_InitTypeDef sConfigIC;
+
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 6400-1;//799
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 0xffffffff;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  //htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_IC_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_4) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 #endif
 
@@ -600,7 +640,6 @@ void I2C_init(void)
 
 /* USER CODE BEGIN 4 */
 int fputc(int ch, FILE *f)
-
 {
     HAL_UART_Transmit(&DEBUG_UART, (uint8_t *)&ch,1, 0xFFFF);
     return ch;
@@ -615,12 +654,48 @@ void UsartReceive_IDLE(UART_HandleTypeDef *huart)
         __HAL_UART_CLEAR_IDLEFLAG(huart);
         HAL_UART_DMAStop(huart);
         temp = huart->hdmarx->Instance->CNDTR;
-        UsartType.RX_Size = RX_LEN - temp;
-        UsartType.RX_flag = 1;
-        HAL_UART_Receive_DMA(huart, UsartType.RX_pData, RX_LEN);
+
+        if(huart->Instance == USART1)
+        {
+            UsartType1.RX_Size = RX_LEN - temp;
+            UsartType1.RX_flag = 1;
+            HAL_UART_Receive_DMA(huart, UsartType1.RX_pData, RX_LEN);
+        } else if(huart->Instance == USART2)
+        {
+            UsartType2.RX_Size = RX_LEN - temp;
+            UsartType2.RX_flag = 1;
+            HAL_UART_Receive_DMA(huart, UsartType2.RX_pData, RX_LEN);
+        } else if(huart->Instance == USART3)
+        {
+            UsartType3.RX_Size = RX_LEN - temp;
+            UsartType3.RX_flag = 1;
+            HAL_UART_Receive_DMA(huart, UsartType3.RX_pData, RX_LEN);
+        }
+    }
+}
+
+void remoteControlHandle(uint8_t *key)
+{
+    if(!strcmp(key,"stop"))
+    {
+        //stop
+    }
+    else if(!strcmp(key,"play"))
+    {
+        //play
+    }
+    else if(!strcmp(key,"next"))
+    {
+    }
+    else if(!strcmp(key,"poweron"))
+    {
+    }
+    else if(!strcmp(key,"poweroff"))
+    {
     }
 
 }
+
 
 /* USER CODE END 4 */
 

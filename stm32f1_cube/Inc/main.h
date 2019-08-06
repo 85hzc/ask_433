@@ -51,6 +51,7 @@
 #define PROJECTOR_MBI5153   1
 #define PROJECTOR_OSRAM     0
 
+#define IR_REMOTE           0
 
 typedef volatile uint32_t   vu32;
 typedef volatile uint16_t   vu16;
@@ -59,7 +60,7 @@ typedef uint32_t            u32;
 typedef uint16_t            u16;
 typedef uint8_t             u8;
 
-#define RX_LEN              1024
+#define RX_LEN              128
 
 typedef struct
 {

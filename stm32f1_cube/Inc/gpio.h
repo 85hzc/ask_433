@@ -6,44 +6,65 @@
 
 /*---------------------- GPIO配置宏 ------------------------*/
 
-#define LED_Pin           GPIO_PIN_0
-#define LED_GPIO_Port     GPIOA
+#define LED_Pin           GPIO_PIN_1
+#define LED_GPIO_Port     GPIOB
 
 #define INT_Pin           GPIO_PIN_5
 #define INT_GPIO_Port     GPIOC
 
-#define IR_IN_Pin         GPIO_PIN_1
-#define IR_IN_GPIO_Port   GPIOB
+#define IR_IN_Pin         GPIO_PIN_0
+#define IR_IN_GPIO_Port   GPIOA
 
+#define UART_ble_TX       GPIO_PIN_10
+#define UART_ble_RX       GPIO_PIN_11
+#define UART_ble_Port     GPIOB
+#define UART_wifi_TX      GPIO_PIN_9
+#define UART_wifi_RX      GPIO_PIN_10
+#define UART_wifi_Port    GPIOA
+#define UART_Debug_TX     GPIO_PIN_2
+#define UART_Debug_RX     GPIO_PIN_3
+#define UART_Debug_Port   GPIOA
 
+#define SD_CS_GPIO        GPIO_PIN_12
+#define SD_CS_PORT        GPIOB
 
 #define SPI1_SCK          GPIO_PIN_5
 #define SPI1_MISO         GPIO_PIN_6
 #define SPI1_MOSI         GPIO_PIN_7
-#define SPI1_PORT         GPIOB
+#define SPI1_PORT         GPIOA
 
+#define SPI2_SCK          GPIO_PIN_13
+#define SPI2_MISO         GPIO_PIN_14
+#define SPI2_MOSI         GPIO_PIN_15
+#define SPI2_PORT         GPIOB
 
+//#if(PROJECTOR_MBI5153)
 /////MBI GPIO
-#define DCLK_PIN          GPIO_PIN_5             // MBI dclk 引脚
-#define GCLK_PIN          GPIO_PIN_1             // MBI gclk 引脚
+#define DCLK_PIN          GPIO_PIN_6             // MBI dclk 引脚
 #define LE_PIN            GPIO_PIN_7             // MBI LE 引脚
-#define SDI_PIN           GPIO_PIN_8             // MBI SDI 引脚
-#define MBI_PORT          GPIOB                  // MBI驱动 GPIO端口
+#define SDI_PIN           GPIO_PIN_5             // MBI SDI 引脚
+#define MBI_PORT          GPIOA                  // MBI驱动 GPIO端口
 
-#define AG_OE_PIN         GPIO_PIN_2             // AG OE 引脚
-#define AG_CLK_PIN        GPIO_PIN_3             // AG Clk 引脚
-#define AG_DIN_PIN        GPIO_PIN_4             // AG Din 引脚
+#define GCLK_PIN          GPIO_PIN_0             // MBI gclk 引脚
+#define MBI_GCLK_PORT     GPIOB                  // MBI驱动 GPIO端口
 
+
+#define AG_OE_PIN         GPIO_PIN_15             // AG OE 引脚
+#define AG_CLK_PIN        GPIO_PIN_14             // AG Clk 引脚
+#define AG_DIN_PIN        GPIO_PIN_13             // AG Din 引脚
+#define AG_PORT           GPIOC                   // AG驱动 GPIO端口
+
+//#elif(PROJECTOR_OSRAM)
 /////OSRAM GPIO
 #define QUADRANT_EN       GPIO_PIN_1
 #define QUADRANT_EN_PORT  GPIOA
 
-#define SCL_GPIO_Port     GPIOB
-#define SDA_GPIO_Port     GPIOB
 #define SCL_Pin           GPIO_PIN_6
 #define SDA_Pin           GPIO_PIN_7
+#define SCL_GPIO_Port     GPIOB
+#define SDA_GPIO_Port     GPIOB
 
-#define Q0_SI             GPIO_PIN_1
+#define Q0_SI             GPIO_PIN_5
 #define Q0_UPD            GPIO_PIN_2
 #define Q1_SI             GPIO_PIN_3
 #define Q1_UPD            GPIO_PIN_4
@@ -51,9 +72,9 @@
 #define Q2_UPD            GPIO_PIN_9
 #define Q3_SI             GPIO_PIN_10
 #define QT_CLK            GPIO_PIN_11
-#define Q3_UPD            GPIO_PIN_12
+#define Q3_UPD            GPIO_PIN_0
 #define OSRAM_PORT        GPIOB
-
+//#endif
 
 /*---------------------- GPIO控制宏 ------------------------*/
 
@@ -64,15 +85,15 @@
 #define SDI_PIN_H         MBI_PORT->BSRR = SDI_PIN;                        // 输出高电平
 #define SDI_PIN_L         MBI_PORT->BSRR = (uint32_t)SDI_PIN << 16;        // 输出低电平
 
-#define GCLK_PIN_H        MBI_PORT->BSRR = GCLK_PIN;                       // 输出高电平
-#define GCLK_PIN_L        MBI_PORT->BSRR = (uint32_t)GCLK_PIN << 16;       // 输出低电平
+#define GCLK_PIN_H        MBI_GCLK_PORT->BSRR = GCLK_PIN;                       // 输出高电平
+#define GCLK_PIN_L        MBI_GCLK_PORT->BSRR = (uint32_t)GCLK_PIN << 16;       // 输出低电平
 
-#define AG_CLK_PIN_H      MBI_PORT->BSRR = AG_CLK_PIN;                     // 输出高电平
-#define AG_CLK_PIN_L      MBI_PORT->BSRR = (uint32_t)AG_CLK_PIN << 16;     // 输出低电平
-#define AG_DIN_PIN_H      MBI_PORT->BSRR = AG_DIN_PIN;                     // 输出高电平
-#define AG_DIN_PIN_L      MBI_PORT->BSRR = (uint32_t)AG_DIN_PIN << 16;     // 输出低电平
-#define AG_OE_PIN_H       MBI_PORT->BSRR = AG_OE_PIN;                      // 输出高电平
-#define AG_OE_PIN_L       MBI_PORT->BSRR = (uint32_t)AG_OE_PIN << 16;      // 输出低电平
+#define AG_CLK_PIN_H      AG_PORT->BSRR = AG_CLK_PIN;                     // 输出高电平
+#define AG_CLK_PIN_L      AG_PORT->BSRR = (uint32_t)AG_CLK_PIN << 16;     // 输出低电平
+#define AG_DIN_PIN_H      AG_PORT->BSRR = AG_DIN_PIN;                     // 输出高电平
+#define AG_DIN_PIN_L      AG_PORT->BSRR = (uint32_t)AG_DIN_PIN << 16;     // 输出低电平
+#define AG_OE_PIN_H       AG_PORT->BSRR = AG_OE_PIN;                      // 输出高电平
+#define AG_OE_PIN_L       AG_PORT->BSRR = (uint32_t)AG_OE_PIN << 16;      // 输出低电平
 
 
 #define Q0_SI_H           OSRAM_PORT->BSRR = Q0_SI;                        // 输出高电平

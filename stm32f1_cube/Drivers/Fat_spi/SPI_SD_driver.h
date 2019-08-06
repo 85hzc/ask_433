@@ -35,8 +35,8 @@
 
 /* Private macro -------------------------------------------------------------*/
 //SD卡CS片选使能端操作：
-#define SD_CS_ENABLE()      HAL_GPIO_WritePin(GPIOD,GPIO_PIN_15,GPIO_PIN_RESET)   //选中SD卡
-#define SD_CS_DISABLE()     HAL_GPIO_WritePin(GPIOD,GPIO_PIN_15,GPIO_PIN_SET)     //不选中SD卡
+#define SD_CS_ENABLE()      HAL_GPIO_WritePin(SD_CS_PORT,SD_CS_GPIO,GPIO_PIN_RESET)   //选中SD卡
+#define SD_CS_DISABLE()     HAL_GPIO_WritePin(SD_CS_PORT,SD_CS_GPIO,GPIO_PIN_SET)     //不选中SD卡
 #define SD_PWR_ON()         HAL_GPIO_WritePin(GPIOD,GPIO_PIN_10,GPIO_PIN_RESET)  //SD卡上电
 #define SD_PWR_OFF()        HAL_GPIO_WritePin(GPIOD,GPIO_PIN_10,GPIO_PIN_SET)    //SD卡断电
 #define SD_DET()            !HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_2) //检测有卡 //1-有 0-无

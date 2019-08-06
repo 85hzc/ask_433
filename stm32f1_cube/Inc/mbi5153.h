@@ -13,7 +13,7 @@
 
 
 #define MBI5153_SIZE                                1
-#define SCAN_LINE                                   8
+#define SCAN_LINE                                   16
 
 #define SCAN_LINE_1                                 0x0
 #define SCAN_LINE_2                                 0x1
@@ -22,13 +22,13 @@
 #define SCAN_LINE_16                                0xf
 #define SCAN_LINE_32                                0x1f
 
-#define SECS                                        8
+#define SECS                                        4
 
 #define SCAN_SUPPORT
 
 
-void display_X(void);
-void display_Sink(void);
+void MBI5153_X(void);
+void MBI5153_Sink(void);
 void cycleScan_X(uint8_t type);
 void cycleScan_Sink(void);
 

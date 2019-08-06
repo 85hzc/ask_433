@@ -15,7 +15,7 @@ u8  SD_Type=0;
 
 /* Private functions ---------------------------------------------------------*/
 
-extern SPI_HandleTypeDef        hspi1;
+extern SPI_HandleTypeDef        hspi2;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ void SPI_Configuration(void)
 
 #if 0
     //SPI1 Periph clock enable 
-    __HAL_RCC_SPI1_CLK_ENABLE();
+    __HAL_RCC_SPI2_CLK_ENABLE();
     //__HAL_RCC_GPIOA_CLK_ENABLE()
     //RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOG | RCC_APB2Periph_AFIO, ENABLE);
 
@@ -54,11 +54,11 @@ void SPI_Configuration(void)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 #endif
 
-    //Configure PG15 pin: SD_CS pin 
-    GPIO_InitStructure.Pin = GPIO_PIN_15; 
+    //Configure PB12 pin: SD_CS pin 
+    GPIO_InitStructure.Pin = SD_CS_GPIO; 
     GPIO_InitStructure.Speed = GPIO_SPEED_HIGH; 
     GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;    //推挽输出
-    HAL_GPIO_Init(GPIOD,&GPIO_InitStructure); 
+    HAL_GPIO_Init(SD_CS_PORT,&GPIO_InitStructure); 
 
     //////SPI模块配置//////
     //一开始SD初始化阶段，SPI时钟频率必须<400K
@@ -88,9 +88,8 @@ void SPI_Configuration(void)
     SPI_InitStructure.SPI_CRCPolynomial = 7;
     SPI_Init(SPI2, &SPI_InitStructure);
 */
-    MX_SPI1_Init();
-    __HAL_SPI_ENABLE(&hspi1);
-    //SPI_Cmd(SPI2, ENABLE);
+    MX_SPI2_Init();
+    __HAL_SPI_ENABLE(&hspi2);
     return;
 }
 
@@ -106,22 +105,22 @@ void SPI_Configuration(void)
 *******************************************************************************/
 void SPI_SetSpeed(u8 SpeedSet)
 {
-    hspi1.Instance = SPI1;
-    hspi1.Init.Mode = SPI_MODE_MASTER;//主模式
-    hspi1.Init.Direction = SPI_DIRECTION_2LINES;//全双工
-    hspi1.Init.DataSize = SPI_DATASIZE_8BIT;//数据位为8位
-    hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;//CPOL=0,low
-    hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;//CPHA为数据线的第一个变化沿
-    hspi1.Init.NSS = SPI_NSS_SOFT;//软件控制NSS
+    hspi2.Instance = SPI2;
+    hspi2.Init.Mode = SPI_MODE_MASTER;//主模式
+    hspi2.Init.Direction = SPI_DIRECTION_2LINES;//全双工
+    hspi2.Init.DataSize = SPI_DATASIZE_8BIT;//数据位为8位
+    hspi2.Init.CLKPolarity = SPI_POLARITY_HIGH;//CPOL=0,low
+    hspi2.Init.CLKPhase = SPI_PHASE_2EDGE;//CPHA为数据线的第一个变化沿
+    hspi2.Init.NSS = SPI_NSS_SOFT;//软件控制NSS
 
     //如果速度设置输入0，则低速模式，非0则高速模式
     if(SpeedSet==SPI_SPEED_LOW)
     {
-        hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+        hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
     }
     else
     {
-        hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+        hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
     }
     //moon.mp3: 4707774 Byte size 目标文件 设为buffer[512]     
     //speed:实验测试数据，最大速度 392314 Byte/S，
@@ -133,12 +132,14 @@ void SPI_SetSpeed(u8 SpeedSet)
     //Prescaler_4,  392314 Byte/S    392314 Byte/S
     //Prescaler_2,  392314 Byte/S
 
-    hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;//最高位先发送
-    hspi1.Init.TIMode = SPI_TIMODE_DISABLE;//TIMODE模式关闭
-    hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;//CRC关闭
-    hspi1.Init.CRCPolynomial = 7;//默认值，无效
+    hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;//最高位先发送
+    hspi2.Init.TIMode = SPI_TIMODE_DISABLE;//TIMODE模式关闭
+    hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;//CRC关闭
+    hspi2.Init.CRCPolynomial = 7;//默认值，无效
 
-    HAL_SPI_Init(&hspi1);
+    HAL_SPI_Init(&hspi2);
+    __HAL_SPI_ENABLE(&hspi2);
+
     return;
 }
 
@@ -153,7 +154,7 @@ void SPI_SetSpeed(u8 SpeedSet)
 u8 SPI_ReadWriteByte(u8 TxData)
 {
     u8 RxData = 0;
-    SPI_HandleTypeDef hspi;
+    //SPI_HandleTypeDef hspi;
 /*
     //等待发送缓冲区空
     while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET);
@@ -165,9 +166,9 @@ u8 SPI_ReadWriteByte(u8 TxData)
     //取数据
     RxData = SPI_I2S_ReceiveData(SPI2);
 */
-    hspi.Instance = SPI1;
-    HAL_SPI_Transmit(&hspi, &TxData, 1, 0xffff);
-    HAL_SPI_Receive(&hspi, &RxData, 1, 0xffff);
+    //hspi.Instance = SPI2;
+    HAL_SPI_Transmit(&hspi2, &TxData, 1, 0xffff);
+    HAL_SPI_Receive(&hspi2, &RxData, 1, 0xffff);
 
     return (u8)RxData;
 }

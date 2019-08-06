@@ -35,8 +35,8 @@
 #include "stm32f1xx.h"
 #include "stm32f1xx_it.h"
 
-extern TIM_HandleTypeDef        htim3;
-extern UART_HandleTypeDef       huart1, huart2;
+extern TIM_HandleTypeDef        htim2, htim3;
+extern UART_HandleTypeDef       huart1, huart2, huart3;
 
 /* USER CODE BEGIN 0 */
 
@@ -208,6 +208,20 @@ void TIM3_IRQHandler(void)
 
 
 /**
+* @brief This function handles TIM3 global interrupt.
+*/
+void TIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM3_IRQn 0 */
+
+  /* USER CODE END TIM3_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim2);
+  /* USER CODE BEGIN TIM3_IRQn 1 */
+
+  /* USER CODE END TIM3_IRQn 1 */
+}
+
+/**
 * @brief This function handles EXTI line[9:5] interrupts.
 */
 void EXTI9_5_IRQHandler(void)
@@ -249,6 +263,20 @@ void USART2_IRQHandler(void)
 {
     UsartReceive_IDLE(&huart2);
     HAL_UART_IRQHandler(&huart2);
+    //printf("2\r\n");
+}
+
+/*******************************************************************************
+* Function Name  : USART3_IRQHandler
+* Description    : This function handles USART2 global interrupt request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void USART3_IRQHandler(void)
+{
+    UsartReceive_IDLE(&huart3);
+    HAL_UART_IRQHandler(&huart3);
     //printf("2\r\n");
 }
 
