@@ -194,6 +194,9 @@ int main(void)
 #elif(PROJECTOR_OSRAM)
         OSRAM_play();
         Delay_ms(500);
+#elif(PROJECTOR_MCUGPIO)
+        MCUGpio_X();
+        MCUGpio_Sink();
 #endif
         //wifi
         if(UsartType1.RX_flag)

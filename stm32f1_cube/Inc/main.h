@@ -49,8 +49,9 @@
 #define LOG_ENABLE          1                   //使能输出记录
 
 #define PROJECTOR_MBI5153   0
-#define PROJECTOR_MBI5124   1
+#define PROJECTOR_MBI5124   0
 #define PROJECTOR_OSRAM     0
+#define PROJECTOR_MCUGPIO   1
 
 #define IR_REMOTE           0
 
