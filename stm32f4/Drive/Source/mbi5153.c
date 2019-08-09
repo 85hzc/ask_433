@@ -33,6 +33,7 @@ extern uint8_t gclk_num;
 
 unsigned short sdi_data=0xffff;
 uint8_t chnFlagPos[16][SECS];//1-8
+uint8_t chnLinePos[16][16];
 
 void soft_reset(void)
 {
@@ -81,14 +82,6 @@ void vsync(void)
     }
     LE_PIN_L
     delay(1);//LE下降沿与gclk上升沿满足要求
-/*
-#if(TWO_TIMER_PULSE==0)
-   // TIM1->CR1 |= 0x01;
-#elif(TWO_TIMER_PULSE==1)
-    gclk_num = 0;
-    Pulse_output(129,1000);
-#endif
-*/
 }
 
 void pre_active(void)
@@ -351,11 +344,21 @@ void MBI_ScanCycle(void)
     gclk_pluse = 0;
 }
 
+static uint8_t  currentLine=1,currentCh=0;
+void reset_mbi_schedule(void)
+{
+    //soft_reset();
+
+    currentLine=1;
+    currentCh=0;
+
+}
+
 uint8_t MBI_SdiInput_X(uint8_t type)
 {
     uint32_t mask=0;
     uint16_t ch=0,j=0,k=0,line=0;
-    static uint8_t  currentLine=1,currentCh=0;
+    //static uint8_t  currentLine=1,currentCh=0;
 
     //写入16*2*16数据
     //for(line = 1; line <= SCAN_LINE; line++)//扫描行数
@@ -385,9 +388,9 @@ uint8_t MBI_SdiInput_X(uint8_t type)
                         {
                             case 0:
                                     if((sdi_data & mask)&&
-                                        //((ch==15)||(ch==0)||(line==1)||(line==16)||(line-ch==1)||(ch+line==16)))
+                                        ((ch==15)||(ch==0)||(line==1)||(line==16)||(line-ch==1)||(ch+line==16)))
                                         //(/*(ch==15)||*/(ch==type%16)||(line-1==type%16)))
-                                        ((line==2)||(line-1==type%16)))
+                                        //((line==2)||(line-1==type%16)))
                                         SDI_PIN_H
                                     else
                                         SDI_PIN_L
@@ -414,7 +417,6 @@ uint8_t MBI_SdiInput_X(uint8_t type)
 
                 if(currentCh==15 && currentLine==16)
                 {
-                    //vsync();
                     currentCh = 0;
                     currentLine = 1;
                     return 1;
@@ -439,7 +441,7 @@ uint8_t MBI_SdiInput_Sink()
 {
     uint32_t mask;
     uint16_t ch,j,k,l,line;
-    static uint8_t  currentLine=1,currentCh=0;
+    //static uint8_t  currentLine=1,currentCh=0;
 
     //写入16*2*16数据
     //for(line = 1; line <= SCAN_LINE; line++)//扫描行数
@@ -503,13 +505,82 @@ uint8_t MBI_SdiInput_Sink()
     }
 }
 
+uint8_t MBI_SdiInput_test()
+{
+    uint32_t mask;
+    uint16_t ch,j,k,l,line;
+
+    //写入16*2*16数据
+    //for(line = 1; line <= SCAN_LINE; line++)//扫描行数
+    for(line = currentLine; line <= SCAN_LINE; line++)//扫描行数
+    {
+        for(ch = 0; ch < 16; ch++)//每个MBI5153有16个通道
+        {
+            if(currentLine==line && currentCh==ch)
+            {
+                //printf("L %d  C %d\r\n",currentLine,currentCh);
+                delay(1);
+                for(j = 0; j < MBI5153_SIZE; j++)//级联IC数量
+                {
+                    for(k = 0; k < 16; k++)
+                    {
+                        mask = 0x8000 >> k;
+                        if(j == MBI5153_SIZE-1)
+                        {
+                            if(k == 15)
+                            {
+                                LE_PIN_H
+                            }
+                        }
+
+                        //for(l=0;l<16;l++)//支持连续的流水灯段
+                        {
+                            if((sdi_data & mask)&&
+                                (chnLinePos[line-1][ch]))
+                                SDI_PIN_H
+                        }
+                        delay(1);
+                        DCLK_PIN_H
+                        delay(1);
+                        DCLK_PIN_L
+                    }
+                }
+                LE_PIN_L
+                SDI_PIN_L
+                delay(1);
+
+                if(currentCh==15 && currentLine==16)
+                {
+                    //vsync();
+                    currentCh = 0;
+                    currentLine = 1;
+                    return 1;
+                }
+                else if(currentCh==15)
+                {
+                    currentCh = 0;
+                    currentLine++;
+                }
+                else
+                {
+                    currentCh++;
+                }
+                delay(100);
+                return 0;
+            }
+        }
+    }
+}
+
 void cycleScan_X(uint8_t type)
 {
     uint16_t line;
     static uint8_t  isVsync = 1;
 
     if(isVsync)
+    {
         vsync();
+    }
 
     MBI_ScanCycle();
     if(isVsync)
@@ -524,7 +595,8 @@ void cycleScan_X(uint8_t type)
     }
     else
     {
-        isVsync = MBI_SdiInput_X(type);
+        //isVsync = MBI_SdiInput_X(type);
+        isVsync = MBI_SdiInput_test();
     }
 }
 
@@ -555,12 +627,27 @@ void cycleScan_Sink(void)
 
 void MBI5153_X(void)
 {
-    static uint8_t key_flag = 0;   //按键标志
+    static uint8_t linef=0,chf=0,key_flag=0;   //按键标志
 
     if(systick - systime>500000)//500ms
     {
-        key_flag++;
         systime = systick;
+#if 1
+        key_flag=chf|linef;
+
+        chf++;
+        chf=chf%16;
+        if(chf%16==0)
+        {
+            linef++;
+            linef=linef%16;
+        }
+        memset(chnLinePos,0,sizeof(chnLinePos));
+        chnLinePos[linef][chf] = 1;
+        //reset_mbi_schedule();
+#else
+        key_flag++;
+#endif
     }
     cycleScan_X(key_flag);
 }

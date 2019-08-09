@@ -173,11 +173,11 @@ void SysTick_Handler(void)
 
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
-  HAL_SYSTICK_IRQHandler();
+  //HAL_SYSTICK_IRQHandler();
 
-  //TimingDelay_Decrement();
+  TimingDelay_Decrement();
   gclk();
-  
+
   /* USER CODE BEGIN SysTick_IRQn 1 */
   //Ges_Tick_Check();
   //LED_Tick_Check();

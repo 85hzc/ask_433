@@ -185,12 +185,13 @@ int main(void)
     {
         //Drv_PWM_Proc();
 #if(PROJECTOR_MBI5153)
-
-        //MBI5153_X();
+        MBI5153_X();
         //MBI5153_play();
-        MBI5153_Sink();
+        //MBI5153_Sink();
+#elif(PROJECTOR_MBI5124)
+        MBI5124_X();
+        //MBI5124_Sink();
 #elif(PROJECTOR_OSRAM)
-
         OSRAM_play();
         Delay_ms(500);
 #endif
@@ -375,7 +376,7 @@ static void MX_GPIO_Init(void)
     LED_GPIO_Init();
 
     //init_tim3PWMIO();
-#if(PROJECTOR_MBI5153)
+#if(PROJECTOR_MBI5153||PROJECTOR_MBI5124)
     MBI_GPIO_Init();//³õÊ¼»¯MBIÇý¶¯pin
 #elif(PROJECTOR_OSRAM)
     OSRAM_GPIO_Init();

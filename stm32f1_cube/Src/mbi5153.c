@@ -15,14 +15,11 @@
 #include "gpio.h"
 #include "mbi5153.h"
 
+#if(PROJECTOR_MBI5153)
 extern uint8_t circuit;
 extern volatile uint32_t gclk_pluse;
 uint64_t systime = 0;
 uint64_t systime1 = 0;
-
-#if(TWO_TIMER_PULSE==1)
-extern uint8_t gclk_num;
-#endif
 
 //unsigned short sdi_data[16]={1<<0,1<<1,1<<2,1<<3,1<<4,1<<5,1<<6,1<<7,\
 //                          1<<8,1<<9,1<<10,1<<11,1<<12,1<<13,1<<14,1<<15};
@@ -77,14 +74,6 @@ void vsync(void)
     }
     LE_PIN_L
     delay(1);//LE下降沿与gclk上升沿满足要求
-/*
-#if(TWO_TIMER_PULSE==0)
-   // TIM1->CR1 |= 0x01;
-#elif(TWO_TIMER_PULSE==1)
-    gclk_num = 0;
-    Pulse_output(129,1000);
-#endif
-*/
 }
 
 void pre_active(void)
@@ -138,7 +127,7 @@ void reg1_config(void)
     }
     LE_PIN_L
     SDI_PIN_L
-    delay(2);
+    delay(1);
 }
 
 void reg2_config(void)
@@ -175,7 +164,7 @@ void reg2_config(void)
     }
     LE_PIN_L
     SDI_PIN_L
-    delay(2);
+    delay(1);
 }
 
 void reg3_config(void)
@@ -380,11 +369,12 @@ uint8_t MBI_SdiInput_X(uint8_t type)
                         switch(0/*type%2*/)
                         {
                             case 0:
-                                    //if((sdi_data & mask)&&
-                                    //    ((ch==15)||(ch==0)||(line==1)||(line==16)||(line-ch==1)||(ch+line==16)))
+                                    if((sdi_data & mask)&&
+                                        //((ch==15)||(ch==0)||(line==1)||(line==16)||(line-ch==1)||(ch+line==16)))
+                                        ((ch==((type>>4)&0xf)%16)&&(line-1==(type&0xf)%16)))
                                         SDI_PIN_H
-                                    //else
-                                    //    SDI_PIN_L
+                                    else
+                                        SDI_PIN_L
                                     break;
 
                             case 1:
@@ -422,7 +412,7 @@ uint8_t MBI_SdiInput_X(uint8_t type)
                 {
                     currentCh++;
                 }
-                delay(5);
+                //delay(1);
                 return 0;
             }
         }
@@ -674,7 +664,6 @@ void MBI5153_play()
     //MBI_Init();
 
 #endif
-    //pluse_enable = 1;
 }
-
+#endif
 

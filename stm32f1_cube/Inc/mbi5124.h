@@ -2,17 +2,12 @@
 #ifndef __MBI5153_H
 #define __MBI5153_H
 
-#define TWO_TIMER_PULSE                             0
-#define TIMER                                       0//(TIM1 1£»TIM3 3)
 
 #define SEPR_SECTION                                1
 #define SECTION_PER_SCAN                            1
 
 
-#define GCLKNUM                                     5
-
-
-#define MBI5153_SIZE                                1
+#define MBI5124_SIZE                                1
 #define SCAN_LINE                                   16
 
 #define SCAN_LINE_1                                 0x0
@@ -25,5 +20,13 @@
 #define SECS                                        4
 
 #define SCAN_SUPPORT
+
+
+void MBI5124_X(void);
+void MBI5124Sink(void);
+void cycleScan_X(uint8_t type);
+void cycleScan_Sink(void);
+
+
 #endif
 

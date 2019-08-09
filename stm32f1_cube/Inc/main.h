@@ -48,7 +48,8 @@
 //#define SYS_FREQUENCY       32000000            //32MHz主频
 #define LOG_ENABLE          1                   //使能输出记录
 
-#define PROJECTOR_MBI5153   1
+#define PROJECTOR_MBI5153   0
+#define PROJECTOR_MBI5124   1
 #define PROJECTOR_OSRAM     0
 
 #define IR_REMOTE           0

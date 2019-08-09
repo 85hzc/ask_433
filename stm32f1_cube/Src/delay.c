@@ -15,11 +15,9 @@
 #include "mbi5153.h"
 #include "main.h"
 
-//static uint32_t TimingDelay;  //计数变量
+static uint32_t TimingDelay;  //计数变量
 volatile uint32_t gclk_pluse = 0xff;
-volatile uint16_t gclk_auto = 0;
-//volatile uint16_t gclk_time = 0;
-volatile uint8_t pluse_force = 1;
+
 void delay_ns(uint32_t time)
 {
     //u32 tt = time;
@@ -41,20 +39,24 @@ void Delay_Init(void)
 */
 //  函数：计时函数
 //  说明：在 SysTick 中断服务函数里被调用
-/*
 void TimingDelay_Decrement(void)
 {
     if (TimingDelay != 0)
-    { 
+    {
         TimingDelay--;
     }
-}*/
+}
 
 //  函数：毫秒延时
 //  参数：nTime - 延时时间，单位ms
 //  说明：每次调用都会重新给TimingDelay赋值，实现 n 毫秒的延时，最大延时 4294967295 ms。
 //
+void Delay_us(u32 nTime)
+{
+    TimingDelay = nTime;
 
+    while(TimingDelay != 0);
+}
 
 //#define PWM_129 129
 #if 0
