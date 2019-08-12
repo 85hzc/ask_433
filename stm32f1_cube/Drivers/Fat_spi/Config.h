@@ -7,8 +7,8 @@
 ** Created   by:
 ** Created date:
 *******************************************************************************/
-#ifndef __Config_h
-#define __Config_h    
+#ifndef __CONFIG_H__
+#define __CONFIG_H__
 
 #include "stm32f1xx.h"
 #include "stm32f1xx_hal_gpio.h"

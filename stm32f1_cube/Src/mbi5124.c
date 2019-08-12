@@ -24,165 +24,14 @@ unsigned short sdi_data=0xffff;
 uint8_t chnFlagPos[16][SECS];//1-8
 static uint8_t  currentLine=0;
 
-void soft_reset(void)
-{
-    unsigned int sck_cnt;
-
-    //复位
-    delay(1);
-    LE_PIN_H
-    delay(1);
-    for(sck_cnt = 10;sck_cnt > 0;sck_cnt--)
-    {
-        DCLK_PIN_H
-        delay(1);
-        DCLK_PIN_L
-        delay(1);
-    }
-    LE_PIN_L
-    delay(1);
-}
-
 void LE(void)
 {
-    unsigned int sck_cnt;
-
     delay(1);
-    //2个clk拉高LE，发送Vsync
     LE_PIN_H
     delay(1);
     LE_PIN_L
-    delay(1);//LE下降沿与gclk上升沿满足要求
-}
-
-void pre_active(void)
-{
-    unsigned int sck_cnt;
-    
-    LE_PIN_H
-    delay(1);
-    for(sck_cnt = 14;sck_cnt > 0;sck_cnt --)
-    {
-        DCLK_PIN_H
-        delay(1);
-        DCLK_PIN_L
-        delay(1);
-    }
-    LE_PIN_L
-    delay(2);
-}
-
-void reg1_config(void)
-{
-    unsigned int sck_cnt;
-    unsigned short j;
-    unsigned short state_reg=0xEB | SCAN_LINE_16<<8;//7F 2B  ;//0x00FF
-    unsigned int mask;
-
-    for(j = 0; j < MBI5124_SIZE; j++)//N片IC级联
-    {
-        for(sck_cnt = 0;sck_cnt < 16;sck_cnt ++)
-        {
-            mask = 0x8000 >> sck_cnt;
-            if(j == MBI5124_SIZE-1)
-                if(sck_cnt == 12){
-                    LE_PIN_H
-                    delay(1);
-                }
-            
-            if(state_reg & mask)
-            {
-                SDI_PIN_H
-            }
-            else
-            {
-                SDI_PIN_L
-            }
-            delay(1);
-            DCLK_PIN_H
-            delay(1);
-            DCLK_PIN_L
-        }
-    }
-    LE_PIN_L
-    SDI_PIN_L
     delay(1);
 }
-
-void reg2_config(void)
-{
-    unsigned int sck_cnt;
-    unsigned short j;
-    unsigned short state_reg=0x0400;
-    unsigned int mask;
-    
-    for(j = 0; j < MBI5124_SIZE; j++)//N片IC级联
-    {
-        for(sck_cnt = 0;sck_cnt < 16;sck_cnt ++)
-        {
-            mask = 0x8000 >> sck_cnt;
-            if(j == MBI5124_SIZE-1)
-                if(sck_cnt == 8){
-                    LE_PIN_H
-                    delay(1);
-                }
-
-            if(state_reg & mask)
-            {
-                SDI_PIN_H
-            }
-            else
-            {
-                SDI_PIN_L
-            }
-            delay(1);
-            DCLK_PIN_H
-            delay(1);
-            DCLK_PIN_L
-        }
-    }
-    LE_PIN_L
-    SDI_PIN_L
-    delay(1);
-}
-
-void reg3_config(void)
-{
-    unsigned int sck_cnt;
-    unsigned short j;
-    unsigned short state_reg=0x0000;
-    unsigned int mask;
-    
-    for(j = 0; j < MBI5124_SIZE; j++)//N片IC级联
-    {
-        for(sck_cnt = 0;sck_cnt < 16;sck_cnt ++)
-        {
-            mask = 0x8000 >> sck_cnt;
-            if(j == MBI5124_SIZE-1)
-                if(sck_cnt == 0){
-                    LE_PIN_H
-                    delay(1);
-                }
-            
-            if(state_reg & mask)
-            {
-                SDI_PIN_H
-            }
-            else
-            {
-                SDI_PIN_L
-            }
-            delay(1);
-            DCLK_PIN_H
-            delay(1);
-            DCLK_PIN_L
-        }
-    }
-    LE_PIN_L
-    SDI_PIN_L
-    delay(2);
-}
-
 
 void MBI_ScanDisplay(void)
 {
@@ -302,10 +151,17 @@ uint8_t MBI_SdiInput_X(uint8_t type)
                 {
                     case 0:
                         //if(((ch==15)||(ch==0)||(line==0)||(line==15)||(line==ch)||(ch+line==15))&&
-                        if(((line==1)||(line==8))&&
+                        //if(((line==1)||(line==2)||(line==3)))//&&
                             //(/*(line==2)||*/(line==type%16)))
-                            (/*(line==2)||*/(ch==type%16)))
+                            //(/*(line==2)||(ch==type%16))*/)
+                        if((ch==type%16)&&(line==6)&&(type%2==0))
+                        {
                             SDI_PIN_H
+                        }
+                        else if((ch==type%16)&&(line==7)&&(type%2==1))
+                        {
+                            SDI_PIN_H
+                        }
                         else
                             SDI_PIN_L
                         break;

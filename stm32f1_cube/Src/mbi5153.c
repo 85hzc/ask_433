@@ -244,7 +244,6 @@ void MBI_cycleScanRegConfig(void)
 */
 }
 
-#ifdef SCAN_SUPPORT
 void MBI_ScanDisplay(void)
 {
     static uint8_t ii = 0;
@@ -586,14 +585,11 @@ void MBI5153_Sink(void)
         systime1 = HAL_GetTick();
     }
 }
-#endif
 
 void MBI5153_play()
 {
     unsigned short i,j,k,line;
-    //unsigned short red1,green1,blue1,red2,green2,blue2;
     unsigned int mask;
-    //unsigned int bufaddA,bufaddB;
 
     //MBI_Init();
     //vsync();
@@ -651,19 +647,6 @@ void MBI5153_play()
     }
     //pluse_enable = 0;
     vsync();
-
-#ifdef SCAN_SUPPORT
-    //¿ªÊ¼ÏÔÊ¾
-    //for(i=0;i<125;i++)
-    //while(1)
-    //{
-    //    MBI_ScanDisplay();
-    //}
-
-    //soft_reset();
-    //MBI_Init();
-
-#endif
 }
 #endif
 

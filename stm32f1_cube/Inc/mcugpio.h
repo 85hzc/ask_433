@@ -6,9 +6,6 @@
 #define SCAN_LINE                                   16
 #define SECS                                        4
 
-#define SCAN_SUPPORT
-
-
 void McuGpio_X(void);
 void McuGpio_Sink(void);
 void cycleScan_X(uint8_t type);
