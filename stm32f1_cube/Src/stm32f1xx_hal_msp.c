@@ -304,6 +304,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct;
+  #if 0
   if(htim_ic->Instance==TIM3)
   {
   /* USER CODE BEGIN TIM3_MspInit 0 */
@@ -329,7 +330,9 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
 
   /* USER CODE END TIM3_MspInit 1 */
   }
-  else if(htim_ic->Instance==TIM2)
+  else 
+#endif
+  if(htim_ic->Instance==TIM2)
   {
   /* USER CODE BEGIN TIM2_MspInit 0 */
 

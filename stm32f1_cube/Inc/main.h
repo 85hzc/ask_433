@@ -52,7 +52,6 @@
 #define PROJECTOR_MBI5124   1
 #define PROJECTOR_OSRAM     0
 #define PROJECTOR_MCUGPIO   0
-
 #define IR_REMOTE           0
 
 typedef volatile uint32_t   vu32;

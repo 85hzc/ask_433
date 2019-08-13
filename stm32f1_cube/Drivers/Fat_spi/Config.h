@@ -20,5 +20,8 @@
 #include "ff.h"
 #include "diskio.h"
 
+#define MAX_FILE_NUM        4       //256 must be % comfort
+#define MAX_FILE_SIZE       1024       //256 must be % comfort
+
 #endif
 

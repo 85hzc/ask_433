@@ -44,6 +44,7 @@
 
 static uint32_t          tickstart;
 uint32_t                 turn_off;
+uint8_t                  runFlag;
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef       huart1, huart2, huart3;
 DMA_HandleTypeDef        hdma_usart1_rx, hdma_usart2_rx, hdma_usart3_rx;
@@ -55,7 +56,9 @@ SPI_HandleTypeDef        hspi1,hspi2;
 
 extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
-
+extern uint8_t           currentProgram;
+extern uint16_t          actType;
+extern uint16_t          actTime;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -127,6 +130,12 @@ void MX_SPI2_Init(void)
 
 /* USER CODE END 0 */
 
+void appInit(void)
+{
+    runFlag = 1;
+
+}
+
 int main(void)
 {
     uint8_t *ptr;
@@ -157,7 +166,7 @@ int main(void)
     Drv_IR_Init();
 #endif
     SPI_Configuration();    //SPI³õÊ¼»¯
-
+    appInit();
     printf("system start.\r\n");
     //Drv_PWM_Init();
 
@@ -191,6 +200,7 @@ int main(void)
 #elif(PROJECTOR_MBI5124)
         MBI5124_X();
         //MBI5124_Sink();
+        //MBI5124_Play();
 #elif(PROJECTOR_OSRAM)
         OSRAM_play();
         Delay_ms(500);
@@ -214,10 +224,10 @@ int main(void)
             memset(key, 0, sizeof(key));
 
             strcpy(key,ptr);
+            printf("printf:%s\r\n",key);
             remoteControlHandle(key);
 
             HAL_UART_Transmit(&huart2, UsartType2.RX_pData, UsartType2.RX_Size, 0xffff);
-            HAL_UART_Transmit(&huart3, UsartType2.RX_pData, UsartType2.RX_Size, 0xffff);
         }
         //ble
         if(UsartType3.RX_flag)
@@ -680,22 +690,36 @@ void UsartReceive_IDLE(UART_HandleTypeDef *huart)
 
 void remoteControlHandle(uint8_t *key)
 {
+    uint16_t ttt;
+
     if(!strcmp(key,"stop"))
     {
         //stop
+        runFlag = 0;
     }
     else if(!strcmp(key,"play"))
     {
         //play
+        runFlag = 1;
     }
     else if(!strcmp(key,"next"))
     {
+        readFromTfcard();
+        currentProgram++;
     }
     else if(!strcmp(key,"poweron"))
     {
     }
     else if(!strcmp(key,"poweroff"))
     {
+    }
+    else
+    {
+        ttt = atoi(key);
+        if(ttt>10)
+            actTime = ttt-10;
+        else
+            actType = ttt;
     }
 
 }

@@ -24,9 +24,6 @@ static FRESULT res,res1;    // FatFs function common result code
 UINT br, bw;         // File R/W count
 u32 tx,ty,r_data,g_data,b_data;
 
-FIL file;
-ErrorStatus HSEStartUpStatus;
-
  //24位。。变成16位图 
 u32 RGB888ToRGB565(u8 r,u8 g,u8 b)
  {return (u32) (r & 0xF8) << 8 | (g & 0xFC) << 3 | (b & 0xF8) >> 3;}    //565

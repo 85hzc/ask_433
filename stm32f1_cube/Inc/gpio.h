@@ -12,7 +12,7 @@
 //#define INT_Pin           GPIO_PIN_1
 //#define INT_GPIO_Port     GPIOA
 
-#define IR_IN_Pin         GPIO_PIN_0
+#define IR_IN_Pin         GPIO_PIN_0  //TIM2 CH1
 #define IR_IN_GPIO_Port   GPIOA
 
 #define UART_ble_TX       GPIO_PIN_10
