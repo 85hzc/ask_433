@@ -15,6 +15,8 @@
 #include "gpio.h"
 #include "eplos.h"
 
+#if(PROJECTOR_OSRAM)
+
 //uint8_t OSRAM_SlaveAddress = 0;
 
 void i2c_read(unsigned char addr, unsigned char* buf, int len);
@@ -22,7 +24,9 @@ void i2c_write(unsigned char addr, unsigned char* buf, int len);
 uint8_t I2CReadFromRegister(uint8_t SlaveAddress, uint8_t regaddr, uint8_t *resp);
 uint8_t I2CWriteToRegister(uint8_t SlaveAddress, uint8_t RegisterAddr, uint8_t *command, uint8_t NumByteToWrite);
 
-uint8_t displayMatrix[256] = {
+uint8_t displayMatrix[32][32] = {};
+
+uint8_t displayMatrix1Q[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -173,47 +177,69 @@ uint8_t I2CWriteToRegister(uint8_t SlaveAddress, uint8_t RegisterAddr, uint8_t *
 void OSRAM_play(void)
 {
     unsigned short k,fixel;
-    uint8_t        crc, mask;
+    uint8_t        crc0,crc1,crc2,crc3,mask;
 
     printf("OSRAM_play\r\n");
 
-    CRC8_calc(displayMatrix, sizeof(displayMatrix), &crc);
+    CRC8_calc(displayMatrix1Q, sizeof(displayMatrix1Q), &crc0);
 
     //Ð´Èë256bitsÊý¾Ý
     for(fixel = 0; fixel <= QT_PIXELS; fixel++)
     {
         delay(1);
-
         QT_CLK_H
 
-        if(displayMatrix[fixel] ==1)
+        if(displayMatrix1Q[fixel])
+            Q0_SI_H
+
+        if(displayMatrix1Q[fixel])
             Q1_SI_H
 
+        if(displayMatrix1Q[fixel])
+            Q2_SI_H
+
+        if(displayMatrix1Q[fixel])
+            Q3_SI_H
+
         delay(1);
+        Q0_SI_L
         Q1_SI_L
+        Q2_SI_L
+        Q3_SI_L
+
         QT_CLK_L
     }
 
     for(k = 0; k < 8; k++)
     {
         delay(1);
-        
         QT_CLK_H
 
         mask = 0x80 >> k;
-        if(crc & mask)
+        if(crc0 & mask)
+            Q0_SI_H
+        if(crc0 & mask)
             Q1_SI_H
+        if(crc0 & mask)
+            Q2_SI_H
+        if(crc0 & mask)
+            Q3_SI_H
 
         if(k == 7)
         {
-            Q3_UPD_H
+            Q1_UPD_H
         }
-        delay(1);
 
+        delay(1);
+        Q0_SI_L
         Q1_SI_L
+        Q2_SI_L
+        Q3_SI_L
+
         QT_CLK_L
     }
 
-    Q3_UPD_L
+    Q1_UPD_L
 }
+#endif
 
