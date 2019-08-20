@@ -6,7 +6,7 @@
 #define MBI5124_SIZE                                1
 #define SCAN_LINE                                   16
 
-#define SECS                                        4
+#define SECS                                        3
 
 
 void MBI5124_X(void);

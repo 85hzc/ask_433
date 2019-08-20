@@ -4,7 +4,7 @@
 
 
 #define SCAN_LINE                                   16
-#define SECS                                        4
+#define SECS                                        3
 
 void McuGpio_X(void);
 void McuGpio_Sink(void);

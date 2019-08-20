@@ -5,6 +5,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx.h"
 #include "SPI_SD_driver.h"
+#include "diskio.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -307,11 +308,12 @@ u8 SD_Init(void)
     u8 buff[6];
 
     //如果没有检测到卡插入，直接退出，返回错误标志
-//    if(!SD_DET())
-//    {
-//        //return 99;        
-//        return STA_NODISK;  //  FatFS错误标志：没有插入磁盘
-//    }
+    if(!SD_DET())
+    {
+        //return 99;
+        printf("No tf card.\r\n");
+        return STA_NODISK;  //  FatFS错误标志：没有插入磁盘
+    }
 
     //SD卡上电
     //SD_PWR_ON();

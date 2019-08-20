@@ -9,8 +9,10 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "drv_ir.h"
 #include "main.h"
+
+#include "drv_ir.h"
+#include "drv_serial.h"
 
 #define TIME_GAP(s1,s2,max) (s2>=s1?s2-s1:max-s1+s2)
 
@@ -127,7 +129,7 @@ static void Drv_IR_MI_Decode(uint32_t cap, uint32_t max)
                 IR_code = REMOTE_MI_OK;
                 break;
             default:
-                //Drv_SERIAL_Log("invalid IR RX code.\r\n");
+                //printf("invalid IR RX code.\r\n");
                 break;
         }
         firstFlag = 1;
@@ -135,12 +137,11 @@ static void Drv_IR_MI_Decode(uint32_t cap, uint32_t max)
         IR_repeat++;
     }
 
-    //Drv_SERIAL_Log("%08x,%d\r\n", IR_data, IR_repeat);
+    printf("%08x,%d\r\n", IR_data, IR_repeat);
     if ((IR_repeat == 3 || firstFlag) && IR_code) {
       IR_repeat = 0;
       firstFlag = 0;
-      //Drv_SERIAL_Rpt(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
-      //Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
+      Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
     }
   }
   IR_captured = cap;
@@ -179,7 +180,7 @@ static int Drv_IR_NEC_Decode(uint32_t cap, uint32_t max)
     IR_start = IR_captured;
   }
   
-  //Drv_SERIAL_Log("cap=%d,time_gap=%d,index=%d\r",cap, time_gap, IR_index);
+  printf("cap=%d,time_gap=%d,index=%d\r",cap, time_gap, IR_index);
   if (IR_index >= 32){
     uint8_t *IR_ptr = (uint8_t*)&IR_data;
     if (
@@ -189,10 +190,9 @@ static int Drv_IR_NEC_Decode(uint32_t cap, uint32_t max)
       IR_code = (IR_ptr[0]|(IR_ptr[2]<<8));
       IR_valid = 1;
       IR_index = 0;
-      //Drv_SERIAL_Log("Drv_IR_NEC_Decode[0x%x]\r\n",IR_code);
+      printf("Drv_IR_NEC_Decode[0x%x]\r\n",IR_code);
       if (IR_code) {
-        //Drv_SERIAL_Rpt(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
-        //Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
+        Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
       }
       return 0;
     }
@@ -203,9 +203,8 @@ static int Drv_IR_NEC_Decode(uint32_t cap, uint32_t max)
     {
       if (time_gap >= 1060 && time_gap <= 1080)
       {
-        //Drv_SERIAL_Rpt(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
-        //Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
-        //Drv_SERIAL_Log("Drv_IR_NEC_Decode repeat[0x%x]\r\n",IR_code);
+        Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
+        printf("Drv_IR_NEC_Decode repeat[0x%x]\r\n",IR_code);
         return 0;
       }
     }

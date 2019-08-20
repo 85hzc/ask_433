@@ -37,6 +37,8 @@
 #include "gpio.h"
 #include "mbi5153.h"
 #include "delay.h"
+#include "drv_ir.h"
+#include "drv_serial.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -44,7 +46,11 @@
 
 static uint32_t          tickstart;
 uint32_t                 turn_off;
+uint8_t                  scenMode=0;
 uint8_t                  runFlag;
+uint8_t                  powerFlag;
+uint8_t                  single_cmd[CMD_LEN_MAX];
+
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef       huart1, huart2, huart3;
 DMA_HandleTypeDef        hdma_usart1_rx, hdma_usart2_rx, hdma_usart3_rx;
@@ -79,7 +85,7 @@ static void MX_TIM2_Init(void);
 void Drv_PWM_Init(void);
 void Drv_PWM_Proc(void);
 void I2C_init(void);
-void remoteControlHandle(uint8_t *key);
+void UartControlHandle(uint8_t *key);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -133,13 +139,65 @@ void MX_SPI2_Init(void)
 void appInit(void)
 {
     runFlag = 1;
+    powerFlag = 1;
+    Drv_SERIAL_Init();
+}
 
+void Drv_SERIAL_Proc(void)
+{
+    uint8_t *ptr;
+    uint8_t key[16];
+    
+    //wifi
+    if(UsartType1.RX_flag)
+    {
+        UsartType1.RX_flag = 0;
+        HAL_UART_Transmit(&huart2, UsartType1.RX_pData, UsartType1.RX_Size, 0xffff);
+    }
+    //debug
+    if(UsartType2.RX_flag)
+    {
+        UsartType2.RX_flag = 0;
+
+        ptr = UsartType2.RX_pData;
+
+        memset(key, 0, sizeof(key));
+
+        strncpy(key,ptr,UsartType2.RX_Size);
+        UartControlHandle(key);
+        //HAL_UART_Transmit(&huart2, UsartType2.RX_pData, UsartType2.RX_Size, 0xffff);
+    }
+    //ble
+    if(UsartType3.RX_flag)
+    {
+        UsartType3.RX_flag = 0;
+        HAL_UART_Transmit(&huart2, UsartType3.RX_pData, UsartType3.RX_Size, 0xffff);
+    }
+#if 0
+    /* 1. read the uart buffer... */
+    if (HAL_OK == Drv_SERIAL_Read(single_cmd, 0))
+    {
+        if (Drv_CMD_Handler(single_cmd) > 0)
+        {
+            if (CMD_HEADER_REQ == single_cmd[0])
+            {
+                single_cmd[0] = CMD_HEADER_RSP;
+                Drv_SERIAL_Write(single_cmd, 0);
+            }
+        }
+    }
+#endif
+    /* 2. read the action buffer... */
+    if (HAL_OK == Drv_SERIAL_Read_Act(single_cmd))
+    {
+        printf("Act location:0x%x 0x%x 0x%x 0x%x\r\n",
+                single_cmd[0],single_cmd[1],single_cmd[2],single_cmd[3]);
+        (void)Drv_CMD_Handler(single_cmd);
+    }
 }
 
 int main(void)
 {
-    uint8_t *ptr;
-    uint8_t key[16];
 
     /* USER CODE BEGIN 1 */
 
@@ -190,6 +248,9 @@ int main(void)
     eplos_config();
 #endif
 
+#if(PROJECTOR_MBI5124)
+    reg_config();
+#endif
     while (1)
     {
         //Drv_PWM_Proc();
@@ -198,43 +259,21 @@ int main(void)
         //MBI5153_play();
         //MBI5153_Sink();
 #elif(PROJECTOR_MBI5124)
-        MBI5124_X();
-        //MBI5124_Sink();
-        //MBI5124_Play();
+        if(scenMode==0)
+            MBI5124_X();
+        else if(scenMode==1)
+            MBI5124_Sink();
+        else if(scenMode==2)
+            MBI5124_Play();
 #elif(PROJECTOR_OSRAM)
         OSRAM_play();
         Delay_ms(500);
 #elif(PROJECTOR_MCUGPIO)
         MCUGpio_X();
-        MCUGpio_Sink();
+        //MCUGpio_Sink();
 #endif
-        //wifi
-        if(UsartType1.RX_flag)
-        {
-            UsartType1.RX_flag = 0;
-            HAL_UART_Transmit(&huart2, UsartType1.RX_pData, UsartType1.RX_Size, 0xffff);
-        }
-        //debug
-        if(UsartType2.RX_flag)
-        {
-            UsartType2.RX_flag = 0;
 
-            ptr = UsartType2.RX_pData;
-
-            memset(key, 0, sizeof(key));
-
-            strcpy(key,ptr);
-            printf("printf:%s\r\n",key);
-            remoteControlHandle(key);
-
-            HAL_UART_Transmit(&huart2, UsartType2.RX_pData, UsartType2.RX_Size, 0xffff);
-        }
-        //ble
-        if(UsartType3.RX_flag)
-        {
-            UsartType3.RX_flag = 0;
-            HAL_UART_Transmit(&huart2, UsartType3.RX_pData, UsartType3.RX_Size, 0xffff);
-        }
+        Drv_SERIAL_Proc();
     }
 }
 
@@ -393,6 +432,8 @@ static void MX_GPIO_Init(void)
     MBI_GPIO_Init();//³õÊ¼»¯MBIÇý¶¯pin
 #elif(PROJECTOR_OSRAM)
     OSRAM_GPIO_Init();
+#elif(PROJECTOR_MCUGPIO)
+    MCU_GPIO_Init();
 #endif
 
     /* EXTI interrupt init*/
@@ -550,7 +591,7 @@ static void MX_TIM2_Init(void)
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
   sConfigIC.ICFilter = 0;
-  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_4) != HAL_OK)
+  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -688,38 +729,77 @@ void UsartReceive_IDLE(UART_HandleTypeDef *huart)
     }
 }
 
-void remoteControlHandle(uint8_t *key)
+void UartControlHandle(uint8_t *key)
 {
     uint16_t ttt;
+    uint16_t IR_code = 0;
+
+/*
+    IR_code = REMOTE_MI_DOWN;
+    IR_code = REMOTE_MI_LEFT;
+    IR_code = REMOTE_MI_RIGHT;
+    IR_code = REMOTE_MI_PLUS;
+    IR_code = REMOTE_MI_MINUS;
+    IR_code = REMOTE_MI_BACK;
+    IR_code = REMOTE_MI_HOME;//focus+
+    IR_code = REMOTE_MI_MENU;//focus-
+    IR_code = REMOTE_MI_OK;
+*/
+    printf("key:%s\r\n",key);
 
     if(!strcmp(key,"stop"))
     {
         //stop
         runFlag = 0;
     }
-    else if(!strcmp(key,"play"))
+    else if(!strcmp(key,"start"))
     {
         //play
         runFlag = 1;
     }
     else if(!strcmp(key,"next"))
     {
-        readFromTfcard();
+        IR_code = REMOTE_MI_DOWN;
         currentProgram++;
+    }
+    else if(!strcmp(key,"pre"))
+    {
+        if(currentProgram>0)
+        {
+            currentProgram--;
+        }
+        IR_code = REMOTE_MI_UP;
     }
     else if(!strcmp(key,"poweron"))
     {
+        IR_code = REMOTE_MI_POWER;
+        powerFlag = powerFlag==1?0:1;
     }
-    else if(!strcmp(key,"poweroff"))
-    {
-    }
-    else
+    else //flash time and display scens
     {
         ttt = atoi(key);
-        if(ttt>10)
-            actTime = ttt-10;
+        if(ttt>15)
+        {
+            actTime = ttt-15;
+        }
+        else if(ttt<=15 && ttt>10)
+        {
+            if(ttt==11)
+                scenMode = 0;
+            else if(ttt==12)
+                scenMode = 1;
+            else if(ttt==13)
+                scenMode = 2;
+        }
         else
+        {
             actType = ttt;
+        }
+    }
+
+    if (IR_code) {
+
+        Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
     }
 
 }

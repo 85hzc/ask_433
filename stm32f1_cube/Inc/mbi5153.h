@@ -22,7 +22,7 @@
 #define SCAN_LINE_16                                0xf
 #define SCAN_LINE_32                                0x1f
 
-#define SECS                                        4
+#define SECS                                        3
 
 #define SCAN_SUPPORT
 

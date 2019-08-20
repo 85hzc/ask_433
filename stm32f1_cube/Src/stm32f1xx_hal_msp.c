@@ -344,7 +344,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
     PA0     ------> TIM2_CH1
     */
     GPIO_InitStruct.Pin = IR_IN_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;//GPIO_MODE_AF_INPUT GPIO_MODE_IT_FALLING
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;//GPIO_MODE_AF_INPUT GPIO_MODE_IT_FALLING
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     //GPIO_InitStruct.Alternate = GPIO_AF1_TIM3;

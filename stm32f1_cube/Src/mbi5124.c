@@ -37,6 +37,47 @@ void LE(void)
     delay(1);
 }
 
+void reg_config(void)
+{
+    unsigned int sck_cnt;
+    unsigned short j;
+    unsigned short state_reg;
+    unsigned int mask;
+
+    //state_reg=0x7D6B;//red 
+    state_reg=0xF16B;//green 
+    //state_reg=0xED6B;//blue 
+    for(j = 0; j < MBI5124_SIZE; j++)//N片IC级联
+    {
+        for(sck_cnt = 0;sck_cnt < 16;sck_cnt ++)
+        {
+            mask = 0x8000 >> sck_cnt;
+            if(j == MBI5124_SIZE-1)
+                if(sck_cnt == 12){
+                    LE_PIN_H
+                    delay(1);
+                }
+            
+            if(state_reg & mask)
+            {
+                SDI_PIN_H
+            }
+            else
+            {
+                SDI_PIN_L
+            }
+            delay(1);
+            DCLK_PIN_H
+            delay(1);
+            DCLK_PIN_L
+        }
+    }
+    LE_PIN_L
+    SDI_PIN_L
+    delay(1);
+}
+
+
 void MBI_ScanCycle(void)
 {
     delay(1);
@@ -216,41 +257,39 @@ uint8_t MBI_SdiInput_Sink()
     uint16_t ch,j,l,line;
 
     //写入16*2*16数据
-    for(line = currentLine; line < SCAN_LINE; line++)//扫描行数
+    line = currentLine;
+    for(ch = 0; ch < 16; ch++)//每个MBI5153有16个通道
     {
-        for(ch = 0; ch < 16; ch++)//每个MBI5153有16个通道
+        //for(j = 0; j < MBI5124_SIZE; j++)//级联IC数量
         {
-            //for(j = 0; j < MBI5124_SIZE; j++)//级联IC数量
+            for(l=0;l<SECS;l++)//支持连续的流水灯段
             {
-                for(l=0;l<SECS;l++)//支持连续的流水灯段
-                {
-                    if((chnFlagPos[ch][l]-1==line)||(chnFlagPos[ch][l]-2==line)||(chnFlagPos[ch][l]==line))
-                        SDI_PIN_H
-                }
-                //delay(1);
-                DCLK_PIN_H
-                delay(1);
-                DCLK_PIN_L
+                if((chnFlagPos[ch][l]==line+1)||(chnFlagPos[ch][l]==line+2)||(chnFlagPos[ch][l]==line))
+                    SDI_PIN_H
             }
-            SDI_PIN_L
+            //delay(1);
+            DCLK_PIN_H
             delay(1);
-
-            if(ch==15 && currentLine==15)
-            {
-                currentLine = 0;
-                return 1;
-            }
-            else if(ch==15)
-            {
-                currentLine++;
-            }
-            /*else
-            {
-                currentCh++;
-            }*/
+            DCLK_PIN_L
         }
-        return 0;
+        SDI_PIN_L
+        delay(1);
+
+        if(ch==15 && currentLine==15)
+        {
+            currentLine = 0;
+            return 1;
+        }
+        else if(ch==15)
+        {
+            currentLine++;
+        }
+        /*else
+        {
+            currentCh++;
+        }*/
     }
+    return 0;
 }
 
 uint8_t MBI_SdiInput_Play()
@@ -258,39 +297,37 @@ uint8_t MBI_SdiInput_Play()
     uint16_t ch,j,l,line;
 
     //写入16*2*16数据
-    for(line = currentLine; line < SCAN_LINE; line++)//扫描行数
+    line = currentLine;
+    for(ch = 0; ch < 16; ch++)//每个MBI5153有16个通道
     {
-        for(ch = 0; ch < 16; ch++)//每个MBI5153有16个通道
+        //for(j = 0; j < MBI5124_SIZE; j++)//级联IC数量
         {
-            //for(j = 0; j < MBI5124_SIZE; j++)//级联IC数量
-            {
 
-                if(dispBuffer[line][ch])
-                    SDI_PIN_H
+            if(dispBuffer[line][ch])
+                SDI_PIN_H
 
-                DCLK_PIN_H
-                delay(1);
-                DCLK_PIN_L
-            }
-            SDI_PIN_L
+            DCLK_PIN_H
             delay(1);
-
-            if(ch==15 && currentLine==15)
-            {
-                currentLine = 0;
-                return 1;
-            }
-            else if(ch==15)
-            {
-                currentLine++;
-            }
-            /*else
-            {
-                currentCh++;
-            }*/
+            DCLK_PIN_L
         }
-        return 0;
+        SDI_PIN_L
+        delay(1);
+
+        if(ch==15 && currentLine==15)
+        {
+            currentLine = 0;
+            return 1;
+        }
+        else if(ch==15)
+        {
+            currentLine++;
+        }
+        /*else
+        {
+            currentCh++;
+        }*/
     }
+    return 0;
 }
 
 void cycleScan_X(uint8_t type)
@@ -340,7 +377,7 @@ void MBI5124_Sink(void)
 {
     int number;
 
-    if(HAL_GetTick() - systime>100000)//100ms
+    if((HAL_GetTick() - systime>100000) && runFlag)//100ms
     {
         number = (HAL_GetTick()-systime)%16;//8-15
         systime = HAL_GetTick();
@@ -357,7 +394,7 @@ void MBI5124_Sink(void)
     }
     cycleScan_Sink();
 
-    if(HAL_GetTick() - systime1>30000)//30ms
+    if((HAL_GetTick() - systime1>30000) && runFlag)//30ms
     {
         for(int i=0;i<16;i++)
         {
@@ -380,10 +417,13 @@ void MBI5124_Play(void)
 
     if((HAL_GetTick() - systime>30000) && runFlag)//100ms
     {
-        for(j=0;j<256;j++)
+        readFromTfcard();
+        memcpy(dispBuffer,fileBuffer,256);
+        /*for(j=0;j<256;j++)
         {
             dispBuffer[j/16][j%16] = fileBuffer[j];
-        }
+        }*/
+        systime = HAL_GetTick();
     }
     cycleScan_Play();
 }
