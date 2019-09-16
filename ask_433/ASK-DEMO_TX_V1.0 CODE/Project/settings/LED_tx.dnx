@@ -16,7 +16,7 @@
         <ShowSource>1</ShowSource>
     </Trace1>
     <DebugChecksum>
-        <Checksum>1781493701</Checksum>
+        <Checksum>3930711030</Checksum>
     </DebugChecksum>
     <CodeCoverage>
         <Enabled>_ 0</Enabled>
@@ -80,9 +80,6 @@
         <GraphEnabled>0</GraphEnabled>
         <ShowTimeLog>1</ShowTimeLog>
     </DataSample>
-    <Breakpoints>
-        <Count>0</Count>
-    </Breakpoints>
     <LogFile>
         <LoggingEnabled>_ 0</LoggingEnabled>
         <LogFile>_ ""</LogFile>
@@ -92,6 +89,9 @@
         <LoggingEnabled>_ 0</LoggingEnabled>
         <LogFile>_ ""</LogFile>
     </TermIOLog>
+    <Breakpoints>
+        <Count>0</Count>
+    </Breakpoints>
     <Aliases>
         <A0>_ "E:\Workdocuments\07_Electronic Components\433mH\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\My_Lib\TIME\time.c" ""</A0>
         <A1>_ "E:\Workdocuments\07_Electronic Components\433mH\凌承芯\ASK_demo资料包\ASK_demo_V1.0\发射demo\软件工程文件\ASK-DEMO_T_V1.0 CODE\My_Lib\USART\USART.c" ""</A1>

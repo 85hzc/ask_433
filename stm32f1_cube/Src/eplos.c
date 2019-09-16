@@ -14,35 +14,73 @@
 #include "delay.h"
 #include "gpio.h"
 #include "eplos.h"
+#include "config.h"
 
 #if(PROJECTOR_OSRAM)
 
 //uint8_t OSRAM_SlaveAddress = 0;
+extern uint8_t              runFlag;
+extern char                 fileBuffer[MAX_FILE_SIZE];   // file copy buffer
+
+uint64_t                    systime = 0;
+uint64_t                    systime1 = 0;
 
 void i2c_read(unsigned char addr, unsigned char* buf, int len);
 void i2c_write(unsigned char addr, unsigned char* buf, int len);
 uint8_t I2CReadFromRegister(uint8_t SlaveAddress, uint8_t regaddr, uint8_t *resp);
 uint8_t I2CWriteToRegister(uint8_t SlaveAddress, uint8_t RegisterAddr, uint8_t *command, uint8_t NumByteToWrite);
 
-uint8_t displayMatrix[32][32] = {};
+uint8_t displayMatrix[32][32] = {
+    0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,
+    0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0};
 
 uint8_t displayMatrix1Q[256] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0,
-    1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0,
-    1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0,
-    1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0,
-    1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0,
-    1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-    1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,
+    0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,
+    0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,
+    0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,
+    0,1,0,0,1,0,1,1,1,1,0,1,1,1,1,0,
+    0,1,0,0,1,0,1,0,0,0,0,1,0,0,0,0,
+    0,1,0,0,1,0,1,0,0,0,0,1,0,0,0,0,
+    0,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 uint8_t UpdateCRC8(uint8_t crcIn, uint8_t byte)
 {
@@ -78,7 +116,7 @@ void CRC8_calc(const void *inSrc, int inLen, uint8_t *outResult)
     *outResult = crc&0xffu;
 }
 
-void eplos_config(void)
+void EPLOS_config(void)
 {
     uint8_t QuadrantConf[2];
 
@@ -87,6 +125,18 @@ void eplos_config(void)
     I2CWriteToRegister(I2C_ADDR01, EPLOS_CFG01, QuadrantConf, 2);
     I2CWriteToRegister(I2C_ADDR23, EPLOS_CFG23, QuadrantConf, 2);
 }
+
+
+void EPLOS_diag(void)
+{
+    uint8_t QuadrantConf[2];
+
+    QuadrantConf[0] = 0x11;
+    QuadrantConf[1] = 0x11;
+    I2CWriteToRegister(I2C_ADDR01, EPLOS_DIAG_OUT_SEL01, QuadrantConf, 2);
+    I2CWriteToRegister(I2C_ADDR23, EPLOS_DIAG_OUT_SEL23, QuadrantConf, 2);
+}
+
 
 void i2cmsginfo(uint8_t *tx, int txlen, uint8_t *rx, int rxlen)
 {
@@ -174,21 +224,37 @@ uint8_t I2CWriteToRegister(uint8_t SlaveAddress, uint8_t RegisterAddr, uint8_t *
     return OSRAM_I2C_Write(command, SlaveAddress, RegisterAddr, NumByteToWrite);
 }
 
-void OSRAM_play(void)
+void OSRAM_framRefresh(void)
 {
     unsigned short k,fixel;
     uint8_t        crc0,crc1,crc2,crc3,mask;
 
-    printf("OSRAM_play\r\n");
+    printf("OSRAM_framRefresh\r\n");
 
     CRC8_calc(displayMatrix1Q, sizeof(displayMatrix1Q), &crc0);
+    CRC8_calc(displayMatrix1Q, sizeof(displayMatrix1Q), &crc1);
+    CRC8_calc(displayMatrix1Q, sizeof(displayMatrix1Q), &crc2);
+    CRC8_calc(displayMatrix1Q, sizeof(displayMatrix1Q), &crc3);
 
     //Ð´Èë256bitsÊý¾Ý
-    for(fixel = 0; fixel <= QT_PIXELS; fixel++)
+    for(fixel = 0; fixel < QT_PIXELS; fixel++)
     {
         delay(1);
         QT_CLK_H
 
+#if 0
+        if(displayMatrix[fixel/16][fixel%16])
+            Q0_SI_H
+
+        if(displayMatrix[fixel/16+16][fixel%16])
+            Q1_SI_H
+
+        if(displayMatrix[fixel/16+16][fixel%16+16])
+            Q2_SI_H
+
+        if(displayMatrix[fixel/16][fixel%16+16])
+            Q3_SI_H
+#else
         if(displayMatrix1Q[fixel])
             Q0_SI_H
 
@@ -200,7 +266,7 @@ void OSRAM_play(void)
 
         if(displayMatrix1Q[fixel])
             Q3_SI_H
-
+#endif
         delay(1);
         Q0_SI_L
         Q1_SI_L
@@ -218,16 +284,16 @@ void OSRAM_play(void)
         mask = 0x80 >> k;
         if(crc0 & mask)
             Q0_SI_H
-        if(crc0 & mask)
+        if(crc1 & mask)
             Q1_SI_H
-        if(crc0 & mask)
+        if(crc2 & mask)
             Q2_SI_H
-        if(crc0 & mask)
+        if(crc3 & mask)
             Q3_SI_H
 
         if(k == 7)
         {
-            Q1_UPD_H
+            QT_UPD_H
         }
 
         delay(1);
@@ -239,7 +305,30 @@ void OSRAM_play(void)
         QT_CLK_L
     }
 
-    Q1_UPD_L
+    QT_UPD_L
 }
+
+void OSRAM_play(void)
+{
+    static uint8_t j=0;
+
+    if((HAL_GetTick() - systime>1000000) && runFlag)//100ms
+    {
+#if 0
+        memcpy(displayMatrix,cartoonBuffer[32*(j%20)],1024);
+        j++;
+#else
+        SD_ReadFileData();
+        for(j=0;j<1024;j++)
+        {
+            displayMatrix[j/32][j%32] = fileBuffer[j];
+        }
+#endif
+        systime = HAL_GetTick();
+
+        OSRAM_framRefresh();
+    }
+}
+
 #endif
 

@@ -50,6 +50,8 @@ uint8_t                  scenMode=0;
 uint8_t                  runFlag;
 uint8_t                  powerFlag;
 uint8_t                  single_cmd[CMD_LEN_MAX];
+uint16_t                 actType = 1;
+uint16_t                 actTime = 100;
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef       huart1, huart2, huart3;
@@ -63,8 +65,6 @@ SPI_HandleTypeDef        hspi1,hspi2;
 extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
 extern uint8_t           currentProgram;
-extern uint16_t          actType;
-extern uint16_t          actTime;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -241,15 +241,17 @@ int main(void)
     printf("system init hclk:%d\r\n",HAL_RCC_GetHCLKFreq());
 /*
     SD_Init();
-    test();           //²âÊÔº¯Êý
+    SD_ReadSDFiles();
+    fileCopy();           //²âÊÔº¯Êý
 */
 #if(PROJECTOR_OSRAM)
     I2C_init();
-    eplos_config();
+    EPLOS_config();
+    //EPLOS_diag();
 #endif
 
 #if(PROJECTOR_MBI5124)
-    reg_config();
+    //reg_config();
 #endif
     while (1)
     {
@@ -265,6 +267,10 @@ int main(void)
             MBI5124_Sink();
         else if(scenMode==2)
             MBI5124_Play();
+        else if(scenMode==3)
+            MBI5124_Prompt();
+        //else if(scenMode==4)
+        //    MBI5124_Cartoon();
 #elif(PROJECTOR_OSRAM)
         OSRAM_play();
         Delay_ms(500);
@@ -790,6 +796,10 @@ void UartControlHandle(uint8_t *key)
                 scenMode = 1;
             else if(ttt==13)
                 scenMode = 2;
+            else if(ttt==14)
+                scenMode = 3;
+            else if(ttt==15)
+                scenMode = 4;
         }
         else
         {

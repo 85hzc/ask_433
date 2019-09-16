@@ -207,7 +207,7 @@ void IIC_NAck(void)
 void IIC_Send_Byte(BYTE txd)
 {                        
   BYTE i;   
-  SDA_OUT(); 	    
+  SDA_OUT();
   IIC_SCL_0();//push down scl  to start transmit data
   delayus(2);
   for(i = 0; i < 8; ++i)
@@ -229,7 +229,7 @@ void IIC_Send_Byte(BYTE txd)
   }
 
   IIC_Wait_Ack();//hzc +
-} 	  
+}
 
 //¶Á1¸ö×Ö½Ú£¬ack=1Ê±£¬·¢ËÍACK£¬ack=0£¬·¢ËÍnACK   
 /**

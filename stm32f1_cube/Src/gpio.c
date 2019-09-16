@@ -74,11 +74,15 @@ void OSRAM_GPIO_Init(void)
     HAL_GPIO_Init(QUADRANT_EN_PORT, &GPIO_InitStruct);
 
     /*Configure GPIO pins :  */
-    GPIO_InitStruct.Pin = QT_CLK|Q0_SI|Q0_UPD|Q1_SI|Q1_UPD|Q2_SI|Q2_UPD|Q3_SI|Q3_UPD;
+    GPIO_InitStruct.Pin = QT_CLK|Q0_SI|Q1_SI|Q2_SI|Q3_SI|QT_UPD;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(OSRAM_PORT, &GPIO_InitStruct);
 }
 
+void MCU_GPIO_Init(void)
+{
+
+}
 

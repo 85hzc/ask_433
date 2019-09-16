@@ -5,161 +5,86 @@
     <configuration>
         <name>Debug</name>
         <outputs>
-            <file>$TOOLKIT_DIR$\config\lnkstm8s003f3.icf</file>
+            <file>$PROJ_DIR$\..\..\ASK-DEMO_RX_NEW\User\main.c</file>
+            <file>$PROJ_DIR$\..\..\ASK-DEMO_RX_NEW\User\Ask.c</file>
             <file>$TOOLKIT_DIR$\lib\dlstm8smn.a</file>
-            <file>$TOOLKIT_DIR$\lib\dbgstm8smd.a</file>
-            <file>$PROJ_DIR$\Debug\Obj\fm24.o</file>
+            <file>$PROJ_DIR$\..\User\fm24.c</file>
+            <file>$PROJ_DIR$\..\My_Lib\LED\led.c</file>
+            <file>$PROJ_DIR$\..\My_Lib\TIME\time.c</file>
             <file>$PROJ_DIR$\Debug\Obj\fm24.pbi</file>
-            <file>$PROJ_DIR$\..\My_Lib\delay\delay.h</file>
             <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
+            <file>$PROJ_DIR$\..\My_Lib\delay\delay.c</file>
+            <file>$PROJ_DIR$\..\My_Lib\KEY\key.c</file>
+            <file>$TOOLKIT_DIR$\lib\dbgstm8smd.a</file>
             <file>$PROJ_DIR$\..\My_Lib\KEY\key.h</file>
+            <file>$PROJ_DIR$\..\My_Lib\USART\USART.c</file>
+            <file>$TOOLKIT_DIR$\config\lnkstm8s003f3.icf</file>
             <file>$PROJ_DIR$\Debug\Obj\USART.o</file>
-            <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
+            <file>$PROJ_DIR$\..\My_Lib\EEPROM\eeprom.c</file>
             <file>$PROJ_DIR$\Debug\Obj\main.pbi</file>
             <file>$PROJ_DIR$\Debug\Obj\key.o</file>
             <file>$TOOLKIT_DIR$\inc\io_macros.h</file>
+            <file>$PROJ_DIR$\..\My_Lib\delay\delay.h</file>
+            <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
             <file>$PROJ_DIR$\..\User\ALL_Includes.h</file>
+            <file>$PROJ_DIR$\..\User\main.c</file>
             <file>$PROJ_DIR$\Debug\Obj\ASK.o</file>
             <file>$PROJ_DIR$\Debug\Obj\main.o</file>
+            <file>$PROJ_DIR$\Debug\Obj\fm24.o</file>
             <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
-            <file>$PROJ_DIR$\Debug\Exe\LED.hex</file>
-            <file>$PROJ_DIR$\Debug\Obj\USART.pbi</file>
-            <file>$PROJ_DIR$\Debug\Obj\eeprom.pbi</file>
+            <file>$PROJ_DIR$\..\User\ASK.C</file>
             <file>$PROJ_DIR$\Debug\Obj\time.o</file>
-            <file>$PROJ_DIR$\..\My_Lib\KEY\key.c</file>
-            <file>$PROJ_DIR$\..\User\fm24.c</file>
-            <file>$PROJ_DIR$\..\My_Lib\EEPROM\eeprom.c</file>
-            <file>$PROJ_DIR$\..\My_Lib\delay\delay.c</file>
-            <file>$PROJ_DIR$\..\My_Lib\LED\led.c</file>
-            <file>$PROJ_DIR$\Debug\Obj\eeprom.o</file>
-            <file>$PROJ_DIR$\..\User\main.c</file>
-            <file>$PROJ_DIR$\Debug\Obj\key.pbi</file>
-            <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
-            <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
-            <file>$PROJ_DIR$\..\User\ASK.H</file>
-            <file>$PROJ_DIR$\Debug\Obj\time.pbi</file>
-            <file>$PROJ_DIR$\..\User\MyType.h</file>
-            <file>$TOOLKIT_DIR$\inc\c\intrinsics.h</file>
             <file>$PROJ_DIR$\..\My_Lib\TIME\time.h</file>
             <file>$TOOLKIT_DIR$\inc\c\DLib_Defaults.h</file>
-            <file>$PROJ_DIR$\Debug\Obj\ASK.pbi</file>
+            <file>$PROJ_DIR$\Debug\Obj\eeprom.o</file>
+            <file>$TOOLKIT_DIR$\lib\dlstm8smn.h</file>
+            <file>$TOOLKIT_DIR$\inc\c\ysizet.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\key.pbi</file>
+            <file>$PROJ_DIR$\Debug\Obj\USART.pbi</file>
+            <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
+            <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
             <file>$TOOLKIT_DIR$\inc\c\ystdio.h</file>
-            <file>$PROJ_DIR$\..\My_Lib\USART\USART.c</file>
-            <file>$PROJ_DIR$\Debug\Exe\LED.out</file>
-            <file>$PROJ_DIR$\..\My_Lib\LED\led.h</file>
-            <file>$TOOLKIT_DIR$\inc\iostm8s103f3.h</file>
-            <file>$PROJ_DIR$\Debug\Obj\LED_tx.pbd</file>
             <file>$TOOLKIT_DIR$\inc\c\string.h</file>
             <file>$TOOLKIT_DIR$\inc\c\stdio.h</file>
-            <file>$PROJ_DIR$\..\My_Lib\USART\USART.h</file>
-            <file>$PROJ_DIR$\..\My_Lib\TIME\time.c</file>
-            <file>$PROJ_DIR$\..\My_Lib\EEPROM\eeprom.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\time.pbi</file>
+            <file>$PROJ_DIR$\..\User\MyType.h</file>
             <file>$PROJ_DIR$\Debug\Obj\led.o</file>
-            <file>$PROJ_DIR$\Debug\Obj\delay.o</file>
-            <file>$PROJ_DIR$\..\User\ASK.C</file>
-            <file>$PROJ_DIR$\Debug\Obj\led.pbi</file>
-            <file>$TOOLKIT_DIR$\lib\dlstm8smn.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\ASK.pbi</file>
+            <file>$PROJ_DIR$\..\User\ASK.H</file>
+            <file>$TOOLKIT_DIR$\inc\iostm8s103f3.h</file>
+            <file>$PROJ_DIR$\..\My_Lib\EEPROM\eeprom.h</file>
             <file>$PROJ_DIR$\Debug\Obj\delay.pbi</file>
-            <file>$TOOLKIT_DIR$\inc\c\ysizet.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\eeprom.pbi</file>
+            <file>$PROJ_DIR$\Debug\Exe\LED.hex</file>
+            <file>$TOOLKIT_DIR$\inc\c\intrinsics.h</file>
+            <file>$PROJ_DIR$\Debug\Exe\LED.out</file>
+            <file>$PROJ_DIR$\..\My_Lib\LED\led.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\LED_tx.pbd</file>
+            <file>$PROJ_DIR$\..\My_Lib\USART\USART.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\delay.o</file>
+            <file>$PROJ_DIR$\Debug\Obj\led.pbi</file>
+            <file>$PROJ_DIR$\..\..\ASK-DEMO_RX_NEW\User\ALL_Includes.h</file>
         </outputs>
-        <file>
-            <name>[ROOT_NODE]</name>
-            <outputs>
-                <tool>
-                    <name>ILINK</name>
-                    <file> 40</file>
-                </tool>
-            </outputs>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\My_Lib\KEY\key.c</name>
-            <outputs>
-                <tool>
-                    <name>ICCSTM8</name>
-                    <file> 11</file>
-                </tool>
-                <tool>
-                    <name>BICOMP</name>
-                    <file> 28</file>
-                </tool>
-            </outputs>
-            <inputs>
-                <tool>
-                    <name>ICCSTM8</name>
-                    <file> 13 42 12 33 5 41 7 46 35 48 44 6 29 36 53 16 30 9 55 34 31</file>
-                </tool>
-                <tool>
-                    <name>BICOMP</name>
-                    <file> 41 29 48 33 46 34 12 36 6 42 5 7 35 44 31 13 9 55 30 53 16</file>
-                </tool>
-            </inputs>
-        </file>
         <file>
             <name>$PROJ_DIR$\..\User\fm24.c</name>
             <outputs>
                 <tool>
                     <name>ICCSTM8</name>
-                    <file> 3</file>
+                    <file> 25</file>
                 </tool>
                 <tool>
                     <name>BICOMP</name>
-                    <file> 4</file>
+                    <file> 6</file>
                 </tool>
             </outputs>
             <inputs>
                 <tool>
                     <name>ICCSTM8</name>
-                    <file> 13 42 12 33 5 41 7 46 35 48 44 6 29 36 53 16 30 9 55 34 31</file>
+                    <file> 21 46 18 42 19 53 11 55 29 47 39 7 37 30 32 26 36 20 33 51 45</file>
                 </tool>
                 <tool>
                     <name>BICOMP</name>
-                    <file> 41 16 48 6 33 46 34 12 36 42 5 7 35 44 31 29 53 13 55 30 9</file>
-                </tool>
-            </inputs>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\My_Lib\EEPROM\eeprom.c</name>
-            <outputs>
-                <tool>
-                    <name>ICCSTM8</name>
-                    <file> 26</file>
-                </tool>
-                <tool>
-                    <name>BICOMP</name>
-                    <file> 19</file>
-                </tool>
-            </outputs>
-            <inputs>
-                <tool>
-                    <name>ICCSTM8</name>
-                    <file> 48 13 42 12 33 5 41 7 46 35 44 6 29 36 53 16 30 9 55 34 31</file>
-                </tool>
-                <tool>
-                    <name>BICOMP</name>
-                    <file> 5 35 29 42 7 44 13 33 41 46 48 12 6 30 9 34 55 36 53 16 31</file>
-                </tool>
-            </inputs>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\My_Lib\delay\delay.c</name>
-            <outputs>
-                <tool>
-                    <name>ICCSTM8</name>
-                    <file> 50</file>
-                </tool>
-                <tool>
-                    <name>BICOMP</name>
-                    <file> 54</file>
-                </tool>
-            </outputs>
-            <inputs>
-                <tool>
-                    <name>ICCSTM8</name>
-                    <file> 13 42 12 33 5 41 7 46 35 48 44 6 29 36 53 16 30 9 55 34 31</file>
-                </tool>
-                <tool>
-                    <name>BICOMP</name>
-                    <file> 46 33 29 41 48 12 42 5 7 35 44 6 30 9 13 34 55 36 53 16 31</file>
+                    <file> 21 53 26 47 7 42 55 51 18 30 46 19 11 29 39 45 37 32 33 36 20</file>
                 </tool>
             </inputs>
         </file>
@@ -168,82 +93,21 @@
             <outputs>
                 <tool>
                     <name>ICCSTM8</name>
-                    <file> 49</file>
+                    <file> 43</file>
                 </tool>
                 <tool>
                     <name>BICOMP</name>
-                    <file> 52</file>
+                    <file> 57</file>
                 </tool>
             </outputs>
             <inputs>
                 <tool>
                     <name>ICCSTM8</name>
-                    <file> 13 42 12 33 5 41 7 46 35 48 44 6 29 36 53 16 30 9 55 34 31</file>
+                    <file> 21 46 18 42 19 53 11 55 29 47 39 7 37 30 32 26 36 20 33 51 45</file>
                 </tool>
                 <tool>
                     <name>BICOMP</name>
-                    <file> 29 7 42 44 13 5 35 31 36 6 33 41 46 48 34 12 9 55 30 53 16</file>
-                </tool>
-            </inputs>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\User\main.c</name>
-            <outputs>
-                <tool>
-                    <name>ICCSTM8</name>
-                    <file> 15</file>
-                </tool>
-                <tool>
-                    <name>BICOMP</name>
-                    <file> 10</file>
-                </tool>
-            </outputs>
-            <inputs>
-                <tool>
-                    <name>ICCSTM8</name>
-                    <file> 13 42 12 33 5 41 7 46 35 48 44 6 29 36 53 16 30 9 55 34 31</file>
-                </tool>
-                <tool>
-                    <name>BICOMP</name>
-                    <file> 7 29 42 44 13 5 35 31 36 6 33 41 46 48 34 12 55 9 30 53 16</file>
-                </tool>
-            </inputs>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\My_Lib\USART\USART.c</name>
-            <outputs>
-                <tool>
-                    <name>ICCSTM8</name>
-                    <file> 8</file>
-                </tool>
-                <tool>
-                    <name>BICOMP</name>
-                    <file> 18</file>
-                </tool>
-            </outputs>
-            <inputs>
-                <tool>
-                    <name>ICCSTM8</name>
-                    <file> 46 13 42 12 33 5 41 7 35 48 44 6 29 36 53 16 30 9 55 34 31 45 38</file>
-                </tool>
-                <tool>
-                    <name>BICOMP</name>
-                    <file> 46 12 13 33 34 6 41 48 29 53 45 42 5 7 35 44 31 36 16 55 30 9 38</file>
-                </tool>
-            </inputs>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\Debug\Exe\LED.out</name>
-            <outputs>
-                <tool>
-                    <name>OBJCOPY</name>
-                    <file> 17</file>
-                </tool>
-            </outputs>
-            <inputs>
-                <tool>
-                    <name>ILINK</name>
-                    <file> 0 14 50 26 3 11 49 15 20 8 1 2</file>
+                    <file> 11 37 46 39 21 20 19 29 45 42 53 55 47 51 18 30 7 33 36 32 26</file>
                 </tool>
             </inputs>
         </file>
@@ -252,21 +116,136 @@
             <outputs>
                 <tool>
                     <name>ICCSTM8</name>
-                    <file> 20</file>
+                    <file> 28</file>
                 </tool>
                 <tool>
                     <name>BICOMP</name>
-                    <file> 32</file>
+                    <file> 41</file>
                 </tool>
             </outputs>
             <inputs>
                 <tool>
                     <name>ICCSTM8</name>
-                    <file> 35 13 42 12 33 5 41 7 46 48 44 6 29 36 53 16 30 9 55 34 31</file>
+                    <file> 29 21 46 18 42 19 53 11 55 47 39 7 37 30 32 26 36 20 33 51 45</file>
                 </tool>
                 <tool>
                     <name>BICOMP</name>
-                    <file> 5 35 29 42 7 44 13 33 41 46 48 12 6 30 9 34 55 36 53 16 31</file>
+                    <file> 19 29 46 21 37 11 39 42 53 55 47 18 7 36 20 51 33 30 32 26 45</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\My_Lib\delay\delay.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCSTM8</name>
+                    <file> 56</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 48</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCSTM8</name>
+                    <file> 21 46 18 42 19 53 11 55 29 47 39 7 37 30 32 26 36 20 33 51 45</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 55 21 42 37 53 47 18 46 19 11 29 39 7 36 20 51 33 30 32 26 45</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\My_Lib\KEY\key.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCSTM8</name>
+                    <file> 17</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 34</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCSTM8</name>
+                    <file> 21 46 18 42 19 53 11 55 29 47 39 7 37 30 32 26 36 20 33 51 45</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 53 37 47 46 21 20 42 55 51 18 19 11 29 39 45 30 7 33 36 32 26</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\My_Lib\USART\USART.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCSTM8</name>
+                    <file> 14</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 35</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCSTM8</name>
+                    <file> 55 21 46 18 42 19 53 11 29 47 39 7 37 30 32 26 36 20 33 51 45 40 38</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 55 18 21 42 51 7 53 47 37 32 40 46 19 11 29 39 45 30 26 33 36 20 38</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\My_Lib\EEPROM\eeprom.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCSTM8</name>
+                    <file> 31</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 49</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCSTM8</name>
+                    <file> 47 21 46 18 42 19 53 11 55 29 39 7 37 30 32 26 36 20 33 51 45</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 19 29 37 46 11 39 21 42 53 55 47 18 7 36 20 51 33 30 32 26 45</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\User\main.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCSTM8</name>
+                    <file> 24</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 16</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCSTM8</name>
+                    <file> 21 46 18 42 19 53 11 55 29 47 39 7 37 30 32 26 36 20 33 51 45</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 42 51 55 18 20 53 47 46 21 37 19 11 29 39 45 7 33 30 36 32 26</file>
                 </tool>
             </inputs>
         </file>
@@ -275,23 +254,47 @@
             <outputs>
                 <tool>
                     <name>ICCSTM8</name>
-                    <file> 14</file>
+                    <file> 23</file>
                 </tool>
                 <tool>
                     <name>BICOMP</name>
-                    <file> 37</file>
+                    <file> 44</file>
                 </tool>
             </outputs>
             <inputs>
                 <tool>
                     <name>ICCSTM8</name>
-                    <file> 31 13 42 12 33 5 41 7 46 35 48 44 6 29 36 53 16 30 9 55 34</file>
+                    <file> 45 21 46 18 42 19 53 11 55 29 47 39 7 37 30 32 26 36 20 33 51</file>
                 </tool>
                 <tool>
                     <name>BICOMP</name>
-                    <file> 12 41 48 29 13 33 46 42 5 7 35 44 6 30 9 31 34 55 36 53 16</file>
+                    <file> 37 53 21 47 46 20 42 55 51 18 19 11 29 39 45 30 7 33 36 32 26</file>
                 </tool>
             </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\LED.out</name>
+            <outputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 50</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 13 23 56 31 25 17 43 24 28 14 2 10</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>[ROOT_NODE]</name>
+            <outputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 52</file>
+                </tool>
+            </outputs>
         </file>
     </configuration>
     <configuration>

@@ -19,14 +19,16 @@
 #if(PROJECTOR_MBI5124)
 extern uint8_t              runFlag;
 extern char                 fileBuffer[MAX_FILE_SIZE];   // file copy buffer
+extern char                 promptBuffer[16*6][16];
+//extern char                 cartoonBuffer[16*20][16];
+extern uint16_t             actType;
+extern uint16_t             actTime;
 
 uint64_t                    systime = 0;
 uint64_t                    systime1 = 0;
 uint8_t                     chnFlagPos[16][SECS];//1-8
 static uint8_t              currentLine=0;
-char                        dispBuffer[16][16];
-uint16_t                    actType = 1;
-uint16_t                    actTime = 100;
+char                        refreshBuf[16][16];
 
 void LE(void)
 {
@@ -302,8 +304,7 @@ uint8_t MBI_SdiInput_Play()
     {
         //for(j = 0; j < MBI5124_SIZE; j++)//级联IC数量
         {
-
-            if(dispBuffer[line][ch])
+            if(refreshBuf[line][ch])
                 SDI_PIN_H
 
             DCLK_PIN_H
@@ -415,17 +416,52 @@ void MBI5124_Play(void)
 {
     uint16_t j;
 
-    if((HAL_GetTick() - systime>30000) && runFlag)//100ms
+    if((HAL_GetTick() - systime>20000) && runFlag)//100ms
     {
-        readFromTfcard();
-        memcpy(dispBuffer,fileBuffer,256);
+        readFromCaption();
+        memcpy(refreshBuf,fileBuffer,256);
         /*for(j=0;j<256;j++)
         {
-            dispBuffer[j/16][j%16] = fileBuffer[j];
+            refreshBuf[j/16][j%16] = fileBuffer[j];
         }*/
         systime = HAL_GetTick();
     }
     cycleScan_Play();
 }
+
+void MBI5124_Prompt(void)
+{
+    static uint8_t j=0;
+
+    if((HAL_GetTick() - systime>300000) && runFlag)//100ms
+    {
+        memcpy(refreshBuf,promptBuffer[16*(j%6)],256);
+        j++;
+        /*for(j=0;j<256;j++)
+        {
+            refreshBuf[j/16][j%16] = fileBuffer[j];
+        }*/
+        systime = HAL_GetTick();
+    }
+    cycleScan_Play();
+}
+#if 0
+void MBI5124_Cartoon(void)
+{
+    static uint8_t j=0;
+
+    if((HAL_GetTick() - systime>70000) && runFlag)//100ms
+    {
+        memcpy(refreshBuf,cartoonBuffer[16*(j%20)],256);
+        j++;
+        /*for(j=0;j<256;j++)
+        {
+            refreshBuf[j/16][j%16] = fileBuffer[j];
+        }*/
+        systime = HAL_GetTick();
+    }
+    cycleScan_Play();
+}
+#endif
 #endif
 

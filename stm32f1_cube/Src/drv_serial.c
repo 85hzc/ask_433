@@ -103,7 +103,7 @@ static void handle_func_MIkeys(uint16_t key)
             break;
         case REMOTE_MI_UP:
         case REMOTE_MI_DOWN:
-            readFromTfcard();
+            SD_ReadFileData();
             break;
         case REMOTE_MI_LEFT:
         case REMOTE_MI_RIGHT:

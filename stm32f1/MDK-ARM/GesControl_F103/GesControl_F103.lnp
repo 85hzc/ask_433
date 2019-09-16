@@ -1,0 +1,27 @@
+--cpu Cortex-M3
+"gescontrol_f103\startup_stm32f103xb.o"
+"gescontrol_f103\stm32f1xx_hal_dma.o"
+"gescontrol_f103\stm32f1xx_hal_cortex.o"
+"gescontrol_f103\stm32f1xx_hal_rcc.o"
+"gescontrol_f103\stm32f1xx_hal_rcc_ex.o"
+"gescontrol_f103\stm32f1xx_hal_pwr.o"
+"gescontrol_f103\stm32f1xx_hal_tim.o"
+"gescontrol_f103\stm32f1xx_hal_tim_ex.o"
+"gescontrol_f103\stm32f1xx_hal_gpio.o"
+"gescontrol_f103\stm32f1xx_hal_flash_ex.o"
+"gescontrol_f103\stm32f1xx_hal_uart.o"
+"gescontrol_f103\stm32f1xx_hal_flash.o"
+"gescontrol_f103\stm32f1xx_hal_gpio_ex.o"
+"gescontrol_f103\stm32f1xx_hal.o"
+"gescontrol_f103\system_stm32f1xx.o"
+"gescontrol_f103\main.o"
+"gescontrol_f103\stm32f1xx_hal_msp.o"
+"gescontrol_f103\stm32f1xx_it.o"
+"gescontrol_f103\app.o"
+"gescontrol_f103\gesture.o"
+"gescontrol_f103\siliconsi115x.o"
+"gescontrol_f103\softi2c.o"
+--library_type=microlib --strict --scatter "GesControl_F103\GesControl_F103.sct"
+--diag_suppress=L6329 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "GesControl_F103.map" -o GesControl_F103\GesControl_F103.axf

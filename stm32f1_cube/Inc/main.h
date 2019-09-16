@@ -49,10 +49,10 @@
 #define LOG_ENABLE          1                   //使能输出记录
 
 #define PROJECTOR_MBI5153   0
-#define PROJECTOR_MBI5124   1
-#define PROJECTOR_OSRAM     0
+#define PROJECTOR_MBI5124   0
+#define PROJECTOR_OSRAM     1
 #define PROJECTOR_MCUGPIO   0
-#define IR_REMOTE           0
+#define IR_REMOTE           1
 
 typedef volatile uint32_t   vu32;
 typedef volatile uint16_t   vu16;

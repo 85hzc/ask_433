@@ -428,12 +428,7 @@
             <File>
               <FileName>mbi5153.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\mbi5153.c</FilePath>
-            </File>
-            <File>
-              <FileName>timepwm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\timepwm.c</FilePath>
+              <FilePath>..\Drive\Source\mbi5153.c</FilePath>
             </File>
           </Files>
         </Group>
