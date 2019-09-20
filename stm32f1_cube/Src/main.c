@@ -283,7 +283,10 @@ int main(void)
     SDInit();
 #endif
     printf("SDInit ok\r\n");
-    //SD_ReadFileList();
+    SD_ReadFileList("");
+    SD_ReadFileList("/f1");
+    SD_ReadFileList("/f2");
+
     SD_fileCopy();           //²âÊÔº¯Êý
 
 #if(PROJECTOR_OSRAM)

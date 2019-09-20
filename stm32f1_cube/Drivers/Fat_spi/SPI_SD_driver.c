@@ -329,14 +329,12 @@ u8 SD_Init(void)
     //这种卡就用不成咯！ 
     *******************************************************/ 
     SPI_SetSpeed(SPI_SPEED_LOW); //设置SPI速度为低速 
-    printf("%s[%d]\r\n",__FUNCTION__,__LINE__);
 
     //先产生>74个脉冲，让SD卡自己初始化完成
     for(i=0;i<10;i++)
     {
         SPI_ReadWriteByte(0xFF);
     }
-    printf("%s[%d]\r\n",__FUNCTION__,__LINE__);
 
     //-----------------SD卡复位到idle开始-----------------
     //循环连续发送CMD0，直到SD卡返回0x01,进入IDLE状态
@@ -352,7 +350,6 @@ u8 SD_Init(void)
     //}while((r1 != 0x01) && (retry<5));
     //跳出循环后，检查原因：初始化成功？or 重试超时？
 
-    printf("%s[%d] res=%d\r\n",__FUNCTION__,__LINE__,r1);
     if(retry==10)
     //if(retry==5)
     {
@@ -718,10 +715,12 @@ u8 SD_ReadSingleBlock(u32 sector, u8 *buffer)
 
     //设置为高速模式
     SPI_SetSpeed(SPI_SPEED_HIGH);
-    
-    //如果不是SDHC，将sector地址转成byte地址
-    sector = sector<<9;
 
+    //如果不是SDHC，将sector地址转成byte地址
+    if(SD_Type!=SD_TYPE_V2HC)
+    {
+        sector = sector<<9;
+    }
     r1 = SD_SendCommand(CMD17, sector, 0);//读命令
     
     if(r1 != 0x00)
@@ -836,7 +835,10 @@ u8 SD_ReadMultiBlock(u32 sector, u8 *buffer, u8 count)
     SPI_SetSpeed(SPI_SPEED_HIGH);
     
     //如果不是SDHC，将sector地址转成byte地址
-    sector = sector<<9;
+    if(SD_Type!=SD_TYPE_V2HC)
+    {
+        sector = sector<<9;
+    }
     //SD_WaitReady();
     //发读多块命令
     r1 = SD_SendCommand(CMD18, sector, 0);//读命令

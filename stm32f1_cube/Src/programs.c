@@ -9,7 +9,7 @@
 #include "config.h"
 
 static FATFS    fs;            // Work area (file system object) for logical drive
-static FIL      fsrc;      // file objects
+static FIL      fsrc, fdst;      // file objects
 BYTE            buff_filename[50][13];//最多只能读9个文件，保存9个文件名,文件名采用短文件名，最多13个字符
 
 char fileBuffer[MAX_FILE_SIZE]={
@@ -522,12 +522,13 @@ FRESULT SD_ReadFileData()
 ** output paraments:    无    
 ** Returned values:     无
 *********************************************************************************************************/
-void SD_ReadFileList(void)
+void SD_ReadFileList(char *path)
 {
     FILINFO finfo;
     DIR dirs;
-    int i_name=0;
-    char path[50]={""};
+    int i_name=0, br;
+    //char path[50]={""};
+    char buffer[512];
 
     /*挂载文件系统*/
     f_mount(0, &fs);
@@ -541,12 +542,16 @@ void SD_ReadFileList(void)
                 if(!finfo.fname[0]){      //文件名不为空，如果为空，则表明该目录下面的文件已经读完了
                     break;
                 }
-                res = f_open(&fsrc, finfo.fname, FA_OPEN_EXISTING | FA_READ);
+                //res = f_open(&fsrc, finfo.fname, FA_OPEN_EXISTING | FA_READ);
                 stringcopy(buff_filename[i_name], (BYTE*)finfo.fname);
                 printf("filename[%d]:%s\r\n",i_name,buff_filename[i_name]);
                 i_name++;
+                /*
+                //memset(buffer,0,sizeof(buffer));
                 //res = f_read(&fsrc, &buffer, 50, &br);
+                printf("[%s]\r\n",buffer);
                 f_close(&fsrc);
+                */
             }
         }
     }
@@ -560,30 +565,30 @@ void SD_fileCopy(void)
 {
     UINT a = 1;
     char buffer[1024];
-    FIL fsrc, fdst;      // file objects
     FRESULT res1, res2;   // FatFs function common result code
-    DBG;
+
+    memset(buffer,0,sizeof(buffer));
 
     f_mount(0, &fs);
-    DBG;
-    res1 = f_open(&fdst, "huangzhicheng.txt", FA_CREATE_ALWAYS | FA_WRITE);
-    DBG;
-    res2 = f_open(&fsrc, "opplem.txt", FA_OPEN_EXISTING | FA_READ);
+    res1 = f_open(&fdst, "huangzhi", FA_CREATE_ALWAYS | FA_WRITE);//this fatfs support 8bytes file name
+    res2 = f_open(&fsrc, "opple1.txt", FA_OPEN_EXISTING | FA_READ);
     printf("res1:%d,res2:%d\r\n",res1,res2);
 
     if((res1 || res2) != 0)
     {
-        if(res2 == 0)
-        f_close(&fsrc);
-        if(res1 == 0)
-        f_close(&fdst);
+        if(!res2)
+            f_close(&fsrc);
+        if(!res1)
+            f_close(&fdst);
 
         printf("file system test error\r\n");
         return;
     }
 
-    f_read(&fsrc, buffer,1024, &a);      //从opplem.txt中读取1024个字节
-    f_write(&fdst, buffer,1024, &a);     //huangzhicheng.txt中写人1024个字节      
+    f_read(&fsrc, buffer,256, &a);      //从opplem.txt中读取1024个字节
+    printf("read len %d\r\n",a);
+
+    f_write(&fdst, buffer,a, &a);     //huangzhicheng.txt中写人1024个字节      
     f_close(&fsrc);
     f_close(&fdst);
 }
