@@ -28,6 +28,7 @@
 "gescontrol_f103\mcugpio.o"
 "gescontrol_f103\programs.o"
 "gescontrol_f103\drv_serial.o"
+"gescontrol_f103\softspi.o"
 "gescontrol_f103\spi_sd_driver.o"
 "gescontrol_f103\fatspi_test.o"
 "gescontrol_f103\ff.o"

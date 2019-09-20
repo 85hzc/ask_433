@@ -1285,11 +1285,15 @@ FRESULT follow_path (   /* FR_OK(0): successful, !=0: error code */
         (dj->fs->fs_type == FS_FAT32) ? dj->fs->dirbase : 0;
 
     if ((BYTE)*path < ' ') {            /* Null path means the root directory */
+            DBG;
+
         res = dir_seek(dj, 0);
         dj->dir = NULL;
 
     } else {                            /* Follow path */
         for (;;) {
+                DBG;
+
             res = create_name(dj, &path);   /* Get a segment */
             if (res != FR_OK) break;
             res = dir_find(dj);             /* Find it */
@@ -1510,7 +1514,6 @@ FRESULT f_mount (
 )
 {
     FATFS *rfs;
-
 
     if (vol >= _DRIVES)             /* Check if the drive number is valid */
         return FR_INVALID_DRIVE;

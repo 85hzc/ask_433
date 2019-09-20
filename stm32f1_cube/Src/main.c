@@ -39,6 +39,7 @@
 #include "delay.h"
 #include "drv_ir.h"
 #include "drv_serial.h"
+#include "softspi.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -68,7 +69,7 @@ extern uint8_t           currentProgram;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-#define DEBUG_UART       huart2
+#define DEBUG_UART       huart3
 
 /* USER CODE END PV */
 
@@ -123,7 +124,9 @@ void MX_SPI2_Init(void)
     hspi2.Init.CLKPolarity = SPI_POLARITY_HIGH;//CPOL=0,low
     hspi2.Init.CLKPhase = SPI_PHASE_2EDGE;//CPHA为数据线的第一个变化沿
     hspi2.Init.NSS = SPI_NSS_SOFT;//软件控制NSS
-    hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;//2分频，32M/2=16MHz
+    hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;//2分频，32M/2=16MHz
+    //hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;//2分频，32M/2=16MHz
+
     hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;//最高位先发送
     hspi2.Init.TIMode = SPI_TIMODE_DISABLE;//TIMODE模式关闭
     hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;//CRC关闭
@@ -152,9 +155,9 @@ void Drv_SERIAL_Proc(void)
     if(UsartType1.RX_flag)
     {
         UsartType1.RX_flag = 0;
-        HAL_UART_Transmit(&huart2, UsartType1.RX_pData, UsartType1.RX_Size, 0xffff);
+        HAL_UART_Transmit(&DEBUG_UART, UsartType1.RX_pData, UsartType1.RX_Size, 0xffff);
     }
-    //debug
+    //ble
     if(UsartType2.RX_flag)
     {
         UsartType2.RX_flag = 0;
@@ -165,13 +168,19 @@ void Drv_SERIAL_Proc(void)
 
         strncpy(key,ptr,UsartType2.RX_Size);
         UartControlHandle(key);
-        //HAL_UART_Transmit(&huart2, UsartType2.RX_pData, UsartType2.RX_Size, 0xffff);
+        HAL_UART_Transmit(&DEBUG_UART, UsartType2.RX_pData, UsartType2.RX_Size, 0xffff);
     }
-    //ble
+    //debug
     if(UsartType3.RX_flag)
     {
         UsartType3.RX_flag = 0;
-        HAL_UART_Transmit(&huart2, UsartType3.RX_pData, UsartType3.RX_Size, 0xffff);
+
+        ptr = UsartType3.RX_pData;
+
+        memset(key, 0, sizeof(key));
+        strncpy(key,ptr,UsartType3.RX_Size);
+        UartControlHandle(key);
+        HAL_UART_Transmit(&DEBUG_UART, UsartType3.RX_pData, UsartType3.RX_Size, 0xffff);
     }
 #if 0
     /* 1. read the uart buffer... */
@@ -218,13 +227,20 @@ int main(void)
     MX_USART2_UART_Init();
     MX_USART3_UART_Init();
     //MX_TIM3_Init();//for IR INT
+    
 #if(IR_REMOTE)
     MX_TIM2_Init();//for IR INT
     /* Initialize IR state */
     Drv_IR_Init();
 #endif
+
+#ifdef SPI_HARD
     SPI_Configuration();    //SPI初始化
+#else
+    SPI_GPIO_Soft_Init();
+#endif
     appInit();
+
     printf("system start.\r\n");
     //Drv_PWM_Init();
 
@@ -234,16 +250,42 @@ int main(void)
 
     HAL_UART_Receive_DMA(&huart2, UsartType2.RX_pData, RX_LEN);
     __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
+
+    HAL_UART_Receive_DMA(&huart3, UsartType3.RX_pData, RX_LEN);
+    __HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);
 #else
     HAL_UART_Receive_IT(&huart1, rxData, 5);
 #endif
 
     printf("system init hclk:%d\r\n",HAL_RCC_GetHCLKFreq());
-/*
+
+#if 0
+    while(1){
+
+        //SPI_CLK_L;
+        //SPI_CS_L;
+        SPI_MO_L;
+        delayus(100);
+        //SPI_CLK_H;
+        //SPI_CS_H;
+        SPI_MO_H;
+        delayus(100);
+       /*
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+        Delay_ms(10);
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+        Delay_ms(10);*/
+    }
+#endif
+#ifdef SPI_HARD
     SD_Init();
-    SD_ReadSDFiles();
-    fileCopy();           //测试函数
-*/
+#else
+    SDInit();
+#endif
+    printf("SDInit ok\r\n");
+    //SD_ReadFileList();
+    SD_fileCopy();           //测试函数
+
 #if(PROJECTOR_OSRAM)
     I2C_init();
     EPLOS_config();
@@ -272,14 +314,20 @@ int main(void)
         //else if(scenMode==4)
         //    MBI5124_Cartoon();
 #elif(PROJECTOR_OSRAM)
-        OSRAM_play();
-        Delay_ms(500);
+        //OSRAM_play();
+        //Delay_ms(500);
 #elif(PROJECTOR_MCUGPIO)
         MCUGpio_X();
         //MCUGpio_Sink();
 #endif
 
         Drv_SERIAL_Proc();
+        //printf("led\r\n");
+
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+        Delay_ms(200);
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+        Delay_ms(200);
     }
 }
 
@@ -353,7 +401,7 @@ static void MX_USART2_UART_Init(void)
 {
 
     huart2.Instance = USART2;
-    huart2.Init.BaudRate = 115200;
+    huart2.Init.BaudRate = 9600;
     huart2.Init.WordLength = UART_WORDLENGTH_8B;
     huart2.Init.StopBits = UART_STOPBITS_1;
     huart2.Init.Parity = UART_PARITY_NONE;
@@ -371,7 +419,7 @@ static void MX_USART3_UART_Init(void)
 {
 
     huart3.Instance = USART3;
-    huart3.Init.BaudRate = 9600;
+    huart3.Init.BaudRate = 115200;
     huart3.Init.WordLength = UART_WORDLENGTH_8B;
     huart3.Init.StopBits = UART_STOPBITS_1;
     huart3.Init.Parity = UART_PARITY_NONE;
@@ -432,7 +480,7 @@ static void MX_GPIO_Init(void)
 #endif
 
     LED_GPIO_Init();
-
+    
     //init_tim3PWMIO();
 #if(PROJECTOR_MBI5153||PROJECTOR_MBI5124)
     MBI_GPIO_Init();//初始化MBI驱动pin

@@ -56,6 +56,6 @@ typedef struct
 #define BLACK   0x0000
 #define YELLOW  0xFFE0
 
-void fileCopy(void);
+//void fileCopy(void);
 
 #endif

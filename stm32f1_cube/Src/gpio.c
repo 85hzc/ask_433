@@ -29,6 +29,75 @@ void LED_GPIO_Init(void)
     HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 }
 
+//spi init
+void SPI_GPIO_Soft_Init(void)
+{
+    GPIO_InitTypeDef GPIO_InitStruct;
+
+    //Configure PA8 pin: DET pin
+    GPIO_InitStruct.Pin = SD_DET_GPIO;
+    GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    HAL_GPIO_Init(SD_DET_PORT,&GPIO_InitStruct); 
+
+    //Configure PB12 pin: SD_CS pin
+    GPIO_InitStruct.Pin = SD_CS_GPIO;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;    //推挽输出
+    HAL_GPIO_Init(SD_CS_PORT,&GPIO_InitStruct);
+    HAL_GPIO_WritePin(SD_CS_PORT,SD_CS_GPIO,GPIO_PIN_SET);//disable 
+
+
+    // SPI_SCK SPI_MOSI  复用推挽输出
+    GPIO_InitStruct.Pin =  SPI2_SCK | SPI2_MOSI;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+    HAL_GPIO_Init(SPI2_PORT, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(SPI2_PORT,SPI2_SCK|SPI2_MOSI,GPIO_PIN_SET);//disable 
+
+    //SPI_MISO 上拉输入模式
+    GPIO_InitStruct.Pin  = SPI2_MISO;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Mode  = GPIO_MODE_INPUT;
+    HAL_GPIO_Init(SPI2_PORT, &GPIO_InitStruct);
+}
+
+void SPI_GPIO_Hard_Init(void)
+{
+    GPIO_InitTypeDef GPIO_InitStruct;
+
+    //Configure PA8 pin: DET pin
+    GPIO_InitStruct.Pin = SD_DET_GPIO;
+    GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    HAL_GPIO_Init(SD_DET_PORT,&GPIO_InitStruct); 
+
+    //Configure PB12 pin: SD_CS pin
+    GPIO_InitStruct.Pin = SD_CS_GPIO;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;    //推挽输出
+    HAL_GPIO_Init(SD_CS_PORT,&GPIO_InitStruct);
+    HAL_GPIO_WritePin(SD_CS_PORT,SD_CS_GPIO,GPIO_PIN_SET);//disable 
+
+
+    // SPI_SCK SPI_MOSI  复用推挽输出
+    GPIO_InitStruct.Pin =  SPI2_SCK | SPI2_MOSI;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Mode  = GPIO_MODE_AF_PP;
+    HAL_GPIO_Init(SPI2_PORT, &GPIO_InitStruct);
+
+    //SPI_MISO 上拉输入模式
+    GPIO_InitStruct.Pin  = SPI2_MISO;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Mode  = GPIO_MODE_AF_INPUT;
+    HAL_GPIO_Init(SPI2_PORT, &GPIO_InitStruct);
+}
+
+
 // 函数：IO初始化
 void MBI_GPIO_Init(void)
 {

@@ -530,9 +530,9 @@ void SD_ReadFileList(void)
     char path[50]={""};
 
     /*挂载文件系统*/
-    f_mount(0, &fs);     
+    f_mount(0, &fs);
     res =  f_opendir(&dirs, path);
-    if (res == FR_OK) 
+    if (res == FR_OK)
     {
         while (f_readdir(&dirs, &finfo) == FR_OK)
         {
@@ -543,11 +543,16 @@ void SD_ReadFileList(void)
                 }
                 res = f_open(&fsrc, finfo.fname, FA_OPEN_EXISTING | FA_READ);
                 stringcopy(buff_filename[i_name], (BYTE*)finfo.fname);
+                printf("filename[%d]:%s\r\n",i_name,buff_filename[i_name]);
                 i_name++;
                 //res = f_read(&fsrc, &buffer, 50, &br);
                 f_close(&fsrc);
             }
         }
+    }
+    else
+    {
+        printf("open path %s failed.\r\n",path);
     }
 }
 
@@ -557,10 +562,15 @@ void SD_fileCopy(void)
     char buffer[1024];
     FIL fsrc, fdst;      // file objects
     FRESULT res1, res2;   // FatFs function common result code
+    DBG;
 
     f_mount(0, &fs);
+    DBG;
     res1 = f_open(&fdst, "huangzhicheng.txt", FA_CREATE_ALWAYS | FA_WRITE);
+    DBG;
     res2 = f_open(&fsrc, "opplem.txt", FA_OPEN_EXISTING | FA_READ);
+    printf("res1:%d,res2:%d\r\n",res1,res2);
+
     if((res1 || res2) != 0)
     {
         if(res2 == 0)

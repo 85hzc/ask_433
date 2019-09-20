@@ -25,6 +25,9 @@
 #define UART_Debug_RX     GPIO_PIN_3
 #define UART_Debug_Port   GPIOA
 
+#define SD_DET_GPIO       GPIO_PIN_8
+#define SD_DET_PORT       GPIOA
+
 #define SD_CS_GPIO        GPIO_PIN_12
 #define SD_CS_PORT        GPIOB
 

@@ -398,11 +398,14 @@ HAL_StatusTypeDef HAL_SPI_DeInit(SPI_HandleTypeDef *hspi)
     //GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
     HAL_GPIO_Init(SPI2_PORT, &GPIO_InitStruct);//配置SPI的数据线和时钟线
     */
+#if 0
     //////下面是SPI相关GPIO初始化//////
     //Configure SPI2 pins: SCK, MISO and MOSI 
+#if 1
     // SPI_SCK SPI_MOSI  复用推挽输出
     GPIO_InitStruct.Pin =  SPI2_SCK | SPI2_MOSI;
     GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     GPIO_InitStruct.Mode  = GPIO_MODE_AF_PP;
     HAL_GPIO_Init(SPI2_PORT, &GPIO_InitStruct);
 
@@ -411,6 +414,24 @@ HAL_StatusTypeDef HAL_SPI_DeInit(SPI_HandleTypeDef *hspi)
     GPIO_InitStruct.Mode  = GPIO_MODE_AF_INPUT;
     HAL_GPIO_Init(SPI2_PORT, &GPIO_InitStruct);
 
+#else
+    /*##-2- Configure peripheral GPIO ##########################################*/  
+    /* SPI SCK GPIO pin configuration  */
+    GPIO_InitStruct.Pin       = SPI2_SCK;
+    GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull      = GPIO_PULLDOWN;
+    GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(SPI2_PORT, &GPIO_InitStruct);
+
+    /* SPI MISO GPIO pin configuration  */
+    GPIO_InitStruct.Pin = SPI2_MISO;
+    HAL_GPIO_Init(SPI2_PORT, &GPIO_InitStruct);
+
+    /* SPI MOSI GPIO pin configuration  */
+    GPIO_InitStruct.Pin = SPI2_MOSI;
+    HAL_GPIO_Init(SPI2_PORT, &GPIO_InitStruct);
+#endif
+#endif
   /* USER CODE BEGIN SPI2_MspInit 1 */
   /* USER CODE END SPI2_MspInit 1 */
   }

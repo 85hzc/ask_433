@@ -52,7 +52,8 @@
 #define PROJECTOR_MBI5124   0
 #define PROJECTOR_OSRAM     1
 #define PROJECTOR_MCUGPIO   0
-#define IR_REMOTE           1
+#define IR_REMOTE           0
+#define SPI_HARD
 
 typedef volatile uint32_t   vu32;
 typedef volatile uint16_t   vu16;
@@ -80,6 +81,8 @@ typedef struct
 #define LOG_DEBUG(format, args...)    do {\
                                       } while(0)
 #endif  
+
+#define DBG                 printf("%s[%d]\r\n",__FUNCTION__,__LINE__);
 
 /* USER CODE END Private defines */
 

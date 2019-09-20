@@ -540,6 +540,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\drv_serial.c</FilePath>
             </File>
+            <File>
+              <FileName>softspi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\softspi.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

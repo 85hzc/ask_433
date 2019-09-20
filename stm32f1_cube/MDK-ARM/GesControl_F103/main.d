@@ -34,3 +34,4 @@ gescontrol_f103\main.o: ../Inc/mbi5153.h
 gescontrol_f103\main.o: ../Inc/delay.h
 gescontrol_f103\main.o: ../Inc/drv_ir.h
 gescontrol_f103\main.o: ../Inc/drv_serial.h
+gescontrol_f103\main.o: ../Inc/softspi.h

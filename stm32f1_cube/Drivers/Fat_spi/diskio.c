@@ -22,7 +22,7 @@ DSTATUS disk_initialize (
         return STA_NOINIT;  //仅支持磁盘0的操作
     }
 
-    state = SD_Init();
+    state = 0;//SD_Init();
     if(state == STA_NODISK)
     {
         return STA_NODISK;

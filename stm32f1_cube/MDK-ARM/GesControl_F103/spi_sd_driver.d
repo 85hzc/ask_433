@@ -32,3 +32,4 @@ gescontrol_f103\spi_sd_driver.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_h
 gescontrol_f103\spi_sd_driver.o: ..\Drivers\Fat_spi\SPI_SD_driver.h
 gescontrol_f103\spi_sd_driver.o: ..\Drivers\Fat_spi\diskio.h
 gescontrol_f103\spi_sd_driver.o: ..\Drivers\Fat_spi\integer.h
+gescontrol_f103\spi_sd_driver.o: ../Inc/delay.h

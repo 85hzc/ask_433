@@ -22,15 +22,26 @@ Dialog DLL:      TARMSTM.DLL V1.66.0.0
  
 <h2>Project:</h2>
 E:\github\stm32f1_cube\MDK-ARM\Cube_F103.uvprojx
-Project File Date:  08/20/2019
+Project File Date:  09/18/2019
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'GesControl_F103'
-compiling gpio.c...
+compiling ff.c...
+..\Drivers\Fat_spi\ff.c(783): warning:  #550-D: variable "lfen"  was set but never used
+      BYTE a, c, lfen, ord, sum, *dir;
+..\Drivers\Fat_spi\ff.c(783): warning:  #550-D: variable "ord"  was set but never used
+      BYTE a, c, lfen, ord, sum, *dir;
+..\Drivers\Fat_spi\ff.c(783): warning:  #550-D: variable "sum"  was set but never used
+      BYTE a, c, lfen, ord, sum, *dir;
+..\Drivers\Fat_spi\ff.c(846): warning:  #550-D: variable "ord"  was set but never used
+      BYTE a, c, ord, sum, *dir;
+..\Drivers\Fat_spi\ff.c(846): warning:  #550-D: variable "sum"  was set but never used
+      BYTE a, c, ord, sum, *dir;
+..\Drivers\Fat_spi\ff.c: 5 warnings, 0 errors
 linking...
-Program Size: Code=25662 RO-data=426 RW-data=4024 ZI-data=3952  
-"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 0 Warning(s).
+Program Size: Code=24034 RO-data=458 RW-data=2724 ZI-data=3956  
+"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 5 Warning(s).
 
 <h2>Software Packages used:</h2>
 

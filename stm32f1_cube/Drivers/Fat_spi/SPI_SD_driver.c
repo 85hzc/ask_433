@@ -6,12 +6,14 @@
 #include "stm32f1xx.h"
 #include "SPI_SD_driver.h"
 #include "diskio.h"
+#include "delay.h"
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-u8  SD_Type=0;
+static u8  SD_Type=0;
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
@@ -48,35 +50,9 @@ u8 stringcopy(BYTE *buff_to,BYTE *buff_from)
 *******************************************************************************/
 void SPI_Configuration(void)
 {
-    //SPI_InitTypeDef  SPI_InitStructure;
     GPIO_InitTypeDef GPIO_InitStructure;
 
-#if 0
-    //SPI1 Periph clock enable 
-    __HAL_RCC_SPI2_CLK_ENABLE();
-    //__HAL_RCC_GPIOA_CLK_ENABLE()
-    //RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOG | RCC_APB2Periph_AFIO, ENABLE);
-
-
-    //////下面是SPI相关GPIO初始化//////
-    //Configure SPI2 pins: SCK, MISO and MOSI 
-    // SPI_SCK SPI_MOSI  复用推挽输出
-    GPIO_InitStructure.Pin =  GPIO_PIN_13 | GPIO_PIN_15;
-    GPIO_InitStructure.Speed = GPIO_SPEED_HIGH;
-    GPIO_InitStructure.Mode  = GPIO_MODE_AF_PP;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-    //SPI_MISO 上拉输入模式
-    GPIO_InitStructure.Pin  = GPIO_PIN_14;
-    GPIO_InitStructure.Mode  = GPIO_MODE_AF_INPUT;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
-#endif
-
-    //Configure PB12 pin: SD_CS pin 
-    GPIO_InitStructure.Pin = SD_CS_GPIO; 
-    GPIO_InitStructure.Speed = GPIO_SPEED_HIGH; 
-    GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;    //推挽输出
-    HAL_GPIO_Init(SD_CS_PORT,&GPIO_InitStructure); 
+    SPI_GPIO_Hard_Init();
 
     //////SPI模块配置//////
     //一开始SD初始化阶段，SPI时钟频率必须<400K
@@ -171,6 +147,7 @@ void SPI_SetSpeed(u8 SpeedSet)
 *******************************************************************************/
 u8 SPI_ReadWriteByte(u8 TxData)
 {
+    HAL_StatusTypeDef res;
     u8 RxData = 0;
     //SPI_HandleTypeDef hspi;
 /*
@@ -184,10 +161,17 @@ u8 SPI_ReadWriteByte(u8 TxData)
     //取数据
     RxData = SPI_I2S_ReceiveData(SPI2);
 */
-    //hspi.Instance = SPI2;
-    HAL_SPI_Transmit(&hspi2, &TxData, 1, 0xffff);
-    HAL_SPI_Receive(&hspi2, &RxData, 1, 0xffff);
+#if 1
 
+    //HAL_SPI_TransmitReceive(&SpiHandle, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE, 5000);
+    HAL_SPI_TransmitReceive(&hspi2, &TxData, &RxData, 1, 5000);
+#else
+    //hspi.Instance = SPI2;
+    res = HAL_SPI_Transmit(&hspi2, &TxData, 1, 0xffff);
+    //printf("%s[%d]res=%d\r\n",__FUNCTION__,__LINE__,res);
+    res = HAL_SPI_Receive(&hspi2, &RxData, 1, 0xffff);
+    //printf("%s[%d]res=%d\r\n",__FUNCTION__,__LINE__,res);
+#endif
     return (u8)RxData;
 }
 
@@ -216,7 +200,6 @@ u8 SD_WaitReady(void)
 
     return 0;
 }
-
 
 
 /*******************************************************************************
@@ -250,7 +233,8 @@ u8 SD_SendCommand(u8 cmd, u32 arg, u8 crc)
     while((r1 = SPI_ReadWriteByte(0xFF))==0xFF)
     {
         Retry++;
-        if(Retry > 200)
+        //if(Retry > 200)
+        if(Retry >= 10)
         {
             break;
         }
@@ -344,13 +328,15 @@ u8 SD_Init(void)
     //但有的卡需要多次复位，呵呵，这个地方差这一句， 
     //这种卡就用不成咯！ 
     *******************************************************/ 
-    SPI_SetSpeed(0); //设置SPI速度为低速 
+    SPI_SetSpeed(SPI_SPEED_LOW); //设置SPI速度为低速 
+    printf("%s[%d]\r\n",__FUNCTION__,__LINE__);
 
     //先产生>74个脉冲，让SD卡自己初始化完成
     for(i=0;i<10;i++)
     {
         SPI_ReadWriteByte(0xFF);
     }
+    printf("%s[%d]\r\n",__FUNCTION__,__LINE__);
 
     //-----------------SD卡复位到idle开始-----------------
     //循环连续发送CMD0，直到SD卡返回0x01,进入IDLE状态
@@ -358,21 +344,26 @@ u8 SD_Init(void)
     retry = 0;
     do
     {
+        Delay_us(10);
         //发送CMD0，让SD卡进入IDLE状态
         r1 = SD_SendCommand(CMD0, 0, 0x95);
         retry++;
-    }while((r1 != 0x01) && (retry<200));
+    }while((r1 != 0x01) && (retry<10));
+    //}while((r1 != 0x01) && (retry<5));
     //跳出循环后，检查原因：初始化成功？or 重试超时？
-    if(retry==200)
+
+    printf("%s[%d] res=%d\r\n",__FUNCTION__,__LINE__,r1);
+    if(retry==10)
+    //if(retry==5)
     {
+        printf("SD reset time out!\r\n");
         return 1;   //超时返回1
     }
     //-----------------SD卡复位到idle结束-----------------
 
-
-
     //获取卡片的SD版本信息
     r1 = SD_SendCommand_NoDeassert(8, 0x1aa, 0x87);
+    printf("tf card rev 0x%x\r\n",r1);
 
     //如果卡片版本信息是v1.0版本的，即r1=0x05，则进行以下初始化
     if(r1 == 0x05)
@@ -427,7 +418,7 @@ u8 SD_Init(void)
         //----------MMC卡额外初始化操作结束------------
         
         //设置SPI为高速模式
-        SPI_SetSpeed(1);
+        SPI_SetSpeed(SPI_SPEED_HIGH);
 
         SPI_ReadWriteByte(0xFF);
         

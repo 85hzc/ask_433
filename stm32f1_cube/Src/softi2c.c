@@ -23,7 +23,7 @@ void delayus(unsigned long time)
 {
     unsigned int i;
     while(time--)
-        for(i=2;i>0;i--)
+        for(i=1;i>0;i--)
             delay_us();
 }
 
