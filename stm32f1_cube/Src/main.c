@@ -226,18 +226,20 @@ int main(void)
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
     MX_USART3_UART_Init();
-    //MX_TIM3_Init();//for IR INT
-    
+    //MX_TIM2_Init();//for PWM pulse
+
 #if(IR_REMOTE)
-    MX_TIM2_Init();//for IR INT
+    MX_TIM3_Init();//for IR INT
     /* Initialize IR state */
     Drv_IR_Init();
 #endif
 
+#ifdef SUPPORT_FATFS
 #ifdef SPI_HARD
     SPI_Configuration();    //SPI³õÊ¼»¯
 #else
     SPI_GPIO_Soft_Init();
+#endif
 #endif
     appInit();
 
@@ -259,24 +261,7 @@ int main(void)
 
     printf("system init hclk:%d\r\n",HAL_RCC_GetHCLKFreq());
 
-#if 0
-    while(1){
-
-        //SPI_CLK_L;
-        //SPI_CS_L;
-        SPI_MO_L;
-        delayus(100);
-        //SPI_CLK_H;
-        //SPI_CS_H;
-        SPI_MO_H;
-        delayus(100);
-       /*
-        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
-        Delay_ms(10);
-        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
-        Delay_ms(10);*/
-    }
-#endif
+#ifdef SUPPORT_FATFS
 #ifdef SPI_HARD
     SD_Init();
 #else
@@ -286,8 +271,8 @@ int main(void)
     SD_ReadFileList("");
     SD_ReadFileList("/f1");
     SD_ReadFileList("/f2");
-
     SD_fileCopy();           //²âÊÔº¯Êý
+#endif
 
 #if(PROJECTOR_OSRAM)
     I2C_init();
@@ -494,8 +479,8 @@ static void MX_GPIO_Init(void)
 #endif
 
     /* EXTI interrupt init*/
-    HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+    //HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+    //HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 }
 
 /** 
@@ -591,10 +576,11 @@ static void MX_TIM3_Init(void)
   TIM_IC_InitTypeDef sConfigIC;
 
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 6400-1;//799
+  htim3.Init.Prescaler = 6400-1;//0.1ms/pulse
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 0xffffffff;
+  htim3.Init.Period = 0xffff;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.RepetitionCounter = 0;
   //htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_IC_Init(&htim3) != HAL_OK)
   {
@@ -612,13 +598,12 @@ static void MX_TIM3_Init(void)
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
   sConfigIC.ICFilter = 0;
-  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_4) != HAL_OK)
+  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }
 }
 
-#if(IR_REMOTE)
 /* TIM2 init function */
 static void MX_TIM2_Init(void)
 {
@@ -653,11 +638,10 @@ static void MX_TIM2_Init(void)
     Error_Handler();
   }
 }
-#endif
 
 void Drv_PWM_Init(void)
 {
-    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 
     tickstart = HAL_GetTick();
 }
@@ -669,7 +653,7 @@ void Drv_PWM_Proc(void)
         if((HAL_GetTick() - tickstart) > 1000)
         {
             turn_off = 0;
-            __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, (uint32_t)100);
+            __HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_1, (uint32_t)100);
         }
     }
 }
@@ -802,7 +786,7 @@ void UartControlHandle(uint8_t *key)
     IR_code = REMOTE_MI_MENU;//focus-
     IR_code = REMOTE_MI_OK;
 */
-    printf("key:%s\r\n",key);
+    printf("UartControlHandle key:%s\r\n",key);
 
     if(!strcmp(key,"stop"))
     {

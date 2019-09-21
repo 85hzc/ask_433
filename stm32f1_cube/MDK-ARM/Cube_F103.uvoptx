@@ -211,6 +211,14 @@
           <WinId>35905</WinId>
         </Entry>
         <Entry>
+          <Name>System Viewer\TIM2</Name>
+          <WinId>35900</WinId>
+        </Entry>
+        <Entry>
+          <Name>System Viewer\TIM3</Name>
+          <WinId>35901</WinId>
+        </Entry>
+        <Entry>
           <Name>System Viewer\USART3</Name>
           <WinId>35902</WinId>
         </Entry>

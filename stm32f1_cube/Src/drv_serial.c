@@ -16,6 +16,9 @@
 
 static uint32_t          tickstart;
 
+extern uint8_t           single_cmd[CMD_LEN_MAX];
+
+
 int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key);
 
 
@@ -35,6 +38,8 @@ static struct {
 
 void Drv_SERIAL_Init(void)
 {
+
+  memset(single_cmd, 0, sizeof(single_cmd));
   memset((uint8_t*)&act_cmd, 0, sizeof(act_cmd));
 }
 

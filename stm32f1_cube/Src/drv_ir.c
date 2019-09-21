@@ -17,7 +17,7 @@
 #define TIME_GAP(s1,s2,max) (s2>=s1?s2-s1:max-s1+s2)
 
 /* Private variables ---------------------------------------------------------*/
-extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
 
 
 static uint16_t IR_data16L, IR_data16H;
@@ -32,7 +32,7 @@ static int Drv_IR_NEC_Decode(uint32_t cap, uint32_t max);
   */
 void Drv_IR_Init(void)
 {
-  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2);
 }
 
 void Drv_IR_Proc(void)
@@ -41,8 +41,8 @@ void Drv_IR_Proc(void)
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-  if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {
-    Drv_IR_MI_Decode(HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1), __HAL_TIM_GET_AUTORELOAD(htim));
+  if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2) {
+    Drv_IR_MI_Decode(HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2), __HAL_TIM_GET_AUTORELOAD(htim));
   }
 }
 
@@ -137,7 +137,7 @@ static void Drv_IR_MI_Decode(uint32_t cap, uint32_t max)
         IR_repeat++;
     }
 
-    printf("%08x,%d\r\n", IR_data, IR_repeat);
+    printf("MI:%08x,%d\r\n", IR_data, IR_repeat);
     if ((IR_repeat == 3 || firstFlag) && IR_code) {
       IR_repeat = 0;
       firstFlag = 0;
@@ -157,8 +157,10 @@ static int Drv_IR_NEC_Decode(uint32_t cap, uint32_t max)
   static uint32_t IR_captured = 0;
   static uint32_t IR_data = 0;
   static uint32_t IR_start = 0;
-  
-  time_gap = TIME_GAP(IR_captured,cap,max); 
+
+  //TIM3  APB1 
+  //cap:CCR2 is the counter value transferred by the last input capture 1 event (IC1).
+  time_gap = TIME_GAP(IR_captured,cap,max);
   
   if (time_gap >= 125 && time_gap <= 140){
     IR_index = 0;
@@ -175,18 +177,16 @@ static int Drv_IR_NEC_Decode(uint32_t cap, uint32_t max)
     IR_index++;
   }
   else if (time_gap >= 111 && time_gap <= 115){
-    IR_repeat = 1;    
-    time_gap = TIME_GAP(IR_start,IR_captured,max);   
+    IR_repeat = 1;
+    time_gap = TIME_GAP(IR_start,IR_captured,max);
     IR_start = IR_captured;
   }
-  
-  printf("cap=%d,time_gap=%d,index=%d\r",cap, time_gap, IR_index);
+
+  //WARNING:The printf cannot be permitted, otherwise it will be too late to deal with the interrupt
+  //printf("timeGap=%d,id=%d\r\n", time_gap, IR_index);
   if (IR_index >= 32){
     uint8_t *IR_ptr = (uint8_t*)&IR_data;
-    if (
-          (IR_ptr[0] + IR_ptr[1] == 0xff)
-        &&(IR_ptr[2] + IR_ptr[3] == 0xff)
-       ){
+    if ((IR_ptr[0] + IR_ptr[1] == 0xff) && (IR_ptr[2] + IR_ptr[3] == 0xff)){
       IR_code = (IR_ptr[0]|(IR_ptr[2]<<8));
       IR_valid = 1;
       IR_index = 0;
@@ -201,7 +201,8 @@ static int Drv_IR_NEC_Decode(uint32_t cap, uint32_t max)
     IR_repeat = 0;
     if (IR_valid)
     {
-      if (time_gap >= 1060 && time_gap <= 1080)
+       printf("repeat[%d]\r\n",time_gap);
+      if (time_gap >= 1050 && time_gap <= 1080)
       {
         Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
         printf("Drv_IR_NEC_Decode repeat[0x%x]\r\n",IR_code);
