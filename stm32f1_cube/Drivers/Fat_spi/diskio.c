@@ -216,8 +216,13 @@ DRESULT disk_ioctl (
 /* 15-11: Hour(0-23), 10-5: Minute(0-59), 4-0: Second(0-29 *2) */                                                                                                                                                                                                                                                
 DWORD get_fattime (void)
 {
-   
-    return 0;
+    return ((2019UL-1980) << 25) /* Year = 2010 */
+    | (9UL << 21) /* Month = 11 */
+    | (20UL << 16) /* Day = 2 */
+    | (18U << 11) /* Hour = 15 */
+    | (18U << 5) /* Min = 0 */
+    | (18U >> 1) /* Sec = 0 */
+    ;
 }
 
 //得到文件Calendar格式的建立日期,是DWORD get_fattime (void) 逆变换                           
