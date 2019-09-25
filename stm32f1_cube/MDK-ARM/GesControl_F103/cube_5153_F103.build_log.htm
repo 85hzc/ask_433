@@ -27,17 +27,33 @@ Project File Date:  09/18/2019
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'GesControl_F103'
-compiling drv_ir.c...
-..\Src\drv_ir.c(144): warning:  #223-D: function "Drv_SERIAL_Act" declared implicitly
-        Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
-..\Src\drv_ir.c(195): warning:  #223-D: function "Drv_SERIAL_Act" declared implicitly
-          Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
-..\Src\drv_ir.c(207): warning:  #223-D: function "Drv_SERIAL_Act" declared implicitly
-          Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
-..\Src\drv_ir.c: 3 warnings, 0 errors
+compiling eplos.c...
+..\Src\eplos.c(286): warning:  #223-D: function "memset" declared implicitly
+      memset(array, 0, sizeof(array));
+..\Src\eplos.c(305): warning:  #223-D: function "memset" declared implicitly
+      memset(array, 0, sizeof(array));
+..\Src\eplos.c(322): warning:  #223-D: function "memset" declared implicitly
+    memset(pBuffer, 0, NumByteToRead);
+..\Src\eplos.c(389): warning:  #223-D: function "memcpy" declared implicitly
+          memcpy(tmpR, displayMatrix1Q[row], sizeof(tmpR));
+..\Src\eplos.c(397): warning:  #223-D: function "memcpy" declared implicitly
+          memcpy(tmpR, displayMatrix2Q[row], sizeof(tmpR));
+..\Src\eplos.c(406): warning:  #177-D: variable "tmp"  was declared but never referenced
+      uint8_t row, col, tmp;
+..\Src\eplos.c(451): warning:  #177-D: variable "fixel"  was declared but never referenced
+      unsigned short k,fixel;
+..\Src\eplos.c(574): warning:  #177-D: variable "fixel"  was declared but never referenced
+      unsigned short k,fixel;
+..\Src\eplos.c(636): warning:  #223-D: function "SD_ReadPhotoData" declared implicitly
+          SD_ReadPhotoData();
+..\Src\eplos.c(639): warning:  #223-D: function "memcpy" declared implicitly
+          memcpy(displayMatrix0Q, osram_buff, sizeof(osram_buff));
+..\Src\eplos.c(626): warning:  #177-D: variable "j"  was declared but never referenced
+      static uint8_t j=0;
+..\Src\eplos.c: 11 warnings, 0 errors
 linking...
-Program Size: Code=23358 RO-data=426 RW-data=2724 ZI-data=4500  
-"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 3 Warning(s).
+Program Size: Code=25900 RO-data=428 RW-data=2700 ZI-data=4908  
+"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 11 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -60,7 +76,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.1
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>

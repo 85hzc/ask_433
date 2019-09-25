@@ -14,9 +14,13 @@
 #include "drv_ir.h"
 #include "drv_serial.h"
 
+ACT_CMD act_cmd;
+
 static uint32_t          tickstart;
 
 extern uint8_t           single_cmd[CMD_LEN_MAX];
+extern uint8_t           currentProgram;
+extern uint8_t           runFlag;
 
 
 int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key);
@@ -30,17 +34,14 @@ static cmd_table_t cmd_tbl[] = {
 };
 
 
-static struct {
-  uint8_t wr_id;
-  uint8_t rd_id;
-  uint8_t multi_cmd[MULTI_CMD_MAX][CMD_LEN_MAX];
-} act_cmd;
-
 void Drv_SERIAL_Init(void)
 {
 
-  memset(single_cmd, 0, sizeof(single_cmd));
-  memset((uint8_t*)&act_cmd, 0, sizeof(act_cmd));
+    act_cmd.rd_id = 0;
+    act_cmd.wr_id = 0;
+
+    memset(single_cmd, 0, sizeof(single_cmd));
+
 }
 
 int8_t Drv_CMD_Handler(uint8_t *cmd)
@@ -99,25 +100,37 @@ static void handle_func_MIkeys(uint16_t key)
     switch (key)
     {
         case REMOTE_MI_HOME:
-            
             break;
+        
         case REMOTE_MI_MENU:
-            
             break;
+            
         case REMOTE_MI_POWER:
             break;
+            
         case REMOTE_MI_UP:
-        case REMOTE_MI_DOWN:
-            SD_ReadFileData();
+            currentProgram++;
+            runFlag = 1;
             break;
+            
+        case REMOTE_MI_DOWN:
+            currentProgram--;
+            runFlag = 1;
+            break;
+            
         case REMOTE_MI_LEFT:
         case REMOTE_MI_RIGHT:
+            break;
+        
         case REMOTE_MI_OK:
+            runFlag = !runFlag;
+            break;
+        
         case REMOTE_MI_BACK:
         case REMOTE_MI_PLUS:
         case REMOTE_MI_MINUS:
-
           break;
+        
         default:
           printf("invalid key[0x%x]!\r\n",key);
     }
@@ -141,7 +154,7 @@ int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key)
                 tickstart = HAL_GetTick();
             } else {
 
-                if((HAL_GetTick() - tickstart) > ((REMOTE_MI_POWER == key) ? 2000 : 300)) //repeat press
+                if((HAL_GetTick() - tickstart) > ((REMOTE_MI_POWER == key) ? 1000000 : 150000)) //repeat press
                 {
                     tickstart = HAL_GetTick();
                     flag = 1;
@@ -151,20 +164,14 @@ int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key)
             }
 
             if(flag) {
-                //printf("TX key:%x\r\n",key);
+                //printf("IR key:%x\r\n",key);
                 flag = 0;
-                switch (key)
-                {
-                    case REMOTE_MI_POWER:
-                        //handle_power_key();
-                        break;
-                    default:
-                        handle_func_MIkeys(key);
-                }
+                handle_func_MIkeys(key);
             }
         }
         else
-        {//NEC controler
+        {
+            //NEC controler
             switch (key>>8)
             {
                 case REMOTE_NEC_POWER:

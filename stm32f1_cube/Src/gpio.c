@@ -137,17 +137,44 @@ void OSRAM_GPIO_Init(void)
     GPIO_InitTypeDef GPIO_InitStruct;
 
     /*Configure GPIO pins*/
-    GPIO_InitStruct.Pin = QUADRANT_EN;
+    GPIO_InitStruct.Pin = OSRAM_EN;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(QUADRANT_EN_PORT, &GPIO_InitStruct);
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    HAL_GPIO_Init(OSRAM_EN_PORT, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(OSRAM_EN_PORT,OSRAM_EN,GPIO_PIN_SET);//enable eplos 
+
 
     /*Configure GPIO pins :  */
-    GPIO_InitStruct.Pin = QT_CLK|Q0_SI|Q1_SI|Q2_SI|Q3_SI|QT_UPD;
+    GPIO_InitStruct.Pin = QT_CLK;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(OSRAM_PORT, &GPIO_InitStruct);
+    HAL_GPIO_Init(OSRAM_PORT_CLK, &GPIO_InitStruct);
+
+
+    /*Configure GPIO pins :  */
+    GPIO_InitStruct.Pin = Q0_SI;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(OSRAM_PORT_SI0, &GPIO_InitStruct);
+
+
+    /*Configure GPIO pins :  */
+    GPIO_InitStruct.Pin = Q1_SI|Q2_SI|Q3_SI;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(OSRAM_PORT_SI1, &GPIO_InitStruct);
+
+
+    /*Configure GPIO pins :  */
+    GPIO_InitStruct.Pin = QT_UPD;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(OSRAM_PORT_UPD, &GPIO_InitStruct);
 }
 
 void MCU_GPIO_Init(void)

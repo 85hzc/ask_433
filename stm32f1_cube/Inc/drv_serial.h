@@ -38,6 +38,11 @@ typedef enum
   CMD_OP_IR_CODE                = 0x00
 }ir_op_t;
 
+typedef struct {
+  uint8_t wr_id;
+  uint8_t rd_id;
+  uint8_t multi_cmd[MULTI_CMD_MAX][CMD_LEN_MAX];
+} ACT_CMD;
 
 
 #endif

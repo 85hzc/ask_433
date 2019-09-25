@@ -199,8 +199,8 @@ void Drv_SERIAL_Proc(void)
     /* 2. read the action buffer... */
     if (HAL_OK == Drv_SERIAL_Read_Act(single_cmd))
     {
-        printf("Act location:0x%x 0x%x 0x%x 0x%x\r\n",
-                single_cmd[0],single_cmd[1],single_cmd[2],single_cmd[3]);
+        //printf("Act location:0x%x 0x%x 0x%x 0x%x\r\n",
+        //        single_cmd[0],single_cmd[1],single_cmd[2],single_cmd[3]);
         (void)Drv_CMD_Handler(single_cmd);
     }
 }
@@ -268,16 +268,24 @@ int main(void)
     SDInit();
 #endif
     printf("SDInit ok\r\n");
-    SD_ReadFileList("");
-    SD_ReadFileList("/f1");
-    SD_ReadFileList("/f2");
-    SD_fileCopy();           //²âÊÔº¯Êý
+    //SD_ReadFileList("");
+    //SD_ReadFileList("/f1");
+    //SD_ReadFileList("/f2");
+    //SD_fileCopy();           //²âÊÔº¯Êý
 #endif
 
 #if(PROJECTOR_OSRAM)
+    SD_ReadFileList("/OSRAM");
+
     I2C_init();
     EPLOS_config();
+    EPLOS_scimon();
+    //OSRAM_framRefresh();
+    //EPLOS_i2cmon();
     //EPLOS_diag();
+    //Delay_ms(100);
+    //EPLOS_scimon_read();
+    //EPLOS_status_read();
 #endif
 
 #if(PROJECTOR_MBI5124)
@@ -302,20 +310,26 @@ int main(void)
         //else if(scenMode==4)
         //    MBI5124_Cartoon();
 #elif(PROJECTOR_OSRAM)
-        //OSRAM_play();
-        //Delay_ms(500);
+
+        OSRAM_play();
+        //Delay_ms(200);
+        //EPLOS_status_read();
+        //Delay_ms(200);
+
 #elif(PROJECTOR_MCUGPIO)
         MCUGpio_X();
         //MCUGpio_Sink();
 #endif
 
         Drv_SERIAL_Proc();
-        //printf("led\r\n");
 
+/*
         HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
-        Delay_ms(200);
+        Delay_ms(100);
+
         HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
-        Delay_ms(200);
+        Delay_ms(100);
+*/
     }
 }
 
@@ -448,6 +462,8 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOD_CLK_ENABLE();
+
+    __HAL_AFIO_REMAP_PD01_ENABLE();
 
     /*Configure GPIO pin Output Level */
     //HAL_GPIO_WritePin(GPIOA, LED_DCLK_Pin|LED_HOLD_Pin, GPIO_PIN_RESET);
@@ -727,7 +743,7 @@ void I2C_init(void)
     GPIO_InitStruct.Pin = I2C_SDA_PIN | I2C_SCL_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;//GPIO_SPEED_fast
+    GPIO_InitStruct.Speed = GPIO_SPEED_MEDIUM;
     HAL_GPIO_Init(SDA_GPIO_Port, &GPIO_InitStruct);
 
     I2C_set_sda_state(1);

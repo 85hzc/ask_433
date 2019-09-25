@@ -77,34 +77,45 @@
 
 //#elif(PROJECTOR_OSRAM)
 /////OSRAM GPIO
-#define QUADRANT_EN       GPIO_PIN_1
-#define QUADRANT_EN_PORT  GPIOA
 
 #define SCL_Pin           GPIO_PIN_6
 #define SDA_Pin           GPIO_PIN_7
 #define SCL_GPIO_Port     GPIOB
 #define SDA_GPIO_Port     GPIOB
 
-#define Q0_SI             GPIO_PIN_5
-#define Q1_SI             GPIO_PIN_3
-#define Q2_SI             GPIO_PIN_8
-#define Q3_SI             GPIO_PIN_10
-#define QT_UPD            GPIO_PIN_0
-#define QT_CLK            GPIO_PIN_11
-#define OSRAM_PORT        GPIOB
+#define OSRAM_EN          GPIO_PIN_13
+#define OSRAM_EN_PORT     GPIOC
 
-#define Q0_SI_H           OSRAM_PORT->BSRR = Q0_SI;                        // 输出高电平
-#define Q0_SI_L           OSRAM_PORT->BSRR = (uint32_t)Q0_SI << 16;        // 输出低电平 
-#define Q1_SI_H           OSRAM_PORT->BSRR = Q1_SI;                        // 输出高电平
-#define Q1_SI_L           OSRAM_PORT->BSRR = (uint32_t)Q1_SI << 16;        // 输出低电平
-#define Q2_SI_H           OSRAM_PORT->BSRR = Q2_SI;                        // 输出高电平
-#define Q2_SI_L           OSRAM_PORT->BSRR = (uint32_t)Q2_SI << 16;        // 输出低电平
-#define Q3_SI_H           OSRAM_PORT->BSRR = Q3_SI;                        // 输出高电平
-#define Q3_SI_L           OSRAM_PORT->BSRR = (uint32_t)Q3_SI << 16;        // 输出低电平
-#define QT_UPD_H          OSRAM_PORT->BSRR = QT_UPD;                       // 输出高电平
-#define QT_UPD_L          OSRAM_PORT->BSRR = (uint32_t)QT_UPD << 16;       // 输出低电平
-#define QT_CLK_H          OSRAM_PORT->BSRR = QT_CLK;                       // 输出高电平
-#define QT_CLK_L          OSRAM_PORT->BSRR = (uint32_t)QT_CLK << 16;       // 输出低电平
+#define QT_CLK            GPIO_PIN_15
+#define OSRAM_PORT_CLK    GPIOC
+
+#define QT_UPD            GPIO_PIN_0
+#define OSRAM_PORT_UPD    GPIOD
+
+#define Q0_SI             GPIO_PIN_14
+#define OSRAM_PORT_SI0    GPIOC
+#define Q1_SI             GPIO_PIN_0
+#define OSRAM_PORT_SI1    GPIOA
+#define Q2_SI             GPIO_PIN_5
+#define OSRAM_PORT_SI2    GPIOA
+#define Q3_SI             GPIO_PIN_6
+#define OSRAM_PORT_SI3    GPIOA
+
+
+#define Q0_SI_H           OSRAM_PORT_SI0->BSRR = Q0_SI;                        // 输出高电平
+#define Q0_SI_L           OSRAM_PORT_SI0->BSRR = (uint32_t)Q0_SI << 16;        // 输出低电平 
+#define Q1_SI_H           OSRAM_PORT_SI1->BSRR = Q1_SI;                        // 输出高电平
+#define Q1_SI_L           OSRAM_PORT_SI1->BSRR = (uint32_t)Q1_SI << 16;        // 输出低电平
+#define Q2_SI_H           OSRAM_PORT_SI2->BSRR = Q2_SI;                        // 输出高电平
+#define Q2_SI_L           OSRAM_PORT_SI2->BSRR = (uint32_t)Q2_SI << 16;        // 输出低电平
+#define Q3_SI_H           OSRAM_PORT_SI3->BSRR = Q3_SI;                        // 输出高电平
+#define Q3_SI_L           OSRAM_PORT_SI3->BSRR = (uint32_t)Q3_SI << 16;        // 输出低电平
+#define QT_UPD_H          OSRAM_PORT_UPD->BSRR = QT_UPD;                       // 输出高电平
+#define QT_UPD_L          OSRAM_PORT_UPD->BSRR = (uint32_t)QT_UPD << 16;       // 输出低电平
+#define QT_CLK_H          OSRAM_PORT_CLK->BSRR = QT_CLK;                       // 输出高电平
+#define QT_CLK_L          OSRAM_PORT_CLK->BSRR = (uint32_t)QT_CLK << 16;       // 输出低电平
+#define EN_H              OSRAM_EN_PORT->BSRR = OSRAM_EN;                      // 输出高电平
+#define EN_L              OSRAM_EN_PORT->BSRR = (uint32_t)OSRAM_EN << 16;      // 输出低电平
 
 //#elif(PROJECTOR_MCUGPIO)
 

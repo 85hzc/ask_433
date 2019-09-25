@@ -137,7 +137,7 @@ static void Drv_IR_MI_Decode(uint32_t cap, uint32_t max)
         IR_repeat++;
     }
 
-    printf("MI:%08x,%d\r\n", IR_data, IR_repeat);
+    //printf("MI:%08x,%d\r\n", IR_data, IR_repeat);
     if ((IR_repeat == 3 || firstFlag) && IR_code) {
       IR_repeat = 0;
       firstFlag = 0;
