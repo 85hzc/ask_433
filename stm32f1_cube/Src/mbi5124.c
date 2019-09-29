@@ -18,7 +18,6 @@
 
 #if(PROJECTOR_MBI5124)
 extern uint8_t              runFlag;
-extern char                 fileBuffer[MAX_FILE_SIZE];   // file copy buffer
 extern char                 promptBuffer[16*6][16];
 //extern char                 cartoonBuffer[16*20][16];
 extern uint16_t             actType;
@@ -29,6 +28,24 @@ uint64_t                    systime1 = 0;
 uint8_t                     chnFlagPos[16][SECS];//1-8
 static uint8_t              currentLine=0;
 char                        refreshBuf[16][16];
+
+char fileBuffer[MAX_FILE_SIZE]={
+            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,
+            0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,
+            0,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,
+            0,0,0,1,1,1,0,1,1,1,0,1,1,1,1,0,
+            0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,
+            0,0,1,1,1,0,1,1,1,0,0,1,1,0,0,0,
+            0,1,1,1,0,1,1,1,0,0,0,1,1,0,1,0,
+            0,1,1,1,0,1,1,0,0,0,0,1,1,1,1,0,
+            0,1,1,0,0,0,1,0,0,0,0,0,1,1,1,0,
+            0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};   // file copy buffer
 
 void LE(void)
 {
@@ -360,6 +377,30 @@ void cycleScan_Play(void)
     LE();
     MBI_SdiInput_null();
     LE();
+}
+
+void readFromCaption()
+{
+    UINT i,j=0;;
+    char tmp;
+
+    for(i=0;i<16;i++)
+    {
+        tmp = fileBuffer[i*16+15];
+        for(j=15;j>0;j--)
+        {
+            fileBuffer[i*16+j] = fileBuffer[i*16+j-1];
+        }
+
+        fileBuffer[i*16] = tmp;
+    }
+    /*
+    for(i=0;i<16;i++)
+    {
+        printf("\r\n");
+        for(j=0;j<16;j++)
+            printf("%d ",fileBuffer[i*16+j]);
+    }*/
 }
 
 void MBI5124_X(void)

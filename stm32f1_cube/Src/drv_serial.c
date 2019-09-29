@@ -13,15 +13,21 @@
 #include "main.h"
 #include "drv_ir.h"
 #include "drv_serial.h"
+#include "programs.h"
 
 ACT_CMD act_cmd;
 
 static uint32_t          tickstart;
 
 extern uint8_t           single_cmd[CMD_LEN_MAX];
-extern uint8_t           currentProgram;
+extern uint8_t           photoIdx;
+extern uint8_t           filmProgramIdx;
+extern uint8_t           filmFrameIdx;
 extern uint8_t           runFlag;
-
+extern uint8_t           eplosCfgFlag;
+extern uint8_t           eplosSLPxen;
+extern uint8_t           currentAdjustment;
+extern PROGRAMS_TYPE_E   programsType;
 
 int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key);
 
@@ -106,16 +112,51 @@ static void handle_func_MIkeys(uint16_t key)
             break;
             
         case REMOTE_MI_POWER:
+            eplosSLPxen = !eplosSLPxen;
+            eplosCfgFlag = 1;
+            runFlag = 1;
             break;
             
         case REMOTE_MI_UP:
-            currentProgram++;
-            runFlag = 1;
+            if(programsType==PHOTO)
+            {
+                if(photoIdx<0xff)
+                    photoIdx++;
+                else
+                    photoIdx = 0;
+
+                runFlag = 1;
+            }
+            else
+            {
+                if(filmProgramIdx<0xff)
+                    filmProgramIdx++;
+                else
+                    filmProgramIdx = 0;
+
+                filmFrameIdx = 0;//切换影片频道，从片头开始
+            }
             break;
-            
+
         case REMOTE_MI_DOWN:
-            currentProgram--;
-            runFlag = 1;
+            if(programsType==PHOTO)
+            {
+                if(photoIdx>0)
+                    photoIdx--;
+                else
+                    photoIdx=0xff;
+
+                runFlag = 1;
+            }
+            else
+            {
+                if(filmProgramIdx>0)
+                    filmProgramIdx--;
+                else
+                    filmProgramIdx=0xff;
+
+                filmFrameIdx = 0;//切换影片频道，从片头开始
+            }
             break;
             
         case REMOTE_MI_LEFT:
@@ -123,16 +164,31 @@ static void handle_func_MIkeys(uint16_t key)
             break;
         
         case REMOTE_MI_OK:
-            runFlag = !runFlag;
+            runFlag = 1;
+            //photoIdx=0;
+            filmFrameIdx = 0;
+            programsType = (programsType==PHOTO) ? FILM : PHOTO;
             break;
         
         case REMOTE_MI_BACK:
         case REMOTE_MI_PLUS:
+            if(currentAdjustment<0x1f)
+            {
+                currentAdjustment++;
+                eplosCfgFlag = 1;
+            }
+            break;
+            
         case REMOTE_MI_MINUS:
-          break;
-        
+            if(currentAdjustment>0)
+            {
+                currentAdjustment--;
+                eplosCfgFlag = 1;
+            }
+            break;
+
         default:
-          printf("invalid key[0x%x]!\r\n",key);
+            printf("invalid key[0x%x]!\r\n",key);
     }
 }
 

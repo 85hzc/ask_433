@@ -44,6 +44,9 @@
 #define EPLOS_DIAG_VCP_CFG3         0x0F
 
 
+#define SLP_MASK_BIT                6
+
+
 #define QT_PIXELS                   256
 
 #endif

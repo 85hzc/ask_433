@@ -15,57 +15,30 @@
 #include "gpio.h"
 #include "eplos.h"
 #include "config.h"
+#include "programs.h"
 
 #if(PROJECTOR_OSRAM)
 
-//uint8_t OSRAM_SlaveAddress = 0;
 extern uint8_t              runFlag;
 extern char                 fileBuffer[MAX_FILE_SIZE];   // file copy buffer
+extern uint8_t              eplosSLPxen;
+extern uint8_t              eplosCfgFlag;
+extern PROGRAMS_TYPE_E      programsType;
+extern char                 osram_buff[MATRIX_SIZE][MATRIX_SIZE];
+extern uint8_t              photoIdx;
+extern uint8_t              filmFrameIdx;
 
 uint64_t                    systime = 0;
 uint64_t                    systime1 = 0;
+uint8_t                     currentAdjustment = 0;//0 ~ 0x1f
 
 void i2c_read(unsigned char addr, unsigned char* buf, int len);
 void i2c_write(unsigned char addr, unsigned char* buf, int len);
 uint8_t I2CReadFromRegister(uint8_t SlaveAddress, uint8_t regaddr, uint8_t *resp, uint8_t NumByteToRead);
 uint8_t I2CWriteToRegister(uint8_t SlaveAddress, uint8_t RegisterAddr, uint8_t *command, uint8_t NumByteToWrite);
-/*
-uint8_t displayMatrix[32][32] = {
-    0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,
-    0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0};*/
 
     
-volatile uint8_t displayMatrix0Q[16][16] = {
+uint8_t displayMatrix0Q[16][16] = {
 
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -198,8 +171,8 @@ void EPLOS_config(void)
 {
     uint8_t QuadrantConf[2];
 
-    QuadrantConf[0] = 0;//0x0A;//0000 1010 
-    QuadrantConf[1] = 0;//0x0A;
+    QuadrantConf[1] = QuadrantConf[0] = eplosSLPxen<<SLP_MASK_BIT | currentAdjustment;//0x0A;//0000 1010 
+
     I2CWriteToRegister(I2C_ADDR01, EPLOS_CFG01, QuadrantConf, 2);
     I2CWriteToRegister(I2C_ADDR23, EPLOS_CFG23, QuadrantConf, 2);
 }
@@ -230,6 +203,10 @@ void EPLOS_scimon(void)
 {
     uint8_t QuadrantConf[2];
 
+    /*  FRE0_SEL : bit 5
+    0B CRC-8 calculation frame check is selected.
+    1B ¡°One counter¡± frame check algorithm is selected.
+    */
     QuadrantConf[0] = 0x20;
     QuadrantConf[1] = 0x20;
     I2CWriteToRegister(I2C_ADDR01, EPLOS_SCI_MON01, QuadrantConf, 2);
@@ -620,26 +597,62 @@ void OSRAM_framRefreshNull(void)
     QT_UPD_L
 }
 
-extern char osram_buff[16][16];
+void OSRAM_config(void)
+{
+
+    if(eplosCfgFlag)
+    {
+        printf("OSRAM_config [%s]\r\n",eplosSLPxen==ENABLE?"OFF":"ON");
+        eplosCfgFlag = 0;
+    
+        EPLOS_config();
+        EPLOS_scimon();
+        //OSRAM_framRefresh();
+        //EPLOS_i2cmon();
+        //EPLOS_diag();
+        //Delay_ms(100);
+        //EPLOS_scimon_read();
+        //EPLOS_status_read();
+    }
+}
+
 void OSRAM_play(void)
 {
+    uint8_t i;
+    FRESULT res = FR_OK;
     static uint8_t j=0;
 
     //if((HAL_GetTick() - systime>1000000) && runFlag)//100ms
-    if(runFlag)
+    if(runFlag || ((programsType==FILM)/* && (HAL_GetTick() - systime>100000)*/))
     {
 #if 0
         memcpy(displayMatrix,cartoonBuffer[32*(j%20)],1024);
         j++;
 #else
         runFlag = 0;
-        SD_ReadPhotoData();
-        //SD_ReadFilmData();
 
-        memcpy(displayMatrix0Q, osram_buff, sizeof(osram_buff));
-        memcpy(displayMatrix1Q, osram_buff, sizeof(osram_buff));
-        memcpy(displayMatrix2Q, osram_buff, sizeof(osram_buff));
-        memcpy(displayMatrix3Q, osram_buff, sizeof(osram_buff));
+        if(programsType==FILM)
+        {
+            res = SD_ReadFilmData();
+            filmFrameIdx++;
+        }
+        else
+        {
+            res = SD_ReadPhotoData();
+        }
+        if(res != FR_OK)
+        {
+            printf("Read [%s] file failed!\r\n",programsType==PHOTO?"photo":"film");
+            return;
+        }
+        
+        for( i = 0; i < 16; i++ )
+        {
+            memcpy(displayMatrix0Q[i], &osram_buff[16+i][0], 16);
+            memcpy(displayMatrix1Q[i], &osram_buff[i][0], 16);
+            memcpy(displayMatrix2Q[i], &osram_buff[i][16], 16);
+            memcpy(displayMatrix3Q[i], &osram_buff[16+i][16], 16);
+        }
 
         OSRAM_QuadrantConvert();
         //OSRAM_QuadrantShow();
@@ -647,7 +660,8 @@ void OSRAM_play(void)
         systime = HAL_GetTick();
 
         OSRAM_framRefresh();
-        OSRAM_framRefreshNull();
+        OSRAM_framRefresh();
+       // OSRAM_framRefreshNull();
     }
 }
 

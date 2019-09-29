@@ -40,6 +40,7 @@
 #include "drv_ir.h"
 #include "drv_serial.h"
 #include "softspi.h"
+#include "programs.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -49,7 +50,12 @@ static uint32_t          tickstart;
 uint32_t                 turn_off;
 uint8_t                  scenMode=0;
 uint8_t                  runFlag;
+uint8_t                  eplosCfgFlag;
+uint8_t                  eplosSLPxen;
 uint8_t                  powerFlag;
+uint16_t                 fileTotalPhoto;  //静态图片数
+uint16_t                 fileTotalFilm; //每个影片的帧数
+uint8_t                  filmTotalProgram;  //Film目录下的影片个数
 uint8_t                  single_cmd[CMD_LEN_MAX];
 uint16_t                 actType = 1;
 uint16_t                 actTime = 100;
@@ -65,7 +71,11 @@ SPI_HandleTypeDef        hspi1,hspi2;
 
 extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
-extern uint8_t           currentProgram;
+
+extern uint8_t           photoIdx;
+extern uint8_t           filmProgramIdx;
+extern uint8_t           filmFrameIdx;
+extern PROGRAMS_TYPE_E   programsType;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -87,6 +97,7 @@ void Drv_PWM_Init(void);
 void Drv_PWM_Proc(void);
 void I2C_init(void);
 void UartControlHandle(uint8_t *key);
+void AppControlHandle(uint8_t *key);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -141,8 +152,20 @@ void MX_SPI2_Init(void)
 
 void appInit(void)
 {
+
     runFlag = 1;
     powerFlag = 1;
+
+    //芯片配置相关参数
+    eplosCfgFlag = 1;
+    eplosSLPxen = DISABLE;
+
+    //显示相关参数
+    programsType = PHOTO;
+    filmProgramIdx = 0;
+    filmFrameIdx = 0;
+    photoIdx = 0;
+    
     Drv_SERIAL_Init();
 }
 
@@ -167,7 +190,7 @@ void Drv_SERIAL_Proc(void)
         memset(key, 0, sizeof(key));
 
         strncpy(key,ptr,UsartType2.RX_Size);
-        UartControlHandle(key);
+        AppControlHandle(key);
         HAL_UART_Transmit(&DEBUG_UART, UsartType2.RX_pData, UsartType2.RX_Size, 0xffff);
     }
     //debug
@@ -247,13 +270,13 @@ int main(void)
     //Drv_PWM_Init();
 
 #if 1
-    HAL_UART_Receive_DMA(&huart1, UsartType1.RX_pData, RX_LEN);
+    HAL_UART_Receive_DMA(&huart1, UsartType1.RX_pData, UART_RX_LEN);
     __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
 
-    HAL_UART_Receive_DMA(&huart2, UsartType2.RX_pData, RX_LEN);
+    HAL_UART_Receive_DMA(&huart2, UsartType2.RX_pData, UART_RX_LEN);
     __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
 
-    HAL_UART_Receive_DMA(&huart3, UsartType3.RX_pData, RX_LEN);
+    HAL_UART_Receive_DMA(&huart3, UsartType3.RX_pData, UART_RX_LEN);
     __HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);
 #else
     HAL_UART_Receive_IT(&huart1, rxData, 5);
@@ -267,7 +290,7 @@ int main(void)
 #else
     SDInit();
 #endif
-    printf("SDInit ok\r\n");
+    printf("SDInit ok!\r\n");
     //SD_ReadFileList("");
     //SD_ReadFileList("/f1");
     //SD_ReadFileList("/f2");
@@ -275,18 +298,16 @@ int main(void)
 #endif
 
 #if(PROJECTOR_OSRAM)
-    SD_ReadFileList("/OSRAM");
-
     I2C_init();
-    EPLOS_config();
-    EPLOS_scimon();
-    //OSRAM_framRefresh();
-    //EPLOS_i2cmon();
-    //EPLOS_diag();
-    //Delay_ms(100);
-    //EPLOS_scimon_read();
-    //EPLOS_status_read();
+    SD_ReadPhotoFileList("/OSRAM/Photo");
+    SD_ReadFilmFolderList("/OSRAM/Film");
+
+    for(int i=0;i < filmTotalProgram; i++)
+    {
+        SD_ReadFilmFileList(i);
+    }
 #endif
+    printf("Files Ready!\r\n");
 
 #if(PROJECTOR_MBI5124)
     //reg_config();
@@ -310,7 +331,7 @@ int main(void)
         //else if(scenMode==4)
         //    MBI5124_Cartoon();
 #elif(PROJECTOR_OSRAM)
-
+        OSRAM_config();
         OSRAM_play();
         //Delay_ms(200);
         //EPLOS_status_read();
@@ -769,19 +790,19 @@ void UsartReceive_IDLE(UART_HandleTypeDef *huart)
 
         if(huart->Instance == USART1)
         {
-            UsartType1.RX_Size = RX_LEN - temp;
+            UsartType1.RX_Size = UART_RX_LEN - temp;
             UsartType1.RX_flag = 1;
-            HAL_UART_Receive_DMA(huart, UsartType1.RX_pData, RX_LEN);
+            HAL_UART_Receive_DMA(huart, UsartType1.RX_pData, UART_RX_LEN);
         } else if(huart->Instance == USART2)
         {
-            UsartType2.RX_Size = RX_LEN - temp;
+            UsartType2.RX_Size = UART_RX_LEN - temp;
             UsartType2.RX_flag = 1;
-            HAL_UART_Receive_DMA(huart, UsartType2.RX_pData, RX_LEN);
+            HAL_UART_Receive_DMA(huart, UsartType2.RX_pData, UART_RX_LEN);
         } else if(huart->Instance == USART3)
         {
-            UsartType3.RX_Size = RX_LEN - temp;
+            UsartType3.RX_Size = UART_RX_LEN - temp;
             UsartType3.RX_flag = 1;
-            HAL_UART_Receive_DMA(huart, UsartType3.RX_pData, RX_LEN);
+            HAL_UART_Receive_DMA(huart, UsartType3.RX_pData, UART_RX_LEN);
         }
     }
 }
@@ -817,13 +838,13 @@ void UartControlHandle(uint8_t *key)
     else if(!strcmp(key,"next"))
     {
         IR_code = REMOTE_MI_DOWN;
-        currentProgram++;
+        photoIdx++;
     }
     else if(!strcmp(key,"pre"))
     {
-        if(currentProgram>0)
+        if(photoIdx>0)
         {
-            currentProgram--;
+            photoIdx--;
         }
         IR_code = REMOTE_MI_UP;
     }
@@ -862,7 +883,66 @@ void UartControlHandle(uint8_t *key)
 
         Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
     }
+}
 
+void AppControlHandle(uint8_t *key)
+{
+    uint16_t ttt;
+    uint16_t IR_code = 0;
+
+
+    printf("AppControlHandle key:%s\r\n",key);
+
+    if(!strcmp(key,"stop"))
+    {
+        //stop
+        runFlag = 0;
+    }
+    else if(!strcmp(key,"start"))
+    {
+        //play
+        runFlag = 1;
+    }
+    else if(!strcmp(key,"next"))
+    {
+        IR_code = REMOTE_MI_DOWN;
+        photoIdx++;
+    }
+    else if(!strcmp(key,"pre"))
+    {
+        if(photoIdx>0)
+        {
+            photoIdx--;
+        }
+        IR_code = REMOTE_MI_UP;
+    }
+    else if(!strcmp(key,"poweron"))
+    {
+        IR_code = REMOTE_MI_POWER;
+        powerFlag = powerFlag==1?0:1;
+    }
+    else //flash time and display scens
+    {
+        ttt = atoi(key);
+        if(ttt>15)
+        {
+            actTime = ttt-15;
+        }
+        else if(ttt<=15 && ttt>10)
+        {
+            if(ttt==11)
+                scenMode = 0;
+        }
+        else
+        {
+            actType = ttt;
+        }
+    }
+
+    if (IR_code) {
+
+        Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
+    }
 }
 
 

@@ -35,3 +35,4 @@ gescontrol_f103\main.o: ../Inc/delay.h
 gescontrol_f103\main.o: ../Inc/drv_ir.h
 gescontrol_f103\main.o: ../Inc/drv_serial.h
 gescontrol_f103\main.o: ../Inc/softspi.h
+gescontrol_f103\main.o: ../Inc/programs.h

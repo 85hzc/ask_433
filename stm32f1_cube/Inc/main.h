@@ -44,9 +44,8 @@
 
 
 /* USER CODE BEGIN Private defines */
-#define DEBUG_ENABLE        1                   //debug输出开启
+#define DEBUG_ENABLE        0                   //debug输出开启
 //#define SYS_FREQUENCY       32000000            //32MHz主频
-#define LOG_ENABLE          1                   //使能输出记录
 
 #define PROJECTOR_MBI5153   0
 #define PROJECTOR_MBI5124   0
@@ -64,13 +63,13 @@ typedef uint32_t            u32;
 typedef uint16_t            u16;
 typedef uint8_t             u8;
 
-#define RX_LEN              128
+#define UART_RX_LEN              128
 
 typedef struct
 {
     uint8_t RX_flag:1;          //IDLE receive flag
     uint16_t RX_Size;           //receive length
-    uint8_t RX_pData[RX_LEN];   //DMA receive buffer
+    uint8_t RX_pData[UART_RX_LEN];   //DMA receive buffer
 }USART_RECEIVETYPE;
 
 

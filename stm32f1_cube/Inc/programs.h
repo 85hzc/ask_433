@@ -7,4 +7,10 @@ typedef struct
     uint8_t fileName[10];
 } PRO_FILE_S;
 
+typedef enum
+{
+    PHOTO = 0,
+    FILM,    
+} PROGRAMS_TYPE_E;
+
 #endif

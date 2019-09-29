@@ -32,3 +32,4 @@ gescontrol_f103\drv_serial.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_
 gescontrol_f103\drv_serial.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 gescontrol_f103\drv_serial.o: ../Inc/drv_ir.h
 gescontrol_f103\drv_serial.o: ../Inc/drv_serial.h
+gescontrol_f103\drv_serial.o: ../Inc/programs.h
