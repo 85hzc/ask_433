@@ -21,9 +21,6 @@
 
 extern uint8_t              runFlag;
 extern char                 fileBuffer[MAX_FILE_SIZE];   // file copy buffer
-extern uint8_t              eplosSLPxen;
-extern uint8_t              eplosCfgFlag;
-extern PROGRAMS_TYPE_E      programsType;
 extern char                 osram_buff[MATRIX_SIZE][MATRIX_SIZE];
 extern uint8_t              photoIdx;
 extern uint8_t              filmFrameIdx;
@@ -31,13 +28,15 @@ extern uint8_t              filmFrameIdx;
 uint64_t                    systime = 0;
 uint64_t                    systime1 = 0;
 uint8_t                     currentAdjustment = 0;//0 ~ 0x1f
+uint8_t                     eplosCfgFlag;
+uint8_t                     eplosSLPxen;
+extern PROGRAMS_TYPE_E      programsType;
 
 void i2c_read(unsigned char addr, unsigned char* buf, int len);
 void i2c_write(unsigned char addr, unsigned char* buf, int len);
 uint8_t I2CReadFromRegister(uint8_t SlaveAddress, uint8_t regaddr, uint8_t *resp, uint8_t NumByteToRead);
 uint8_t I2CWriteToRegister(uint8_t SlaveAddress, uint8_t RegisterAddr, uint8_t *command, uint8_t NumByteToWrite);
 
-    
 uint8_t displayMatrix0Q[16][16] = {
 
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

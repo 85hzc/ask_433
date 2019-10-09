@@ -233,8 +233,7 @@ u8 SD_SendCommand(u8 cmd, u32 arg, u8 crc)
     while((r1 = SPI_ReadWriteByte(0xFF))==0xFF)
     {
         Retry++;
-        //if(Retry > 200)
-        if(Retry >= 10)
+        if(Retry > 200)
         {
             break;
         }
@@ -346,11 +345,11 @@ u8 SD_Init(void)
         //发送CMD0，让SD卡进入IDLE状态
         r1 = SD_SendCommand(CMD0, 0, 0x95);
         retry++;
-    }while((r1 != 0x01) && (retry<10));
+    }while((r1 != 0x01) && (retry<200));
     //}while((r1 != 0x01) && (retry<5));
     //跳出循环后，检查原因：初始化成功？or 重试超时？
 
-    if(retry==10)
+    if(retry==200)
     //if(retry==5)
     {
         printf("SD reset time out!\r\n");

@@ -132,6 +132,22 @@ void MBI_GPIO_Init(void)
     HAL_GPIO_WritePin(AG_PORT, AG_CLK_PIN|AG_DIN_PIN|AG_OE_PIN, GPIO_PIN_RESET);
 }
 
+// 函数：IO初始化
+void WS2801_GPIO_Init(void)
+{
+    GPIO_InitTypeDef GPIO_InitStruct;
+
+    //初始化引脚
+    /*Configure GPIO pins :  */
+    GPIO_InitStruct.Pin = P1_PIN|P2_PIN|P3_PIN|P4_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(WS_PORT, &GPIO_InitStruct);
+
+    HAL_GPIO_WritePin(WS_PORT, P1_PIN|P2_PIN|P3_PIN|P4_PIN, GPIO_PIN_RESET);
+}
+
 void OSRAM_GPIO_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct;

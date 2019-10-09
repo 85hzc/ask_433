@@ -40,7 +40,7 @@ void SDA_OUT()
     GPIO_InitStructure.Pin = I2C_SDA_PIN;
     GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStructure.Pull = GPIO_NOPULL;
-    GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_MEDIUM;
     HAL_GPIO_Init(SDA_GPIO_Port, &GPIO_InitStructure);
 }
 
@@ -56,7 +56,7 @@ void SDA_IN()
     GPIO_InitStructure.Pin = I2C_SDA_PIN;
     GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
     GPIO_InitStructure.Pull = GPIO_NOPULL;
-    GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_MEDIUM;
     HAL_GPIO_Init(SDA_GPIO_Port, &GPIO_InitStructure);
 }
 
@@ -119,7 +119,7 @@ void IIC_Start(void)
     IIC_SDA_0();   //START:when CLK is high,DATA change form high to low 
     delayus(4);
     IIC_SCL_0();   //hold scl line, prepare to transmit data
-}     
+}
 
 /**
   * @brief  Simulate IIC conmunication : Create Stop signal
@@ -127,11 +127,12 @@ void IIC_Start(void)
   */
 void IIC_Stop(void)
 {
-    SDA_OUT();    //sda output mode 
+    SDA_OUT();    //sda output mode
+    delayus(1);
     IIC_SCL_0();
     IIC_SDA_0();  //STOP:when CLK is high DATA change form low to high
     delayus(4);
-    IIC_SCL_1(); 
+    IIC_SCL_1();
     IIC_SDA_1();  //indicate transmit over
     delayus(4);
 }
@@ -144,8 +145,9 @@ void IIC_Stop(void)
 BYTE IIC_Wait_Ack(void)
 {
     BYTE ucErrTime = 0;
-    SDA_IN();      //set as input mode
     IIC_SDA_1();
+    delayus(1);
+    SDA_IN();      //set as input mode
     delayus(1);
     IIC_SCL_1();
     delayus(1);
@@ -168,12 +170,12 @@ BYTE IIC_Wait_Ack(void)
   */
 void IIC_Ack(void)
 {
-    IIC_SCL_0();
     SDA_OUT();
+    IIC_SCL_0();
     IIC_SDA_0();
-    delayus(2);
+    delayus(4);
     IIC_SCL_1();
-    delayus(2);
+    delayus(4);
     IIC_SCL_0();
 }
 
@@ -183,12 +185,13 @@ void IIC_Ack(void)
   */
 void IIC_NAck(void)
 {
-    IIC_SCL_0();
     SDA_OUT();
+    
+    IIC_SCL_0();
     IIC_SDA_1();
-    delayus(2);
+    delayus(4);
     IIC_SCL_1();
-    delayus(2);
+    delayus(4);
     IIC_SCL_0();
 }   
 
@@ -236,23 +239,23 @@ BYTE IIC_Read_Byte(unsigned char ack)
     SDA_IN();               //SDA input mode
     for(i = 0; i < 8; ++i )
     {
-        IIC_SCL_0(); 
+        IIC_SCL_0();
         delayus(2);
         IIC_SCL_1();
         res <<= 1;
         if(SDA_READ())
         {
-          res++; 
-        }      
-        delayus(1); 
+          res++;
+        }
+        delayus(1);
     }
     if (!ack)
     {
-        IIC_NAck();//make NACK
+        IIC_NAck();//SDA 1 //make NACK
     }
     else
     {
-        IIC_Ack(); //make ACK
+        IIC_Ack(); //SDA 0 //make ACK
     }
     return res;
 }
@@ -265,16 +268,22 @@ len：读入字节的长度
 */
 void i2c_read(unsigned char addr, unsigned char* buf, int len)
 {
+    //__disable_irq();
+
     int i;
     unsigned char t;
     IIC_Start();                        //起始条件，开始数据通信
     //发送地址和数据读写方向
     t = (addr << 1) | 1;                    //低位为1，表示读数据
     IIC_Send_Byte(t);
+
     //读入数据
     for (i=0; i<len; i++)
-        buf[i] = IIC_Read_Byte(0);//send ack
+        buf[i] = IIC_Read_Byte(1);//send ack 1; nack 0
+
     IIC_Stop();                     //终止条件，结束数据通信
+
+    //__enable_irq();
 }
 
 /*
@@ -285,16 +294,22 @@ len：写入字节的长度
 */
 void i2c_write(unsigned char addr, unsigned char* buf, int len)
 {
+    //__disable_irq();
+
     int i;
     unsigned char t;
     IIC_Start();                        //起始条件，开始数据通信
     //发送地址和数据读写方向
     t = (addr << 1) | 0;                    //低位为0，表示写数据
     IIC_Send_Byte(t);
+
     //写入数据
     for (i=0; i<len; i++)
         IIC_Send_Byte(buf[i]);
+
     IIC_Stop();                     //终止条件，结束数据通信
+
+    //__enable_irq();
 }
 
 

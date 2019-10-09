@@ -9,8 +9,8 @@
 #define LED_Pin           GPIO_PIN_1
 #define LED_GPIO_Port     GPIOB
 
-//#define INT_Pin           GPIO_PIN_1
-//#define INT_GPIO_Port     GPIOA
+#define PWM_Pin           GPIO_PIN_0
+#define PWM_GPIO_Port     GPIOB
 
 #define IR_IN_Pin         GPIO_PIN_7  //TIM2 CH1
 #define IR_IN_GPIO_Port   GPIOA
@@ -160,6 +160,24 @@
 
 #define COL_PULL_UP(a)    COL_PORT->BSRR = a;                          // 输出高电平
 #define COL_PULL_DOWN(a)  COL_PORT->BSRR = (uint32_t)a << 16;          // 输出低电平
+
+
+//#elif(PROJECTOR_WS2801)
+#define P1_PIN            GPIO_PIN_8
+#define P2_PIN            GPIO_PIN_7
+#define P3_PIN            GPIO_PIN_6
+#define P4_PIN            GPIO_PIN_5
+#define WS_PORT           GPIOA
+
+#define P1_PIN_H          GPIOA->BSRR = P1_PIN;                        // 输出高电平
+#define P1_PIN_L          GPIOA->BSRR = (uint32_t)P1_PIN << 16;        // 输出低电平 
+#define P2_PIN_H          GPIOA->BSRR = P2_PIN;                        // 输出高电平
+#define P2_PIN_L          GPIOA->BSRR = (uint32_t)P2_PIN << 16;        // 输出低电平 
+#define P3_PIN_H          GPIOA->BSRR = P3_PIN;                        // 输出高电平
+#define P3_PIN_L          GPIOA->BSRR = (uint32_t)P3_PIN << 16;        // 输出低电平 
+#define P4_PIN_H          GPIOA->BSRR = P4_PIN;                        // 输出高电平
+#define P4_PIN_L          GPIOA->BSRR = (uint32_t)P4_PIN << 16;        // 输出低电平 
+
 
 //#endif
 

@@ -22,50 +22,15 @@ Dialog DLL:      TARMSTM.DLL V1.66.0.0
  
 <h2>Project:</h2>
 E:\github\stm32f1_cube\MDK-ARM\Cube_F103.uvprojx
-Project File Date:  09/18/2019
+Project File Date:  10/09/2019
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'GesControl_F103'
-compiling programs.c...
-../Inc/programs.h(16): warning:  #1-D: last line of file ends without a newline
-  #endif
-..\Src\programs.c(44): warning:  #223-D: function "memset" declared implicitly
-      memset(path, 0, sizeof(path));
-..\Src\programs.c(45): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
-      sprintf(path,"/OSRAM/Photo/%s",photo_filename[photoIdx%fileTotalPhoto]);
-..\Src\programs.c(47): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
-      res = f_open(&fsrc, path, 
-A_OPEN_EXISTING | 
-A_READ);
-..\Src\programs.c(74): warning:  #223-D: function "memset" declared implicitly
-      memset(path, 0, sizeof(path));
-..\Src\programs.c(75): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
-      sprintf(path,"/OSRAM/Film/%s/%s",film_foldername[filmProgramIdx%filmTotalProgram],film_filename[filmFrameIdx%fileTotalFilm]);
-..\Src\programs.c(79): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
-      res = f_open(&fsrc, path, 
-A_OPEN_EXISTING | 
-A_READ);
-..\Src\programs.c(127): warning:  #223-D: function "stringcopy" declared implicitly
-                  stringcopy(photo_filename[i_name], (BYTE*)finfo.fname);
-..\Src\programs.c(110): warning:  #177-D: variable "br"  was declared but never referenced
-      int i_name=0, br;
-..\Src\programs.c(148): warning:  #223-D: function "memset" declared implicitly
-      memset(path, 0, sizeof(path));
-..\Src\programs.c(167): warning:  #223-D: function "stringcopy" declared implicitly
-                  stringcopy(film_filename[i_name], (BYTE*)finfo.fname);
-..\Src\programs.c(144): warning:  #177-D: variable "br"  was declared but never referenced
-      int i_name=0, br;
-..\Src\programs.c(203): warning:  #223-D: function "stringcopy" declared implicitly
-                  stringcopy(film_foldername[i_name], (BYTE*)finfo.fname);
-..\Src\programs.c(184): warning:  #177-D: variable "br"  was declared but never referenced
-      int i_name=0, br;
-..\Src\programs.c(222): warning:  #223-D: function "memset" declared implicitly
-      memset(buffer,0,sizeof(buffer));
-..\Src\programs.c: 15 warnings, 0 errors
+compiling drv_fan.c...
 linking...
-Program Size: Code=27404 RO-data=448 RW-data=1172 ZI-data=8740  
-"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 15 Warning(s).
+Program Size: Code=29020 RO-data=428 RW-data=1172 ZI-data=8588  
+"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 

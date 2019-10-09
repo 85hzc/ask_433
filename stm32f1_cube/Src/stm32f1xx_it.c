@@ -35,7 +35,7 @@
 #include "stm32f1xx.h"
 #include "stm32f1xx_it.h"
 
-extern TIM_HandleTypeDef        htim2, htim3;
+extern TIM_HandleTypeDef        htim3;
 extern UART_HandleTypeDef       huart1, huart2, huart3;
 
 /* USER CODE BEGIN 0 */
@@ -201,21 +201,6 @@ void TIM3_IRQHandler(void)
 
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
-  /* USER CODE BEGIN TIM3_IRQn 1 */
-
-  /* USER CODE END TIM3_IRQn 1 */
-}
-
-
-/**
-* @brief This function handles TIM3 global interrupt.
-*/
-void TIM2_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM3_IRQn 0 */
-
-  /* USER CODE END TIM3_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM3_IRQn 1 */
 
   /* USER CODE END TIM3_IRQn 1 */

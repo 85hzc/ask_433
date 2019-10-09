@@ -24,9 +24,11 @@ extern uint8_t           photoIdx;
 extern uint8_t           filmProgramIdx;
 extern uint8_t           filmFrameIdx;
 extern uint8_t           runFlag;
+#if(PROJECTOR_OSRAM)
 extern uint8_t           eplosCfgFlag;
 extern uint8_t           eplosSLPxen;
 extern uint8_t           currentAdjustment;
+#endif
 extern PROGRAMS_TYPE_E   programsType;
 
 int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key);
@@ -112,8 +114,10 @@ static void handle_func_MIkeys(uint16_t key)
             break;
             
         case REMOTE_MI_POWER:
+#if(PROJECTOR_OSRAM)
             eplosSLPxen = !eplosSLPxen;
             eplosCfgFlag = 1;
+#endif
             runFlag = 1;
             break;
             
@@ -172,19 +176,23 @@ static void handle_func_MIkeys(uint16_t key)
         
         case REMOTE_MI_BACK:
         case REMOTE_MI_PLUS:
+#if(PROJECTOR_OSRAM)
             if(currentAdjustment<0x1f)
             {
                 currentAdjustment++;
                 eplosCfgFlag = 1;
             }
+#endif
             break;
             
         case REMOTE_MI_MINUS:
+#if(PROJECTOR_OSRAM)
             if(currentAdjustment>0)
             {
                 currentAdjustment--;
                 eplosCfgFlag = 1;
             }
+#endif
             break;
 
         default:

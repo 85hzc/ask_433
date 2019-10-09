@@ -46,12 +46,8 @@
 
 /* USER CODE END Includes */
 
-static uint32_t          tickstart;
-uint32_t                 turn_off;
 uint8_t                  scenMode=0;
 uint8_t                  runFlag;
-uint8_t                  eplosCfgFlag;
-uint8_t                  eplosSLPxen;
 uint8_t                  powerFlag;
 uint16_t                 fileTotalPhoto;  //静态图片数
 uint16_t                 fileTotalFilm; //每个影片的帧数
@@ -65,8 +61,8 @@ UART_HandleTypeDef       huart1, huart2, huart3;
 DMA_HandleTypeDef        hdma_usart1_rx, hdma_usart2_rx, hdma_usart3_rx;
 USART_RECEIVETYPE        UsartType1, UsartType2, UsartType3;
 
-//TIM_HandleTypeDef      htim1;
-TIM_HandleTypeDef        htim3,htim2;
+TIM_HandleTypeDef        htim1;
+TIM_HandleTypeDef        htim3;
 SPI_HandleTypeDef        hspi1,hspi2;
 
 extern volatile uint16_t I2C_SDA_PIN;
@@ -75,6 +71,10 @@ extern volatile uint16_t I2C_SCL_PIN;
 extern uint8_t           photoIdx;
 extern uint8_t           filmProgramIdx;
 extern uint8_t           filmFrameIdx;
+#if(PROJECTOR_OSRAM)
+extern uint8_t           eplosSLPxen;
+extern uint8_t           eplosCfgFlag;
+#endif
 extern PROGRAMS_TYPE_E   programsType;
 
 /* USER CODE BEGIN PV */
@@ -91,10 +91,10 @@ static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
+static void MX_TIM1_Init(void);
 static void MX_TIM3_Init(void);
-static void MX_TIM2_Init(void);
-void Drv_PWM_Init(void);
-void Drv_PWM_Proc(void);
+extern void Drv_FAN_Init(void);
+extern void Drv_FAN_Proc(void);
 void I2C_init(void);
 void UartControlHandle(uint8_t *key);
 void AppControlHandle(uint8_t *key);
@@ -157,9 +157,10 @@ void appInit(void)
     powerFlag = 1;
 
     //芯片配置相关参数
+#if(PROJECTOR_OSRAM)
     eplosCfgFlag = 1;
     eplosSLPxen = DISABLE;
-
+#endif
     //显示相关参数
     programsType = PHOTO;
     filmProgramIdx = 0;
@@ -167,6 +168,9 @@ void appInit(void)
     photoIdx = 0;
     
     Drv_SERIAL_Init();
+#if(PROJECTOR_OSRAM)
+    Drv_FAN_Init();
+#endif
 }
 
 void Drv_SERIAL_Proc(void)
@@ -193,6 +197,32 @@ void Drv_SERIAL_Proc(void)
         AppControlHandle(key);
         HAL_UART_Transmit(&DEBUG_UART, UsartType2.RX_pData, UsartType2.RX_Size, 0xffff);
     }
+
+#if(PROJECTOR_SLAVE)
+    uint8_t rgbdata[IO_SIZE*CHIP_SIZE*3];
+
+    if(UsartType3.RX_flag)
+    {
+        UsartType3.RX_flag = 0;
+
+        ptr = UsartType2.RX_pData;
+
+        memset(rgbdata, 0, sizeof(rgbdata));
+
+        strncpy(rgbdata,ptr,UsartType2.RX_Size);
+        printf("rx len=%d\r\n",UsartType2.RX_Size);
+        UartDataHandle(rgbdata);
+    }
+#endif
+
+#if(PROJECTOR_MASTER)
+    if(Usart1Tx.TX_flag)
+    {
+        HAL_UART_Transmit(&huart1, Usart1Tx.TX_pData, IO_SIZE*CHIP_SIZE*3, 0xffff);
+        Usart1Tx.TX_flag = 0;
+    }
+#endif
+
     //debug
     if(UsartType3.RX_flag)
     {
@@ -249,7 +279,10 @@ int main(void)
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
     MX_USART3_UART_Init();
-    //MX_TIM2_Init();//for PWM pulse
+    
+#if(PROJECTOR_OSRAM)
+    MX_TIM1_Init();//for fan PWM pulse
+#endif
 
 #if(IR_REMOTE)
     MX_TIM3_Init();//for IR INT
@@ -265,9 +298,7 @@ int main(void)
 #endif
 #endif
     appInit();
-
     printf("system start.\r\n");
-    //Drv_PWM_Init();
 
 #if 1
     HAL_UART_Receive_DMA(&huart1, UsartType1.RX_pData, UART_RX_LEN);
@@ -301,7 +332,15 @@ int main(void)
     I2C_init();
     SD_ReadPhotoFileList("/OSRAM/Photo");
     SD_ReadFilmFolderList("/OSRAM/Film");
-
+    
+    for(int i=0;i < filmTotalProgram; i++)
+    {
+        SD_ReadFilmFileList(i);
+    }
+#elif(PROJECTOR_WS2801)
+    SD_ReadPhotoFileList("/WS2801/Photo");
+    SD_ReadFilmFolderList("/WS2801/Film");
+    
     for(int i=0;i < filmTotalProgram; i++)
     {
         SD_ReadFilmFileList(i);
@@ -314,7 +353,10 @@ int main(void)
 #endif
     while (1)
     {
-        //Drv_PWM_Proc();
+#if(PROJECTOR_OSRAM)
+        Drv_FAN_Proc();
+#endif
+
 #if(PROJECTOR_MBI5153)
         MBI5153_X();
         //MBI5153_play();
@@ -336,7 +378,8 @@ int main(void)
         //Delay_ms(200);
         //EPLOS_status_read();
         //Delay_ms(200);
-
+#elif(PROJECTOR_WS2801)
+        WS2801_play();
 #elif(PROJECTOR_MCUGPIO)
         MCUGpio_X();
         //MCUGpio_Sink();
@@ -513,6 +556,8 @@ static void MX_GPIO_Init(void)
     OSRAM_GPIO_Init();
 #elif(PROJECTOR_MCUGPIO)
     MCU_GPIO_Init();
+#elif(PROJECTOR_WS2801)
+    WS2801_GPIO_Init();
 #endif
 
     /* EXTI interrupt init*/
@@ -540,71 +585,73 @@ static void MX_DMA_Init(void)
     HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
 }
 
-#if 0
-/* TIM3 init function */
-static void MX_TIM3_Init(void)
+
+/* TIM1 init function */
+static void MX_TIM1_Init(void)
 {
 
-    TIM_MasterConfigTypeDef sMasterConfig;
-    TIM_ClockConfigTypeDef sClockSourceConfig;
-    TIM_OC_InitTypeDef sConfigOC;
-    TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
+  TIM_ClockConfigTypeDef sClockSourceConfig;
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
 
-    htim3.Instance = TIM3;
-    htim3.Init.Prescaler = 7;
-    htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim3.Init.Period = 999;
-    htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    //htim3.Init.RepetitionCounter = 0;
-    //htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-    if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
-    {
-        Error_Handler();
-    }
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 640-1;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 99;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  //htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
-    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-    if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
-    {
-        Error_Handler();
-    }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
-    if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
-    {
-        Error_Handler();
-    }
+  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
-    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-    if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
-    {
-        Error_Handler();
-    }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
-    sConfigOC.OCMode = TIM_OCMODE_PWM1;
-    sConfigOC.Pulse = 0;
-    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-    sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-    sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-    sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-    if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-    {
-        Error_Handler();
-    }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
-    sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
-    sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
-    sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-    sBreakDeadTimeConfig.DeadTime = 0;
-    sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-    sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
-    sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
-    if (HAL_TIMEx_ConfigBreakDeadTime(&htim3, &sBreakDeadTimeConfig) != HAL_OK)
-    {
-        Error_Handler();
-    }
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  HAL_TIM_MspPostInit(&htim1);
 }
-#else
+
 /* TIM3 init function */
 static void MX_TIM3_Init(void)
 {
@@ -641,60 +688,6 @@ static void MX_TIM3_Init(void)
   }
 }
 
-/* TIM2 init function */
-static void MX_TIM2_Init(void)
-{
-
-  TIM_MasterConfigTypeDef sMasterConfig;
-  TIM_IC_InitTypeDef sConfigIC;
-
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 6400-1;//799
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 0xffffffff;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  //htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_IC_Init(&htim2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
-  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
-  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
-  sConfigIC.ICFilter = 0;
-  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-}
-
-void Drv_PWM_Init(void)
-{
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-
-    tickstart = HAL_GetTick();
-}
-
-void Drv_PWM_Proc(void)
-{
-    if (turn_off)
-    {
-        if((HAL_GetTick() - tickstart) > 1000)
-        {
-            turn_off = 0;
-            __HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_1, (uint32_t)100);
-        }
-    }
-}
-#endif
 
 /*****************************************************************************
 *    function:

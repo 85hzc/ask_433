@@ -51,6 +51,7 @@
 #define PROJECTOR_MBI5124   0
 #define PROJECTOR_OSRAM     1
 #define PROJECTOR_MCUGPIO   0
+#define PROJECTOR_WS2801    0
 #define IR_REMOTE           1
 
 #define SUPPORT_FATFS

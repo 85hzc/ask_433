@@ -23,13 +23,36 @@ volatile uint32_t gclk_pluse = 0xff;
 void delay_ns(uint32_t time)
 {
     //u32 tt = time;
-    //while(time--) {
+    while(time--) {
         __ASM("nop");
         __ASM("nop");
         __ASM("nop");
         __ASM("nop");
-    //}
+    }
 }
+
+void delayns_300()
+{
+
+    __ASM("nop");
+    __ASM("nop");
+    __ASM("nop");
+    __ASM("nop");
+}
+
+void delayns_600()
+{
+    __ASM("nop");
+    __ASM("nop");
+    __ASM("nop");
+    __ASM("nop");
+    __ASM("nop");
+    __ASM("nop");
+    __ASM("nop");
+    __ASM("nop");
+    __ASM("nop");
+}
+
 /*
 //  函数：延时初始化
 //  说明：配置 SysTick 为1ms中断，并启动定时器

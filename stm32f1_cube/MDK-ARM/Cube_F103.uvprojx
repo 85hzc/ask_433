@@ -545,6 +545,16 @@
               <FileType>1</FileType>
               <FilePath>..\Src\softspi.c</FilePath>
             </File>
+            <File>
+              <FileName>ws2801.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ws2801.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_fan.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\drv_fan.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

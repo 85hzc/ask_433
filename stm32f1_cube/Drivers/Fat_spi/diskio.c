@@ -81,11 +81,11 @@ DRESULT disk_read (
    //     return RES_NOTRDY;  //没有检测到SD卡，报NOT READY错误
    // }
 
-    if(count==1)            //1个sector的读操作      
+    if(count==1)            //1个sector的读操作
     {
-        res = SD_ReadSingleBlock(sector, buff);      
+        res = SD_ReadSingleBlock(sector, buff);
     }
-    else                    //多个sector的读操作     
+    else                    //多个sector的读操作
     {
         res = SD_ReadMultiBlock(sector, buff, count);
     }
