@@ -27,20 +27,10 @@ uint8_t                         cube_buff_R[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PA
 uint8_t                         cube_buff_B[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PAGE_SIZE];
 char                            fileBuffer[MAX_FILE_SIZE];
 #endif
-uint8_t                         photoIdx = 0;
-uint8_t                         filmFrameIdx = 0;
+uint8_t                         photoProgramIdx = 0;
 uint8_t                         filmProgramIdx = 0;
-
+uint8_t                         filmFrameIdx = 0;
 PROGRAMS_TYPE_E                 programsType;
-/*
-PRO_FILE_S fileName[MAX_FILE_NUM]= {
-    {1,"1.txt"},
-    {2,"2.txt"},
-    {3,"3.txt"},
-    {4,"4.txt"},
-
-};
-*/
 
 FRESULT SD_ReadPhotoData()
 {
@@ -51,21 +41,21 @@ FRESULT SD_ReadPhotoData()
     memset(path, 0, sizeof(path));
 
 #if(PROJECTOR_OSRAM)
-    sprintf(path,"/OSRAM/Photo/%s",photo_filename[photoIdx%fileTotalPhoto]);
+    sprintf(path,"/OSRAM/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
 #elif(PROJECTOR_WS2801)
-    sprintf(path,"/WS2801/Photo/%s",photo_filename[photoIdx%fileTotalPhoto]);
+    sprintf(path,"/WS2801/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
 #endif
 
     f_mount(0, &fs);
     res = f_open(&fsrc, path, FA_OPEN_EXISTING | FA_READ);
     if(res != 0)
     {
-        printf("open [%s] error[%d]!\r\n",photo_filename[photoIdx%fileTotalPhoto],res);
+        printf("open [%s] error[%d]!\r\n",photo_filename[photoProgramIdx%fileTotalPhoto],res);
         return res;
     }
     f_read(&fsrc, fileBuffer, MAX_FILE_SIZE, &a);
     f_close(&fsrc);
-    printf("[%s] return %d bytes\r\n",photo_filename[photoIdx%fileTotalPhoto],a);
+    printf("[%s] return %d bytes\r\n",photo_filename[photoProgramIdx%fileTotalPhoto],a);
 
 #if(PROJECTOR_OSRAM)
     for( i=0; i<MATRIX_SIZE; i++ )
@@ -189,8 +179,12 @@ void SD_ReadFilmFileList(char filmId)
     char path[FILE_PATH_LEN];
 
     memset(path, 0, sizeof(path));
+    
+#if(PROJECTOR_OSRAM)
     sprintf(path,"/OSRAM/Film/%s",film_foldername[filmId]);
-
+#elif(PROJECTOR_WS2801)
+    sprintf(path,"/WS2801/Film/%s",film_foldername[filmId]);
+#endif
     /*挂载文件系统*/
     f_mount(0, &fs);
     res =  f_opendir(&dirs, path);

@@ -51,7 +51,11 @@
 #define PROJECTOR_MBI5124   0
 #define PROJECTOR_OSRAM     1
 #define PROJECTOR_MCUGPIO   0
+
 #define PROJECTOR_WS2801    0
+#define CUBE_MASTER         0
+#define CUBE_SLAVE          0
+
 #define IR_REMOTE           1
 
 #define SUPPORT_FATFS
@@ -64,7 +68,7 @@ typedef uint32_t            u32;
 typedef uint16_t            u16;
 typedef uint8_t             u8;
 
-#define UART_RX_LEN              128
+#define UART_RX_LEN         128
 
 typedef struct
 {
@@ -72,8 +76,6 @@ typedef struct
     uint16_t RX_Size;           //receive length
     uint8_t RX_pData[UART_RX_LEN];   //DMA receive buffer
 }USART_RECEIVETYPE;
-
-
 
 #if DEBUG_ENABLE
 #define LOG_DEBUG(format, args...)    do { \

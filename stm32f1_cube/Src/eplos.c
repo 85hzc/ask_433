@@ -22,7 +22,6 @@
 extern uint8_t              runFlag;
 extern char                 fileBuffer[MAX_FILE_SIZE];   // file copy buffer
 extern char                 osram_buff[MATRIX_SIZE][MATRIX_SIZE];
-extern uint8_t              photoIdx;
 extern uint8_t              filmFrameIdx;
 
 uint64_t                    systime = 0;

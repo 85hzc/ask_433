@@ -10,7 +10,7 @@ typedef struct
 typedef enum
 {
     PHOTO = 0,
-    FILM,    
+    FILM,
 } PROGRAMS_TYPE_E;
 
 #endif

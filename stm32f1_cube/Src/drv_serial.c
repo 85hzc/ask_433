@@ -20,7 +20,7 @@ ACT_CMD act_cmd;
 static uint32_t          tickstart;
 
 extern uint8_t           single_cmd[CMD_LEN_MAX];
-extern uint8_t           photoIdx;
+extern uint8_t           photoProgramIdx;
 extern uint8_t           filmProgramIdx;
 extern uint8_t           filmFrameIdx;
 extern uint8_t           runFlag;
@@ -124,10 +124,10 @@ static void handle_func_MIkeys(uint16_t key)
         case REMOTE_MI_UP:
             if(programsType==PHOTO)
             {
-                if(photoIdx<0xff)
-                    photoIdx++;
+                if(photoProgramIdx<0xff)
+                    photoProgramIdx++;
                 else
-                    photoIdx = 0;
+                    photoProgramIdx = 0;
 
                 runFlag = 1;
             }
@@ -145,10 +145,10 @@ static void handle_func_MIkeys(uint16_t key)
         case REMOTE_MI_DOWN:
             if(programsType==PHOTO)
             {
-                if(photoIdx>0)
-                    photoIdx--;
+                if(photoProgramIdx>0)
+                    photoProgramIdx--;
                 else
-                    photoIdx=0xff;
+                    photoProgramIdx=0xff;
 
                 runFlag = 1;
             }

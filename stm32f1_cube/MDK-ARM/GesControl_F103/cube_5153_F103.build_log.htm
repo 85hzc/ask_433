@@ -27,10 +27,255 @@ Project File Date:  10/09/2019
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'GesControl_F103'
+compiling stm32f1xx_hal_tim_ex.c...
+compiling stm32f1xx_hal_pwr.c...
+compiling stm32f1xx_hal_rcc_ex.c...
+compiling stm32f1xx_hal_dma.c...
+compiling stm32f1xx_hal_cortex.c...
+compiling stm32f1xx_hal_rcc.c...
+compiling stm32f1xx_hal_tim.c...
+compiling stm32f1xx_hal_gpio.c...
+compiling stm32f1xx_hal_flash_ex.c...
+compiling stm32f1xx_hal_uart.c...
+compiling stm32f1xx_hal.c...
+compiling stm32f1xx_hal_flash.c...
+compiling stm32f1xx_hal_gpio_ex.c...
+compiling stm32f1xx_hal_spi.c...
+compiling system_stm32f1xx.c...
+compiling main.c...
+../Inc/softspi.h(57): warning:  #1295-D: Deprecated declaration CS_Enable - give arg types
+  void CS_Enable();
+../Inc/softspi.h(60): warning:  #1295-D: Deprecated declaration CS_Disable - give arg types
+  void CS_Disable();
+../Inc/softspi.h(66): warning:  #1295-D: Deprecated declaration SDReadByte - give arg types
+  u8 SDReadByte();
+../Inc/softspi.h(72): warning:  #1295-D: Deprecated declaration SDReset - give arg types
+  u8 SDReset();
+../Inc/softspi.h(75): warning:  #1295-D: Deprecated declaration SDInit - give arg types
+  u8 SDInit();
+../Inc/programs.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif
+../Src/main.c(174): warning:  #223-D: function "Drv_SERIAL_Init" declared implicitly
+      Drv_SERIAL_Init();
+../Src/main.c(225): warning:  #223-D: function "memset" declared implicitly
+          memset(key, 0, sizeof(key));
+../Src/main.c(226): warning:  #223-D: function "strncpy" declared implicitly
+          strncpy(key,ptr,UsartType3.RX_Size);
+../Src/main.c(254): warning:  #223-D: function "Drv_SERIAL_Read_Act" declared implicitly
+      if (HAL_OK == Drv_SERIAL_Read_Act(single_cmd))
+../Src/main.c(258): warning:  #223-D: function "Drv_CMD_Handler" declared implicitly
+          (void)Drv_CMD_Handler(single_cmd);
+../Src/main.c(293): warning:  #223-D: function "SPI_Configuration" declared implicitly
+      SPI_Configuration();    //SPI≥ı ºªØ
+../Src/main.c(318): warning:  #223-D: function "SD_Init" declared implicitly
+      SD_Init();
+../Src/main.c(331): warning:  #223-D: function "SD_ReadPhotoFileList" declared implicitly
+      SD_ReadPhotoFileList("/OSRAM/Photo");
+../Src/main.c(332): warning:  #223-D: function "SD_ReadFilmFolderList" declared implicitly
+      SD_ReadFilmFolderList("/OSRAM/Film");
+../Src/main.c(336): warning:  #223-D: function "SD_ReadFilmFileList" declared implicitly
+          SD_ReadFilmFileList(i);
+../Src/main.c(374): warning:  #223-D: function "OSRAM_config" declared implicitly
+          OSRAM_config();
+../Src/main.c(375): warning:  #223-D: function "OSRAM_play" declared implicitly
+          OSRAM_play();
+../Src/main.c(548): warning:  #223-D: function "LED_GPIO_Init" declared implicitly
+      LED_GPIO_Init();
+../Src/main.c(520): warning:  #177-D: variable "GPIO_InitStruct"  was declared but never referenced
+      GPIO_InitTypeDef GPIO_InitStruct;
+../Src/main.c(663): warning:  #223-D: function "HAL_TIM_MspPostInit" declared implicitly
+    HAL_TIM_MspPostInit(&htim1);
+../Src/main.c(821): warning:  #223-D: function "strcmp" declared implicitly
+      if(!strcmp(key,"stop"))
+../Src/main.c(851): warning:  #223-D: function "atoi" declared implicitly
+          ttt = atoi(key);
+../Src/main.c(877): warning:  #223-D: function "Drv_SERIAL_Act" declared implicitly
+          Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
+../Src/main.c(889): warning:  #223-D: function "strcmp" declared implicitly
+      if(!strcmp(key,"stop"))
+../Src/main.c(919): warning:  #223-D: function "atoi" declared implicitly
+          ttt = atoi(key);
+../Src/main.c(937): warning:  #223-D: function "Drv_SERIAL_Act" declared implicitly
+          Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
+../Src/main.c(952): warning:  #223-D: function "strcmp" declared implicitly
+      if(!strcmp(key,"stop"))
+../Src/main.c(982): warning:  #223-D: function "atoi" declared implicitly
+          ttt = atoi(key);
+../Src/main.c(1000): warning:  #223-D: function "Drv_SERIAL_Act" declared implicitly
+          Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
+../Src/main.c: 30 warnings, 0 errors
+compiling stm32f1xx_hal_msp.c...
+compiling softi2c.c...
+..\Src\softi2c.c(38): warning:  #223-D: function "memset" declared implicitly
+      memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
+..\Src\softi2c.c(54): warning:  #223-D: function "memset" declared implicitly
+      memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
+..\Src\softi2c.c(78): warning:  #188-D: enumerated type mixed with another type
+      HAL_GPIO_WritePin(
+DA_GPIO_Port, I2C_SDA_PIN, 1);
+..\Src\softi2c.c(87): warning:  #188-D: enumerated type mixed with another type
+      HAL_GPIO_WritePin(
+DA_GPIO_Port, I2C_SDA_PIN, 0);
+..\Src\softi2c.c(96): warning:  #188-D: enumerated type mixed with another type
+      HAL_GPIO_WritePin(
+CL_GPIO_Port, I2C_SCL_PIN, 1);
+..\Src\softi2c.c(105): warning:  #188-D: enumerated type mixed with another type
+      HAL_GPIO_WritePin(
+CL_GPIO_Port, I2C_SCL_PIN, 0);
+..\Src\softi2c.c: 6 warnings, 0 errors
+compiling mbi5153.c...
+compiling delay.c...
+compiling stm32f1xx_it.c...
+../Src/stm32f1xx_it.c(178): warning:  #223-D: function "TimingDelay_Decrement" declared implicitly
+    TimingDelay_Decrement();
+../Src/stm32f1xx_it.c(179): warning:  #223-D: function "gclk" declared implicitly
+    gclk();
+../Src/stm32f1xx_it.c(235): warning:  #223-D: function "UsartReceive_IDLE" declared implicitly
+      UsartReceive_IDLE(&huart1);
+../Src/stm32f1xx_it.c(249): warning:  #223-D: function "UsartReceive_IDLE" declared implicitly
+      UsartReceive_IDLE(&huart2);
+../Src/stm32f1xx_it.c(263): warning:  #223-D: function "UsartReceive_IDLE" declared implicitly
+      UsartReceive_IDLE(&huart3);
+../Src/stm32f1xx_it.c: 5 warnings, 0 errors
+compiling gpio.c...
+compiling eplos.c...
+../Inc/programs.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif
+..\Src\eplos.c(262): warning:  #223-D: function "memset" declared implicitly
+      memset(array, 0, sizeof(array));
+..\Src\eplos.c(281): warning:  #223-D: function "memset" declared implicitly
+      memset(array, 0, sizeof(array));
+..\Src\eplos.c(298): warning:  #223-D: function "memset" declared implicitly
+    memset(pBuffer, 0, NumByteToRead);
+..\Src\eplos.c(365): warning:  #223-D: function "memcpy" declared implicitly
+          memcpy(tmpR, displayMatrix1Q[row], sizeof(tmpR));
+..\Src\eplos.c(373): warning:  #223-D: function "memcpy" declared implicitly
+          memcpy(tmpR, displayMatrix2Q[row], sizeof(tmpR));
+..\Src\eplos.c(382): warning:  #177-D: variable "tmp"  was declared but never referenced
+      uint8_t row, col, tmp;
+..\Src\eplos.c(427): warning:  #177-D: variable "fixel"  was declared but never referenced
+      unsigned short k,fixel;
+..\Src\eplos.c(635): warning:  #223-D: function "SD_ReadFilmData" declared implicitly
+              res = SD_ReadFilmData();
+..\Src\eplos.c(635): warning:  #188-D: enumerated type mixed with another type
+              res = SD_ReadFilmData();
+..\Src\eplos.c(640): warning:  #223-D: function "SD_ReadPhotoData" declared implicitly
+              res = SD_ReadPhotoData();
+..\Src\eplos.c(640): warning:  #188-D: enumerated type mixed with another type
+              res = SD_ReadPhotoData();
+..\Src\eplos.c(650): warning:  #223-D: function "memcpy" declared implicitly
+              memcpy(displayMatrix0Q[i], &osram_buff[16+i][0], 16);
+..\Src\eplos.c(622): warning:  #177-D: variable "j"  was declared but never referenced
+      static uint8_t j=0;
+..\Src\eplos.c: 14 warnings, 0 errors
+compiling mbi5124.c...
+compiling drv_ir.c...
+..\Src\drv_ir.c(144): warning:  #223-D: function "Drv_SERIAL_Act" declared implicitly
+        Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
+..\Src\drv_ir.c(195): warning:  #223-D: function "Drv_SERIAL_Act" declared implicitly
+          Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
+..\Src\drv_ir.c(207): warning:  #223-D: function "Drv_SERIAL_Act" declared implicitly
+          Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
+..\Src\drv_ir.c: 3 warnings, 0 errors
+compiling programs.c...
+../Inc/programs.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif
+..\Src\programs.c(51): warning:  #223-D: function "memset" declared implicitly
+      memset(path, 0, sizeof(path));
+..\Src\programs.c(54): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+      sprintf(path,"/OSRAM/Photo/%s",photo_filename[photoIdx%fileTotalPhoto]);
+..\Src\programs.c(60): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
+      res = f_open(&fsrc, path, 
+A_OPEN_EXISTING | 
+A_READ);
+..\Src\programs.c(99): warning:  #223-D: function "memset" declared implicitly
+      memset(path, 0, sizeof(path));
+..\Src\programs.c(102): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+      sprintf(path,"/OSRAM/Film/%s/%s",film_foldername[filmProgramIdx%filmTotalProgram],film_filename[filmFrameIdx%fileTotalFilm]);
+..\Src\programs.c(109): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
+      res = f_open(&fsrc, path, 
+A_OPEN_EXISTING | 
+A_READ);
+..\Src\programs.c(170): warning:  #223-D: function "stringcopy" declared implicitly
+                  stringcopy(photo_filename[i_name], (BYTE*)finfo.fname);
+..\Src\programs.c(153): warning:  #177-D: variable "br"  was declared but never referenced
+      int i_name=0, br;
+..\Src\programs.c(191): warning:  #223-D: function "memset" declared implicitly
+      memset(path, 0, sizeof(path));
+..\Src\programs.c(214): warning:  #223-D: function "stringcopy" declared implicitly
+                  stringcopy(film_filename[i_name], (BYTE*)finfo.fname);
+..\Src\programs.c(187): warning:  #177-D: variable "br"  was declared but never referenced
+      int i_name=0, br;
+..\Src\programs.c(250): warning:  #223-D: function "stringcopy" declared implicitly
+                  stringcopy(film_foldername[i_name], (BYTE*)finfo.fname);
+..\Src\programs.c(231): warning:  #177-D: variable "br"  was declared but never referenced
+      int i_name=0, br;
+..\Src\programs.c(269): warning:  #223-D: function "memset" declared implicitly
+      memset(buffer,0,sizeof(buffer));
+..\Src\programs.c: 15 warnings, 0 errors
+compiling drv_serial.c...
+../Inc/programs.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif
+..\Src\drv_serial.c(51): warning:  #223-D: function "memset" declared implicitly
+      memset(single_cmd, 0, sizeof(single_cmd));
+..\Src\drv_serial.c(79): warning:  #223-D: function "memcpy" declared implicitly
+      memcpy(act_cmd.multi_cmd[act_cmd.wr_id], pData, CMD_LEN_MAX-1);
+..\Src\drv_serial.c(89): warning:  #223-D: function "memcpy" declared implicitly
+          memcpy(pData, act_cmd.multi_cmd[act_cmd.rd_id], CMD_LEN_MAX-1);
+..\Src\drv_serial.c(246): warning:  #127-D: expected a statement
+              }
+..\Src\drv_serial.c: 5 warnings, 0 errors
+compiling mcugpio.c...
+compiling ws2801.c...
+../Inc/programs.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif
+..\Src\ws2801.c: 1 warning, 0 errors
+compiling softspi.c...
+../Inc/softspi.h(57): warning:  #1295-D: Deprecated declaration CS_Enable - give arg types
+  void CS_Enable();
+../Inc/softspi.h(60): warning:  #1295-D: Deprecated declaration CS_Disable - give arg types
+  void CS_Disable();
+../Inc/softspi.h(66): warning:  #1295-D: Deprecated declaration SDReadByte - give arg types
+  u8 SDReadByte();
+../Inc/softspi.h(72): warning:  #1295-D: Deprecated declaration SDReset - give arg types
+  u8 SDReset();
+../Inc/softspi.h(75): warning:  #1295-D: Deprecated declaration SDInit - give arg types
+  u8 SDInit();
+..\Src\softspi.c(14): warning:  #223-D: function "delayus" declared implicitly
+      delayus(i);
+..\Src\softspi.c(226): warning:  #223-D: function "SPI_GPIO_Soft_Init" declared implicitly
+      SPI_GPIO_Soft_Init();
+..\Src\softspi.c(221): warning:  #177-D: variable "time"  was declared but never referenced
+      u8 time = 0;
+..\Src\softspi.c: 8 warnings, 0 errors
 compiling drv_fan.c...
+compiling SPI_SD_driver.c...
+..\Drivers\Fat_spi\SPI_SD_driver.c(55): warning:  #223-D: function "SPI_GPIO_Hard_Init" declared implicitly
+      SPI_GPIO_Hard_Init();
+..\Drivers\Fat_spi\SPI_SD_driver.c(85): warning:  #223-D: function "MX_SPI2_Init" declared implicitly
+      MX_SPI2_Init();
+..\Drivers\Fat_spi\SPI_SD_driver.c(53): warning:  #177-D: variable "GPIO_InitStructure"  was declared but never referenced
+      GPIO_InitTypeDef GPIO_InitStructure;
+..\Drivers\Fat_spi\SPI_SD_driver.c(150): warning:  #177-D: variable "res"  was declared but never referenced
+      HAL_StatusTypeDef res;
+..\Drivers\Fat_spi\SPI_SD_driver.c: 4 warnings, 0 errors
+compiling FatSpi_Test.c...
+compiling diskio.c...
+compiling ff.c...
+..\Drivers\Fat_spi\ff.c(783): warning:  #550-D: variable "lfen"  was set but never used
+      BYTE a, c, lfen, ord, sum, *dir;
+..\Drivers\Fat_spi\ff.c(783): warning:  #550-D: variable "ord"  was set but never used
+      BYTE a, c, lfen, ord, sum, *dir;
+..\Drivers\Fat_spi\ff.c(783): warning:  #550-D: variable "sum"  was set but never used
+      BYTE a, c, lfen, ord, sum, *dir;
+..\Drivers\Fat_spi\ff.c(846): warning:  #550-D: variable "ord"  was set but never used
+      BYTE a, c, ord, sum, *dir;
+..\Drivers\Fat_spi\ff.c(846): warning:  #550-D: variable "sum"  was set but never used
+      BYTE a, c, ord, sum, *dir;
+..\Drivers\Fat_spi\ff.c: 5 warnings, 0 errors
 linking...
-Program Size: Code=29020 RO-data=428 RW-data=1172 ZI-data=8588  
-"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 0 Warning(s).
+Program Size: Code=28852 RO-data=428 RW-data=1180 ZI-data=8756  
+"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 96 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -53,7 +298,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.1
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:36
 </pre>
 </body>
 </html>

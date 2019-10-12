@@ -46,7 +46,7 @@
 
 /* USER CODE END Includes */
 
-uint8_t                  scenMode=0;
+uint8_t                  scenMode = 0;
 uint8_t                  runFlag;
 uint8_t                  powerFlag;
 uint16_t                 fileTotalPhoto;  //静态图片数
@@ -55,10 +55,13 @@ uint8_t                  filmTotalProgram;  //Film目录下的影片个数
 uint8_t                  single_cmd[CMD_LEN_MAX];
 uint16_t                 actType = 1;
 uint16_t                 actTime = 100;
+uint8_t                  usartTxFlag = 0;
+uint8_t                  usartTxData[2];
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef       huart1, huart2, huart3;
 DMA_HandleTypeDef        hdma_usart1_rx, hdma_usart2_rx, hdma_usart3_rx;
+DMA_HandleTypeDef        hdma_usart1_tx, hdma_usart2_tx, hdma_usart3_tx;
 USART_RECEIVETYPE        UsartType1, UsartType2, UsartType3;
 
 TIM_HandleTypeDef        htim1;
@@ -68,7 +71,7 @@ SPI_HandleTypeDef        hspi1,hspi2;
 extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
 
-extern uint8_t           photoIdx;
+extern uint8_t           photoProgramIdx;
 extern uint8_t           filmProgramIdx;
 extern uint8_t           filmFrameIdx;
 #if(PROJECTOR_OSRAM)
@@ -97,7 +100,8 @@ extern void Drv_FAN_Init(void);
 extern void Drv_FAN_Proc(void);
 void I2C_init(void);
 void UartControlHandle(uint8_t *key);
-void AppControlHandle(uint8_t *key);
+void AppControlEplosHandle(uint8_t *key);
+void AppControlEplosHandle(uint8_t *key);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -165,7 +169,7 @@ void appInit(void)
     programsType = PHOTO;
     filmProgramIdx = 0;
     filmFrameIdx = 0;
-    photoIdx = 0;
+    photoProgramIdx = 0;
     
     Drv_SERIAL_Init();
 #if(PROJECTOR_OSRAM)
@@ -177,52 +181,40 @@ void Drv_SERIAL_Proc(void)
 {
     uint8_t *ptr;
     uint8_t key[16];
-    
-    //wifi
+
+#if(CUBE_SLAVE)
+    //BLE mesh 8258/8269
     if(UsartType1.RX_flag)
     {
         UsartType1.RX_flag = 0;
+        ptr = UsartType1.RX_pData;
+
+        memset(key, 0, sizeof(key));
+        strncpy(key,ptr,UsartType1.RX_Size);
+        printf("rx len=%d\r\n",UsartType1.RX_Size);
+        
+        //UartDataHandle(rgbdata);
+#if PROJECTOR_WS2801
+        AppControlCubeHandle(key);
+#elif PROJECTOR_OSRAM
+        AppControlEplosHandle(key);
+#endif
         HAL_UART_Transmit(&DEBUG_UART, UsartType1.RX_pData, UsartType1.RX_Size, 0xffff);
     }
+#endif
+
     //ble
+    /*
     if(UsartType2.RX_flag)
     {
         UsartType2.RX_flag = 0;
-
         ptr = UsartType2.RX_pData;
 
         memset(key, 0, sizeof(key));
-
         strncpy(key,ptr,UsartType2.RX_Size);
-        AppControlHandle(key);
-        HAL_UART_Transmit(&DEBUG_UART, UsartType2.RX_pData, UsartType2.RX_Size, 0xffff);
+        //HAL_UART_Transmit(&DEBUG_UART, UsartType2.RX_pData, UsartType2.RX_Size, 0xffff);
     }
-
-#if(PROJECTOR_SLAVE)
-    uint8_t rgbdata[IO_SIZE*CHIP_SIZE*3];
-
-    if(UsartType3.RX_flag)
-    {
-        UsartType3.RX_flag = 0;
-
-        ptr = UsartType2.RX_pData;
-
-        memset(rgbdata, 0, sizeof(rgbdata));
-
-        strncpy(rgbdata,ptr,UsartType2.RX_Size);
-        printf("rx len=%d\r\n",UsartType2.RX_Size);
-        UartDataHandle(rgbdata);
-    }
-#endif
-
-#if(PROJECTOR_MASTER)
-    if(Usart1Tx.TX_flag)
-    {
-        HAL_UART_Transmit(&huart1, Usart1Tx.TX_pData, IO_SIZE*CHIP_SIZE*3, 0xffff);
-        Usart1Tx.TX_flag = 0;
-    }
-#endif
-
+    */
     //debug
     if(UsartType3.RX_flag)
     {
@@ -233,8 +225,17 @@ void Drv_SERIAL_Proc(void)
         memset(key, 0, sizeof(key));
         strncpy(key,ptr,UsartType3.RX_Size);
         UartControlHandle(key);
-        HAL_UART_Transmit(&DEBUG_UART, UsartType3.RX_pData, UsartType3.RX_Size, 0xffff);
+        //HAL_UART_Transmit(&DEBUG_UART, UsartType3.RX_pData, UsartType3.RX_Size, 0xffff);
     }
+
+#if(CUBE_MASTER)
+    if(usartTxFlag)
+    {
+        HAL_UART_Transmit(&huart1, usartTxData, sizeof(usartTxData), 0xffff);
+        usartTxFlag = 0;
+    }
+#endif
+
 #if 0
     /* 1. read the uart buffer... */
     if (HAL_OK == Drv_SERIAL_Read(single_cmd, 0))
@@ -279,10 +280,7 @@ int main(void)
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
     MX_USART3_UART_Init();
-    
-#if(PROJECTOR_OSRAM)
-    MX_TIM1_Init();//for fan PWM pulse
-#endif
+    MX_TIM1_Init();//for PWM pulse
 
 #if(IR_REMOTE)
     MX_TIM3_Init();//for IR INT
@@ -574,13 +572,22 @@ static void MX_DMA_Init(void)
     __HAL_RCC_DMA1_CLK_ENABLE();
 
     /* DMA interrupt init */
+    /* DMA1_Channel2_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
+    /* DMA1_Channel3_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
+    /* DMA1_Channel4_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
     /* DMA1_Channel5_IRQn interrupt configuration */
     HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
     /* DMA1_Channel6_IRQn interrupt configuration */
     HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
-    /* DMA1_Channel6_IRQn interrupt configuration */
+    /* DMA1_Channel7_IRQn interrupt configuration */
     HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
 }
@@ -596,7 +603,11 @@ static void MX_TIM1_Init(void)
   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
 
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 640-1;
+#if(PROJECTOR_OSRAM)
+  htim1.Init.Prescaler = 640-1;//1KHz
+#elif(PROJECTOR_WS2801)
+  htim1.Init.Prescaler = 64-1;//10KHz
+#endif
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 99;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -805,18 +816,7 @@ void UartControlHandle(uint8_t *key)
     uint16_t ttt;
     uint16_t IR_code = 0;
 
-/*
-    IR_code = REMOTE_MI_DOWN;
-    IR_code = REMOTE_MI_LEFT;
-    IR_code = REMOTE_MI_RIGHT;
-    IR_code = REMOTE_MI_PLUS;
-    IR_code = REMOTE_MI_MINUS;
-    IR_code = REMOTE_MI_BACK;
-    IR_code = REMOTE_MI_HOME;//focus+
-    IR_code = REMOTE_MI_MENU;//focus-
-    IR_code = REMOTE_MI_OK;
-*/
-    printf("UartControlHandle key:%s\r\n",key);
+    printf("UartControlHandle key:%s,len=%d\r\n",key,UsartType3.RX_Size);
 
     if(!strcmp(key,"stop"))
     {
@@ -831,13 +831,13 @@ void UartControlHandle(uint8_t *key)
     else if(!strcmp(key,"next"))
     {
         IR_code = REMOTE_MI_DOWN;
-        photoIdx++;
+        photoProgramIdx++;
     }
     else if(!strcmp(key,"pre"))
     {
-        if(photoIdx>0)
+        if(photoProgramIdx>0)
         {
-            photoIdx--;
+            photoProgramIdx--;
         }
         IR_code = REMOTE_MI_UP;
     }
@@ -878,13 +878,13 @@ void UartControlHandle(uint8_t *key)
     }
 }
 
-void AppControlHandle(uint8_t *key)
+void AppControlEplosHandle(uint8_t *key)
 {
     uint16_t ttt;
     uint16_t IR_code = 0;
 
 
-    printf("AppControlHandle key:%s\r\n",key);
+    printf("AppControlEplosHandle key:%s\r\n",key);
 
     if(!strcmp(key,"stop"))
     {
@@ -899,13 +899,13 @@ void AppControlHandle(uint8_t *key)
     else if(!strcmp(key,"next"))
     {
         IR_code = REMOTE_MI_DOWN;
-        photoIdx++;
+        photoProgramIdx++;
     }
     else if(!strcmp(key,"pre"))
     {
-        if(photoIdx>0)
+        if(photoProgramIdx>0)
         {
-            photoIdx--;
+            photoProgramIdx--;
         }
         IR_code = REMOTE_MI_UP;
     }
@@ -938,6 +938,39 @@ void AppControlHandle(uint8_t *key)
     }
 }
 
+void AppControlCubeHandle(uint8_t *key)
+{
+    uint16_t ttt;
+    uint16_t IR_code = 0;
+    uint8_t pId,fId;
+    PROGRAMS_TYPE_E type;
+
+    type = *key++;
+    pId = *key++;
+    fId = *key;
+
+    printf("AppControlCubeHandle type:%d,pid:%d,fid:%d\r\n",type,pId,fId);
+
+    switch(type)
+    {
+        case PHOTO:
+            runFlag = TRUE;
+            photoProgramIdx = pId;
+            programsType = PHOTO;
+            break;
+
+        case FILM:
+            runFlag = TRUE;
+            filmProgramIdx = pId;
+            filmFrameIdx = fId;
+            programsType = FILM;
+            break;
+
+        default:
+            break;
+    }
+
+}
 
 /* USER CODE END 4 */
 
