@@ -18,8 +18,9 @@
 
 #if(PROJECTOR_MBI5124)
 extern uint8_t              runFlag;
-extern char                 promptBuffer[16*6][16];
+extern char                 fileBuffer[MAX_FILE_SIZE];   // file copy buffer
 //extern char                 cartoonBuffer[16*20][16];
+//extern char                 promptBuffer[16*6][16];
 extern uint16_t             actType;
 extern uint16_t             actTime;
 
@@ -29,6 +30,7 @@ uint8_t                     chnFlagPos[16][SECS];//1-8
 static uint8_t              currentLine=0;
 char                        refreshBuf[16][16];
 
+/*
 char fileBuffer[MAX_FILE_SIZE]={
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -46,7 +48,7 @@ char fileBuffer[MAX_FILE_SIZE]={
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};   // file copy buffer
-
+*/
 void LE(void)
 {
     delay(1);
@@ -469,7 +471,7 @@ void MBI5124_Play(void)
     }
     cycleScan_Play();
 }
-
+#if 0
 void MBI5124_Prompt(void)
 {
     static uint8_t j=0;
@@ -486,7 +488,7 @@ void MBI5124_Prompt(void)
     }
     cycleScan_Play();
 }
-#if 0
+
 void MBI5124_Cartoon(void)
 {
     static uint8_t j=0;

@@ -1,11 +1,10 @@
 #include "stm32f1xx.h"
 #include "delay.h"
 #include "gpio.h"
-#include "eplos.h"
 #include "config.h"
 #include "programs.h"
 
-#if(PROJECTOR_WS2801)
+#if(PROJECTOR_CUBE)
 
 extern uint8_t                  runFlag;
 extern char                     fileBuffer[MAX_FILE_SIZE];
@@ -39,21 +38,21 @@ void Send_8bits1(uint8_t dat)
     {
         if(dat & 0x80)//1,for "1",H:0.8us,L:0.45us;
         {
-            P1_PIN_H;
+            CU_P1_PIN_H;
             delay_ns(3);
-            P1_PIN_L;
+            CU_P1_PIN_L;
             delay_ns(1);
         }
         else    //0 ,for "0",H:0.4us,L: 0.85us
         {
-            P1_PIN_H;
+            CU_P1_PIN_H;
             delayns_300();
-            P1_PIN_L;
+            CU_P1_PIN_L;
             delay_ns(3);
         }
         dat=dat<<1;
     }
-    P1_PIN_L;
+    CU_P1_PIN_L;
 }
 
 void Send_8bits2(uint8_t dat)
@@ -65,21 +64,21 @@ void Send_8bits2(uint8_t dat)
     {
         if(dat & 0x80)//1,for "1",H:0.8us,L:0.45us;
         {
-            P2_PIN_H;
+            CU_P2_PIN_H;
             delay_ns(3);
-            P2_PIN_L;
+            CU_P2_PIN_L;
             delay_ns(1);
         }
         else    //0 ,for "0",H:0.4us,L: 0.85us
         {
-            P2_PIN_H;
+            CU_P2_PIN_H;
             delayns_300();
-            P2_PIN_L;
+            CU_P2_PIN_L;
             delay_ns(3);
         }
         dat=dat<<1;
     }
-    P2_PIN_L;
+    CU_P2_PIN_L;
 }
 
 void Send_8bits3(uint8_t dat)
@@ -91,21 +90,21 @@ void Send_8bits3(uint8_t dat)
     {
         if(dat & 0x80)//1,for "1",H:0.8us,L:0.45us;
         {
-            P3_PIN_H;
+            CU_P3_PIN_H;
             delay_ns(3);
-            P3_PIN_L;
+            CU_P3_PIN_L;
             delay_ns(1);
         }
         else    //0 ,for "0",H:0.4us,L: 0.85us
         {
-            P3_PIN_H;
+            CU_P3_PIN_H;
             delayns_300();
-            P3_PIN_L;
+            CU_P3_PIN_L;
             delay_ns(3);
         }
         dat=dat<<1;
     }
-    P3_PIN_L;
+    CU_P3_PIN_L;
 }
 
 void Send_8bits4(uint8_t dat)
@@ -117,21 +116,21 @@ void Send_8bits4(uint8_t dat)
     {
         if(dat & 0x80)//1,for "1",H:0.8us,L:0.45us;
         {
-            P4_PIN_H;
+            CU_P4_PIN_H;
             delay_ns(3);
-            P4_PIN_L;
+            CU_P4_PIN_L;
             delay_ns(1);
         }
         else    //0 ,for "0",H:0.4us,L: 0.85us
         {
-            P4_PIN_H;
+            CU_P4_PIN_H;
             delayns_300();
-            P4_PIN_L;
+            CU_P4_PIN_L;
             delay_ns(3);
         }
         dat=dat<<1;
     }
-    P4_PIN_L;
+    CU_P4_PIN_L;
 }
 
 void Send_2811_oneString(uint8_t *g,uint8_t *r,uint8_t *b)        //传送16位灰度数据    ,三组相同
@@ -139,7 +138,7 @@ void Send_2811_oneString(uint8_t *g,uint8_t *r,uint8_t *b)        //传送16位灰度
     uint8_t i=0;
 
     __disable_irq();
-    P1_PIN_L;
+    CU_P1_PIN_L;
     /*****************16*3组灰度数据********************************/
     for(i=0;i<CHIP_SIZE;i++)
     {
@@ -156,7 +155,7 @@ void Send_2811_totalPixels1(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P1_PIN_L;
+    CU_P1_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits1(g[i]);
@@ -171,7 +170,7 @@ void Send_2811_totalPixels2(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P2_PIN_L;
+    CU_P2_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits2(g[i]);
@@ -187,7 +186,7 @@ void Send_2811_totalPixels3(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P3_PIN_L;
+    CU_P3_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits3(g[i]);
@@ -202,7 +201,7 @@ void Send_2811_totalPixels4(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P4_PIN_L;
+    CU_P4_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits4(g[i]);
@@ -211,7 +210,7 @@ void Send_2811_totalPixels4(uint8_t *g,uint8_t *r,uint8_t *b)
     }
     __enable_irq();
 }
-
+/*
 void UartDataHandle(uint8_t *data)
 {
     uint8_t i,j;
@@ -230,7 +229,7 @@ void UartDataHandle(uint8_t *data)
         Send_2811_oneString(GData1,RData1,BData1);
     }
 }
-
+*/
 void ColorSchedule()
 {
     uint8_t j,rcolor,gcolor,bcolor;
@@ -416,7 +415,7 @@ void WS2801_play(void)
             printf("Read [%s] file failed!\r\n",programsType==PHOTO?"photo":"film");
             return;
         }
-        
+        usartTxFlag = 1;
         WS2801_QuadrantConvert();
         WS2801_framRefresh();
         //ColorSchedule();

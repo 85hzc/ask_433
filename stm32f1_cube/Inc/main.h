@@ -47,19 +47,27 @@
 #define DEBUG_ENABLE        0                   //debug输出开启
 //#define SYS_FREQUENCY       32000000            //32MHz主频
 
+//MBI5153方案
 #define PROJECTOR_MBI5153   0
+
+//MBI5124 MBI5020方案
 #define PROJECTOR_MBI5124   0
-#define PROJECTOR_OSRAM     1
+
+//OSRAM eplos芯片投射灯方案
+#define PROJECTOR_OSRAM     0
+
+//gpio控制16*16方案
 #define PROJECTOR_MCUGPIO   0
 
-#define PROJECTOR_WS2801    0
+//分体系列立体吊灯方案
+#define PROJECTOR_CUBE      0
 #define CUBE_MASTER         0
 #define CUBE_SLAVE          0
 
-#define IR_REMOTE           1
+#define PROJECTOR_CUBEPLT   1
+#define CUBEPLT_MASTER      1
+#define CUBEPLT_SLAVE       0
 
-#define SUPPORT_FATFS
-#define SPI_HARD
 
 typedef volatile uint32_t   vu32;
 typedef volatile uint16_t   vu16;

@@ -3,6 +3,7 @@
 
 #include "stm32f1xx.h"
 #include "stm32f1xx_hal_gpio.h"
+#include "main.h"
 
 /*---------------------- GPIO配置宏 ------------------------*/
 
@@ -162,13 +163,35 @@
 #define COL_PULL_DOWN(a)  COL_PORT->BSRR = (uint32_t)a << 16;          // 输出低电平
 
 
-//#elif(PROJECTOR_WS2801)
+//#if(PROJECTOR_CUBE)
+
+#define CU_P1_PIN         GPIO_PIN_8
+#define CU_P2_PIN         GPIO_PIN_7
+#define CU_P3_PIN         GPIO_PIN_6
+#define CU_P4_PIN         GPIO_PIN_5
+#define WS_PORT           GPIOA
+
+#define CU_P1_PIN_H       GPIOA->BSRR = CU_P1_PIN;                        // 输出高电平
+#define CU_P1_PIN_L       GPIOA->BSRR = (uint32_t)CU_P1_PIN << 16;        // 输出低电平 
+#define CU_P2_PIN_H       GPIOA->BSRR = CU_P2_PIN;                        // 输出高电平
+#define CU_P2_PIN_L       GPIOA->BSRR = (uint32_t)CU_P2_PIN << 16;        // 输出低电平 
+#define CU_P3_PIN_H       GPIOA->BSRR = CU_P3_PIN;                        // 输出高电平
+#define CU_P3_PIN_L       GPIOA->BSRR = (uint32_t)CU_P3_PIN << 16;        // 输出低电平 
+#define CU_P4_PIN_H       GPIOA->BSRR = CU_P4_PIN;                        // 输出高电平
+#define CU_P4_PIN_L       GPIOA->BSRR = (uint32_t)CU_P4_PIN << 16;        // 输出低电平 
+
+//#elif(CUBEPLT_SLAVE)
+
+#define P0_PIN            GPIO_PIN_0
 #define P1_PIN            GPIO_PIN_8
 #define P2_PIN            GPIO_PIN_7
 #define P3_PIN            GPIO_PIN_6
 #define P4_PIN            GPIO_PIN_5
+
 #define WS_PORT           GPIOA
 
+#define P0_PIN_H          GPIOA->BSRR = P0_PIN;                        // 输出高电平
+#define P0_PIN_L          GPIOA->BSRR = (uint32_t)P0_PIN << 16;        // 输出低电平 
 #define P1_PIN_H          GPIOA->BSRR = P1_PIN;                        // 输出高电平
 #define P1_PIN_L          GPIOA->BSRR = (uint32_t)P1_PIN << 16;        // 输出低电平 
 #define P2_PIN_H          GPIOA->BSRR = P2_PIN;                        // 输出高电平
@@ -177,9 +200,32 @@
 #define P3_PIN_L          GPIOA->BSRR = (uint32_t)P3_PIN << 16;        // 输出低电平 
 #define P4_PIN_H          GPIOA->BSRR = P4_PIN;                        // 输出高电平
 #define P4_PIN_L          GPIOA->BSRR = (uint32_t)P4_PIN << 16;        // 输出低电平 
+#define P5_PIN_H          GPIOA->BSRR = P0_PIN;                        // 输出高电平
+#define P5_PIN_L          GPIOA->BSRR = (uint32_t)P0_PIN << 16;        // 输出低电平 
+#define P6_PIN_H          GPIOA->BSRR = P1_PIN;                        // 输出高电平
+#define P6_PIN_L          GPIOA->BSRR = (uint32_t)P1_PIN << 16;        // 输出低电平 
+#define P7_PIN_H          GPIOA->BSRR = P2_PIN;                        // 输出高电平
+#define P7_PIN_L          GPIOA->BSRR = (uint32_t)P2_PIN << 16;        // 输出低电平 
 
+#define P8_PIN_H          GPIOA->BSRR = P3_PIN;                        // 输出高电平
+#define P8_PIN_L          GPIOA->BSRR = (uint32_t)P3_PIN << 16;        // 输出低电平 
+#define P9_PIN_H          GPIOA->BSRR = P4_PIN;                        // 输出高电平
+#define P9_PIN_L          GPIOA->BSRR = (uint32_t)P4_PIN << 16;        // 输出低电平 
+#define P10_PIN_H         GPIOA->BSRR = P0_PIN;                        // 输出高电平
+#define P10_PIN_L         GPIOA->BSRR = (uint32_t)P0_PIN << 16;        // 输出低电平 
+#define P11_PIN_H         GPIOA->BSRR = P1_PIN;                        // 输出高电平
+#define P11_PIN_L         GPIOA->BSRR = (uint32_t)P1_PIN << 16;        // 输出低电平 
+#define P12_PIN_H         GPIOA->BSRR = P2_PIN;                        // 输出高电平
+#define P12_PIN_L         GPIOA->BSRR = (uint32_t)P2_PIN << 16;        // 输出低电平 
+#define P13_PIN_H         GPIOA->BSRR = P3_PIN;                        // 输出高电平
+#define P13_PIN_L         GPIOA->BSRR = (uint32_t)P3_PIN << 16;        // 输出低电平 
+#define P14_PIN_H         GPIOA->BSRR = P4_PIN;                        // 输出高电平
+#define P14_PIN_L         GPIOA->BSRR = (uint32_t)P4_PIN << 16;        // 输出低电平 
+#define P15_PIN_H         GPIOA->BSRR = P0_PIN;                        // 输出高电平
+#define P15_PIN_L         GPIOA->BSRR = (uint32_t)P0_PIN << 16;        // 输出低电平 
 
 //#endif
+
 
 /*---------------------- GPIO控制宏 ------------------------*/
 

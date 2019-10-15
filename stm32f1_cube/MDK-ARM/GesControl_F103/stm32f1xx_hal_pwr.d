@@ -17,6 +17,7 @@ gescontrol_f103\stm32f1xx_hal_pwr.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1
 gescontrol_f103\stm32f1xx_hal_pwr.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
 gescontrol_f103\stm32f1xx_hal_pwr.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 gescontrol_f103\stm32f1xx_hal_pwr.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio_ex.h
+gescontrol_f103\stm32f1xx_hal_pwr.o: ../Inc/main.h
 gescontrol_f103\stm32f1xx_hal_pwr.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
 gescontrol_f103\stm32f1xx_hal_pwr.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc_ex.h
 gescontrol_f103\stm32f1xx_hal_pwr.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h

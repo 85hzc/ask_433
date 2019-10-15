@@ -20,12 +20,30 @@
 #include "ff.h"
 #include "diskio.h"
 
+#define IR_REMOTE           1
+#define SUPPORT_FATFS
+#define SPI_HARD
+
 #define MAX_FILE_NUM        32
 
 #if(PROJECTOR_OSRAM)
+#define MATRIX_SIZE         32
 #define MAX_FILE_SIZE       2048       //256 must be % comfort
-#elif(PROJECTOR_WS2801)
+#elif(PROJECTOR_CUBE)
+//#define IO_SIZE             16
+#define CUBE_ROW_SIZE       24
+#define CUBE_COL_SIZE       12
+#define CUBE_PAGE_SIZE      4
+#define CHIP_SIZE           (CUBE_ROW_SIZE*CUBE_COL_SIZE)
 #define MAX_FILE_SIZE       4096//(4096*4)       //256 must be % comfort
+#elif(PROJECTOR_MBI5124)
+#define MAX_FILE_SIZE       1024       //256 must be % comfort
+#elif(PROJECTOR_CUBEPLT)
+#define IO_SIZE             16
+#define MODULE_ID           0
+#define CHIP_SIZE           12
+#define CUBE_ONE_MODULE_SIZE (CHIP_SIZE*16*3)
+#define MAX_FILE_SIZE       (IO_SIZE*16*CHIP_SIZE*3)       //256 must be % comfort
 #endif
 
 #define MAX_FILM_FRAME      64
@@ -33,15 +51,6 @@
 
 #define FILE_NAME_LEN       16
 #define FILE_PATH_LEN       64
-
-#define MATRIX_SIZE         32
-#define CUBE_ROW_SIZE       24
-#define CUBE_COL_SIZE       12
-#define CUBE_PAGE_SIZE      4
-
-
-#define CHIP_SIZE           (CUBE_ROW_SIZE*CUBE_COL_SIZE)
-#define IO_SIZE             16
 
 #define SW_period_2ms                               1
 #define SW_period_20ms                              10

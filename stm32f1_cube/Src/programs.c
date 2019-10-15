@@ -5,7 +5,6 @@
 #include "mbi5153.h"
 #include "delay.h"
 #include "programs.h"
-//#include "FatSpi_Test.h"
 #include "config.h"
 
 extern uint16_t                 fileTotalFilm;
@@ -18,15 +17,24 @@ BYTE                            photo_filename[MAX_FILE_NUM][FILE_NAME_LEN];
 BYTE                            film_filename[MAX_FILM_FRAME][FILE_NAME_LEN];
 BYTE                            film_foldername[MAX_FILM_FOLDER][FILE_NAME_LEN];
 
+char                            fileBuffer[MAX_FILE_SIZE];
+
 #if(PROJECTOR_OSRAM)
 uint8_t                         osram_buff[MATRIX_SIZE][MATRIX_SIZE];
-char                            fileBuffer[MAX_FILE_SIZE];
-#elif(PROJECTOR_WS2801)
+#elif(PROJECTOR_CUBE)
 uint8_t                         cube_buff_G[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PAGE_SIZE];
 uint8_t                         cube_buff_R[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PAGE_SIZE];
 uint8_t                         cube_buff_B[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PAGE_SIZE];
-char                            fileBuffer[MAX_FILE_SIZE];
+#elif(PROJECTOR_MBI5124)
+
+#elif(CUBEPLT_SLAVE)
+uint8_t                         cube_buff_G[IO_SIZE][CHIP_SIZE];
+uint8_t                         cube_buff_R[IO_SIZE][CHIP_SIZE];
+uint8_t                         cube_buff_B[IO_SIZE][CHIP_SIZE];
+#elif(CUBEPLT_MASTER)
+uint8_t                         cube_buff_RGB[IO_SIZE*CHIP_SIZE*3];
 #endif
+
 uint8_t                         photoProgramIdx = 0;
 uint8_t                         filmProgramIdx = 0;
 uint8_t                         filmFrameIdx = 0;
@@ -42,7 +50,7 @@ FRESULT SD_ReadPhotoData()
 
 #if(PROJECTOR_OSRAM)
     sprintf(path,"/OSRAM/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
-#elif(PROJECTOR_WS2801)
+#elif(PROJECTOR_CUBE)
     sprintf(path,"/WS2801/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
 #endif
 
@@ -65,7 +73,7 @@ FRESULT SD_ReadPhotoData()
             osram_buff[i][j] = fileBuffer[i*(64+2)+j*2]-'0';
         }
     }
-#elif(PROJECTOR_WS2801)
+#elif(PROJECTOR_CUBE)
     for( i=0; i<CUBE_ROW_SIZE; i++ )
     {
         for( j=0; j<CUBE_COL_SIZE*CUBE_PAGE_SIZE; j++ )
@@ -90,7 +98,7 @@ FRESULT SD_ReadFilmData()
 
 #if(PROJECTOR_OSRAM)
     sprintf(path,"/OSRAM/Film/%s/%s",film_foldername[filmProgramIdx%filmTotalProgram],film_filename[filmFrameIdx%fileTotalFilm]);
-#elif(PROJECTOR_WS2801)
+#elif(PROJECTOR_CUBE)
     sprintf(path,"/WS2801/Film/%s/%s",film_foldername[filmProgramIdx%filmTotalProgram],film_filename[filmFrameIdx%fileTotalFilm]);
 #endif
 
@@ -114,7 +122,7 @@ FRESULT SD_ReadFilmData()
             osram_buff[i][j] = fileBuffer[i*(64+2)+j*2]-'0';
         }
     }
-#elif(PROJECTOR_WS2801)
+#elif(PROJECTOR_CUBE)
     for( i=0; i<CUBE_ROW_SIZE; i++ )
     {
         for( j=0; j<CUBE_COL_SIZE*CUBE_PAGE_SIZE; j++ )
@@ -182,8 +190,10 @@ void SD_ReadFilmFileList(char filmId)
     
 #if(PROJECTOR_OSRAM)
     sprintf(path,"/OSRAM/Film/%s",film_foldername[filmId]);
-#elif(PROJECTOR_WS2801)
+#elif(PROJECTOR_CUBE)
     sprintf(path,"/WS2801/Film/%s",film_foldername[filmId]);
+#elif(CUBEPLT_MASTER)
+    sprintf(path,"/CUBE/Film/%s",film_foldername[filmId]);
 #endif
     /*挂载文件系统*/
     f_mount(0, &fs);

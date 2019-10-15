@@ -41,6 +41,7 @@
 #include "drv_serial.h"
 #include "softspi.h"
 #include "programs.h"
+#include "config.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -55,8 +56,13 @@ uint8_t                  filmTotalProgram;  //Film目录下的影片个数
 uint8_t                  single_cmd[CMD_LEN_MAX];
 uint16_t                 actType = 1;
 uint16_t                 actTime = 100;
-uint8_t                  usartTxFlag = 0;
-uint8_t                  usartTxData[2];
+//uint8_t                  usartTxFlag = 0;
+
+#if(PROJECTOR_CUBE)
+uint8_t                  usartTxData[3];
+#elif(CUBEPLT_MASTER)
+uint8_t                  usartTxData[1024];
+#endif
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef       huart1, huart2, huart3;
@@ -99,9 +105,16 @@ static void MX_TIM3_Init(void);
 extern void Drv_FAN_Init(void);
 extern void Drv_FAN_Proc(void);
 void I2C_init(void);
-void UartControlHandle(uint8_t *key);
+void UartDebugControlHandle(uint8_t *key);
+#if PROJECTOR_CUBE
+void AppControlCubeHandle(uint8_t *key);
+#endif
+#if PROJECTOR_OSRAM
 void AppControlEplosHandle(uint8_t *key);
-void AppControlEplosHandle(uint8_t *key);
+#endif
+#if CUBEPLT_SLAVE
+void AppControlCubePltHandle(uint8_t *key,uint16_t len);
+#endif
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -182,7 +195,6 @@ void Drv_SERIAL_Proc(void)
     uint8_t *ptr;
     uint8_t key[16];
 
-#if(CUBE_SLAVE)
     //BLE mesh 8258/8269
     if(UsartType1.RX_flag)
     {
@@ -194,14 +206,15 @@ void Drv_SERIAL_Proc(void)
         printf("rx len=%d\r\n",UsartType1.RX_Size);
         
         //UartDataHandle(rgbdata);
-#if PROJECTOR_WS2801
+#if PROJECTOR_CUBE
         AppControlCubeHandle(key);
+#elif(CUBEPLT_SLAVE)
+        AppControlCubePltHandle(key, UsartType1.RX_Size);
 #elif PROJECTOR_OSRAM
         AppControlEplosHandle(key);
 #endif
         HAL_UART_Transmit(&DEBUG_UART, UsartType1.RX_pData, UsartType1.RX_Size, 0xffff);
     }
-#endif
 
     //ble
     /*
@@ -215,6 +228,7 @@ void Drv_SERIAL_Proc(void)
         //HAL_UART_Transmit(&DEBUG_UART, UsartType2.RX_pData, UsartType2.RX_Size, 0xffff);
     }
     */
+    
     //debug
     if(UsartType3.RX_flag)
     {
@@ -224,7 +238,17 @@ void Drv_SERIAL_Proc(void)
 
         memset(key, 0, sizeof(key));
         strncpy(key,ptr,UsartType3.RX_Size);
-        UartControlHandle(key);
+        UartDebugControlHandle(key);
+        /*
+        if(key[0]==8)
+        {
+            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+        }
+        else if(key[0]==9)
+        {
+            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+        }
+        */
         //HAL_UART_Transmit(&DEBUG_UART, UsartType3.RX_pData, UsartType3.RX_Size, 0xffff);
     }
 
@@ -234,6 +258,13 @@ void Drv_SERIAL_Proc(void)
         HAL_UART_Transmit(&huart1, usartTxData, sizeof(usartTxData), 0xffff);
         usartTxFlag = 0;
     }
+    /*
+#elif(CUBEPLT_MASTER)
+    if(usartTxFlag)
+    {
+        HAL_UART_Transmit(&huart1, usartTxData, sizeof(usartTxData), 0xffff);
+        usartTxFlag = 0;
+    }*/
 #endif
 
 #if 0
@@ -335,7 +366,7 @@ int main(void)
     {
         SD_ReadFilmFileList(i);
     }
-#elif(PROJECTOR_WS2801)
+#elif(PROJECTOR_CUBE)
     SD_ReadPhotoFileList("/WS2801/Photo");
     SD_ReadFilmFolderList("/WS2801/Film");
     
@@ -343,7 +374,16 @@ int main(void)
     {
         SD_ReadFilmFileList(i);
     }
+#elif(CUBEPLT_MASTER)
+    //SD_ReadPhotoFileList("/CUBE/Photo");
+    SD_ReadFilmFolderList("/CUBE/Film");
+    
+    for(int i=0;i < filmTotalProgram; i++)
+    {
+        SD_ReadFilmFileList(i);
+    }
 #endif
+
     printf("Files Ready!\r\n");
 
 #if(PROJECTOR_MBI5124)
@@ -366,21 +406,19 @@ int main(void)
             MBI5124_Sink();
         else if(scenMode==2)
             MBI5124_Play();
-        else if(scenMode==3)
-            MBI5124_Prompt();
-        //else if(scenMode==4)
-        //    MBI5124_Cartoon();
+#elif(PROJECTOR_MCUGPIO)
+        MCUGpio_X();
+        //MCUGpio_Sink();
 #elif(PROJECTOR_OSRAM)
         OSRAM_config();
         OSRAM_play();
         //Delay_ms(200);
         //EPLOS_status_read();
         //Delay_ms(200);
-#elif(PROJECTOR_WS2801)
+#elif(PROJECTOR_CUBE)
         WS2801_play();
-#elif(PROJECTOR_MCUGPIO)
-        MCUGpio_X();
-        //MCUGpio_Sink();
+#elif(PROJECTOR_CUBEPLT)
+        CUBE_play();
 #endif
 
         Drv_SERIAL_Proc();
@@ -554,8 +592,10 @@ static void MX_GPIO_Init(void)
     OSRAM_GPIO_Init();
 #elif(PROJECTOR_MCUGPIO)
     MCU_GPIO_Init();
-#elif(PROJECTOR_WS2801)
+#elif(PROJECTOR_CUBE)
     WS2801_GPIO_Init();
+#elif(CUBEPLT_SLAVE)
+    CUBE_GPIO_Init();
 #endif
 
     /* EXTI interrupt init*/
@@ -605,7 +645,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
 #if(PROJECTOR_OSRAM)
   htim1.Init.Prescaler = 640-1;//1KHz
-#elif(PROJECTOR_WS2801)
+#elif(PROJECTOR_CUBE)
   htim1.Init.Prescaler = 64-1;//10KHz
 #endif
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -811,12 +851,12 @@ void UsartReceive_IDLE(UART_HandleTypeDef *huart)
     }
 }
 
-void UartControlHandle(uint8_t *key)
+void UartDebugControlHandle(uint8_t *key)
 {
     uint16_t ttt;
     uint16_t IR_code = 0;
 
-    printf("UartControlHandle key:%s,len=%d\r\n",key,UsartType3.RX_Size);
+    printf("UartDebugControlHandle key:%s,len=%d\r\n",key,UsartType3.RX_Size);
 
     if(!strcmp(key,"stop"))
     {
@@ -878,6 +918,7 @@ void UartControlHandle(uint8_t *key)
     }
 }
 
+#if PROJECTOR_OSRAM
 void AppControlEplosHandle(uint8_t *key)
 {
     uint16_t ttt;
@@ -937,7 +978,9 @@ void AppControlEplosHandle(uint8_t *key)
         Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
     }
 }
+#endif
 
+#if PROJECTOR_CUBE
 void AppControlCubeHandle(uint8_t *key)
 {
     uint16_t ttt;
@@ -954,13 +997,13 @@ void AppControlCubeHandle(uint8_t *key)
     switch(type)
     {
         case PHOTO:
-            runFlag = TRUE;
+            runFlag = 1;
             photoProgramIdx = pId;
             programsType = PHOTO;
             break;
 
         case FILM:
-            runFlag = TRUE;
+            runFlag = 1;
             filmProgramIdx = pId;
             filmFrameIdx = fId;
             programsType = FILM;
@@ -969,8 +1012,9 @@ void AppControlCubeHandle(uint8_t *key)
         default:
             break;
     }
-
 }
+#endif
+
 
 /* USER CODE END 4 */
 

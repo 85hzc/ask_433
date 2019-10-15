@@ -17,6 +17,7 @@ gescontrol_f103\ws2801.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.
 gescontrol_f103\ws2801.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
 gescontrol_f103\ws2801.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 gescontrol_f103\ws2801.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio_ex.h
+gescontrol_f103\ws2801.o: ../Inc/main.h
 gescontrol_f103\ws2801.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
 gescontrol_f103\ws2801.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc_ex.h
 gescontrol_f103\ws2801.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h
@@ -30,7 +31,6 @@ gescontrol_f103\ws2801.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.
 gescontrol_f103\ws2801.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 gescontrol_f103\ws2801.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 gescontrol_f103\ws2801.o: ../Inc/delay.h
-gescontrol_f103\ws2801.o: ../Inc/eplos.h
 gescontrol_f103\ws2801.o: ..\Drivers\Fat_spi\config.h
 gescontrol_f103\ws2801.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_usart.h
 gescontrol_f103\ws2801.o: ..\Drivers\Fat_spi\integer.h
