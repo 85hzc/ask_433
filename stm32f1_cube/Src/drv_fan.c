@@ -25,7 +25,7 @@ static uint8_t turn_off = 0;
   */
 void Drv_FAN_Init(void)
 {  
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);  
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);  
 
   tickstart = HAL_GetTick();
 }
@@ -37,7 +37,7 @@ void Drv_FAN_Proc(void)
     if((HAL_GetTick() - tickstart) > tickexpire)
     {
       turn_off = 0;
-      __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2, (uint32_t)0);
+      __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4, (uint32_t)0);
     }
   }
 }
@@ -46,14 +46,14 @@ void drv_fan_speed(uint16_t param)
 {
   param=param>100?100:param;
   
-  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2, (uint32_t)param);
+  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4, (uint32_t)param);
 }
 
 void drv_fan_on(void)
 {
   turn_off = 0;
 
-  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2, 100);
+  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4, 100);
 }
 
 void drv_fan_off(uint32_t delay)

@@ -31,26 +31,65 @@ void delay_ns(uint32_t time)
     }
 }
 
+void delayns_100()
+{
+    __ASM("nop");
+}
 void delayns_300()
 {
-
-    __ASM("nop");
-    __ASM("nop");
-    __ASM("nop");
-    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
 }
 
 void delayns_600()
 {
-    __ASM("nop");
-    __ASM("nop");
-    __ASM("nop");
-    __ASM("nop");
-    __ASM("nop");
-    __ASM("nop");
-    __ASM("nop");
-    __ASM("nop");
-    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+}
+
+
+void delayns_900()
+{
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");
 }
 
 /*

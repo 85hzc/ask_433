@@ -472,7 +472,7 @@ void Send_2811_totalPixels0(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P0_PIN_L;
+    //P0_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits0(g[i]);
@@ -488,7 +488,7 @@ void Send_2811_totalPixels1(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P1_PIN_L;
+    //P1_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits1(g[i]);
@@ -503,7 +503,7 @@ void Send_2811_totalPixels2(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P2_PIN_L;
+    //P2_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits2(g[i]);
@@ -519,7 +519,7 @@ void Send_2811_totalPixels3(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P3_PIN_L;
+    //P3_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits3(g[i]);
@@ -534,7 +534,7 @@ void Send_2811_totalPixels4(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P4_PIN_L;
+    //P4_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits4(g[i]);
@@ -549,7 +549,7 @@ void Send_2811_totalPixels5(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P5_PIN_L;
+    //P5_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits5(g[i]);
@@ -564,7 +564,7 @@ void Send_2811_totalPixels6(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P6_PIN_L;
+    //P6_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits6(g[i]);
@@ -579,7 +579,7 @@ void Send_2811_totalPixels7(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P7_PIN_L;
+    //P7_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits7(g[i]);
@@ -595,7 +595,7 @@ void Send_2811_totalPixels8(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P8_PIN_L;
+    //P8_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits8(g[i]);
@@ -610,7 +610,7 @@ void Send_2811_totalPixels9(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P9_PIN_L;
+    //P9_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits9(g[i]);
@@ -625,7 +625,7 @@ void Send_2811_totalPixels10(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P10_PIN_L;
+    //P10_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits10(g[i]);
@@ -640,7 +640,7 @@ void Send_2811_totalPixels11(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P11_PIN_L;
+    //P11_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits11(g[i]);
@@ -655,7 +655,7 @@ void Send_2811_totalPixels12(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P12_PIN_L;
+    //P12_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits12(g[i]);
@@ -670,7 +670,7 @@ void Send_2811_totalPixels13(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P13_PIN_L;
+    //P13_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits13(g[i]);
@@ -685,7 +685,7 @@ void Send_2811_totalPixels14(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P14_PIN_L;
+    //P14_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits14(g[i]);
@@ -700,7 +700,7 @@ void Send_2811_totalPixels15(uint8_t *g,uint8_t *r,uint8_t *b)
     uint8_t i=0;
 
     __disable_irq();
-    P15_PIN_L;
+    //P15_PIN_L;
     for(i=0;i<CHIP_SIZE;i++)
     {
         Send_8bits15(g[i]);

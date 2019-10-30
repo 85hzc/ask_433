@@ -31,6 +31,10 @@ extern uint8_t           currentAdjustment;
 #endif
 extern PROGRAMS_TYPE_E   programsType;
 
+#if(PROJECTOR_CUBE)
+extern uint8_t           cubeProgramsType;
+#endif
+
 int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key);
 
 
@@ -122,16 +126,7 @@ static void handle_func_MIkeys(uint16_t key)
             break;
             
         case REMOTE_MI_UP:
-            if(programsType==PHOTO)
-            {
-                if(photoProgramIdx<0xff)
-                    photoProgramIdx++;
-                else
-                    photoProgramIdx = 0;
-
-                runFlag = 1;
-            }
-            else
+            if(programsType==FILM)
             {
                 if(filmProgramIdx<0xff)
                     filmProgramIdx++;
@@ -140,19 +135,27 @@ static void handle_func_MIkeys(uint16_t key)
 
                 filmFrameIdx = 0;//切换影片频道，从片头开始
             }
-            break;
-
-        case REMOTE_MI_DOWN:
-            if(programsType==PHOTO)
+            else
             {
-                if(photoProgramIdx>0)
-                    photoProgramIdx--;
+                if(photoProgramIdx<0xff)
+                    photoProgramIdx++;
                 else
-                    photoProgramIdx=0xff;
+                    photoProgramIdx = 0;
 
                 runFlag = 1;
             }
+
+#if(CUBE_MASTER)
+            cubeProgramsType++;
+            if(cubeProgramsType<0xff)
+                cubeProgramsType++;
             else
+                cubeProgramsType = 0;
+#endif
+            break;
+
+        case REMOTE_MI_DOWN:
+            if(programsType==FILM)
             {
                 if(filmProgramIdx>0)
                     filmProgramIdx--;
@@ -161,8 +164,24 @@ static void handle_func_MIkeys(uint16_t key)
 
                 filmFrameIdx = 0;//切换影片频道，从片头开始
             }
+            else
+            {
+                if(photoProgramIdx>0)
+                    photoProgramIdx--;
+                else
+                    photoProgramIdx=0xff;
+
+                runFlag = 1;
+            }
+
+#if(CUBE_MASTER)
+            if(cubeProgramsType>0)
+                cubeProgramsType--;
+            else
+                cubeProgramsType=0xff;
+#endif
             break;
-            
+        
         case REMOTE_MI_LEFT:
         case REMOTE_MI_RIGHT:
             break;
@@ -171,9 +190,9 @@ static void handle_func_MIkeys(uint16_t key)
             runFlag = 1;
             //photoIdx=0;
             filmFrameIdx = 0;
-            programsType = (programsType==PHOTO) ? FILM : PHOTO;
+            programsType = (programsType+1)%MAX_PROGRAMS;
             break;
-        
+
         case REMOTE_MI_BACK:
         case REMOTE_MI_PLUS:
 #if(PROJECTOR_OSRAM)
@@ -184,7 +203,7 @@ static void handle_func_MIkeys(uint16_t key)
             }
 #endif
             break;
-            
+
         case REMOTE_MI_MINUS:
 #if(PROJECTOR_OSRAM)
             if(currentAdjustment>0)

@@ -20,7 +20,7 @@
 #include "ff.h"
 #include "diskio.h"
 
-#define IR_REMOTE           1
+#define IR_REMOTE           0
 #define SUPPORT_FATFS
 #define SPI_HARD
 
@@ -32,7 +32,7 @@
 #elif(PROJECTOR_CUBE)
 //#define IO_SIZE             16
 #define CUBE_ROW_SIZE       24
-#define CUBE_COL_SIZE       12
+#define CUBE_COL_SIZE       8
 #define CUBE_PAGE_SIZE      4
 #define CHIP_SIZE           (CUBE_ROW_SIZE*CUBE_COL_SIZE)
 #define MAX_FILE_SIZE       4096//(4096*4)       //256 must be % comfort
@@ -56,6 +56,7 @@
 #define SW_period_20ms                              10
 #define SW_period_200ms                             100
 #define GRAY                                        10
+#define GRAY_STEP                                   2
 
 typedef enum
 {

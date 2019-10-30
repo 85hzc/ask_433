@@ -56,7 +56,7 @@ uint8_t                  filmTotalProgram;  //Film目录下的影片个数
 uint8_t                  single_cmd[CMD_LEN_MAX];
 uint16_t                 actType = 1;
 uint16_t                 actTime = 100;
-//uint8_t                  usartTxFlag = 0;
+uint8_t                  usartTxFlag = 0;
 
 #if(PROJECTOR_CUBE)
 uint8_t                  usartTxData[3];
@@ -70,7 +70,7 @@ DMA_HandleTypeDef        hdma_usart1_rx, hdma_usart2_rx, hdma_usart3_rx;
 DMA_HandleTypeDef        hdma_usart1_tx, hdma_usart2_tx, hdma_usart3_tx;
 USART_RECEIVETYPE        UsartType1, UsartType2, UsartType3;
 
-TIM_HandleTypeDef        htim1;
+TIM_HandleTypeDef        htim1,htim2;
 TIM_HandleTypeDef        htim3;
 SPI_HandleTypeDef        hspi1,hspi2;
 
@@ -101,6 +101,7 @@ static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 extern void Drv_FAN_Init(void);
 extern void Drv_FAN_Proc(void);
@@ -179,15 +180,16 @@ void appInit(void)
     eplosSLPxen = DISABLE;
 #endif
     //显示相关参数
-    programsType = PHOTO;
+    programsType = AUTO_ALGORITHM;
     filmProgramIdx = 0;
     filmFrameIdx = 0;
     photoProgramIdx = 0;
     
     Drv_SERIAL_Init();
-#if(PROJECTOR_OSRAM)
+//#if(PROJECTOR_OSRAM)
+    //for fan or led lighting
     Drv_FAN_Init();
-#endif
+//#endif
 }
 
 void Drv_SERIAL_Proc(void)
@@ -259,7 +261,8 @@ void Drv_SERIAL_Proc(void)
         usartTxFlag = 0;
     }
     /*
-#elif(CUBEPLT_MASTER)
+    //transmit in CUBE_play
+    #elif(CUBEPLT_MASTER)
     if(usartTxFlag)
     {
         HAL_UART_Transmit(&huart1, usartTxData, sizeof(usartTxData), 0xffff);
@@ -313,10 +316,12 @@ int main(void)
     MX_USART3_UART_Init();
     MX_TIM1_Init();//for PWM pulse
 
+    //MX_TIM2_Init();
+
 #if(IR_REMOTE)
-    MX_TIM3_Init();//for IR INT
+    //MX_TIM3_Init();//for IR INT
     /* Initialize IR state */
-    Drv_IR_Init();
+    //Drv_IR_Init();
 #endif
 
 #ifdef SUPPORT_FATFS
@@ -327,6 +332,8 @@ int main(void)
 #endif
 #endif
     appInit();
+    drv_fan_speed(20);
+
     printf("system start.\r\n");
 
 #if 1
@@ -356,7 +363,7 @@ int main(void)
     //SD_ReadFileList("/f2");
     //SD_fileCopy();           //测试函数
 #endif
-
+#if 0
 #if(PROJECTOR_OSRAM)
     I2C_init();
     SD_ReadPhotoFileList("/OSRAM/Photo");
@@ -383,7 +390,7 @@ int main(void)
         SD_ReadFilmFileList(i);
     }
 #endif
-
+#endif
     printf("Files Ready!\r\n");
 
 #if(PROJECTOR_MBI5124)
@@ -396,10 +403,12 @@ int main(void)
 #endif
 
 #if(PROJECTOR_MBI5153)
+
         MBI5153_X();
         //MBI5153_play();
         //MBI5153_Sink();
 #elif(PROJECTOR_MBI5124)
+
         if(scenMode==0)
             MBI5124_X();
         else if(scenMode==1)
@@ -407,22 +416,27 @@ int main(void)
         else if(scenMode==2)
             MBI5124_Play();
 #elif(PROJECTOR_MCUGPIO)
+
         MCUGpio_X();
         //MCUGpio_Sink();
 #elif(PROJECTOR_OSRAM)
+
         OSRAM_config();
         OSRAM_play();
         //Delay_ms(200);
         //EPLOS_status_read();
         //Delay_ms(200);
 #elif(PROJECTOR_CUBE)
+
         WS2801_play();
 #elif(PROJECTOR_CUBEPLT)
+
         CUBE_play();
 #endif
 
-        Drv_SERIAL_Proc();
+        //Delay_ms(5);
 
+        Drv_SERIAL_Proc();
 /*
         HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
         Delay_ms(100);
@@ -564,6 +578,7 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOD_CLK_ENABLE();
 
     __HAL_AFIO_REMAP_PD01_ENABLE();
+    __HAL_AFIO_REMAP_TIM1_PARTIAL();
 
     /*Configure GPIO pin Output Level */
     //HAL_GPIO_WritePin(GPIOA, LED_DCLK_Pin|LED_HOLD_Pin, GPIO_PIN_RESET);
@@ -645,7 +660,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
 #if(PROJECTOR_OSRAM)
   htim1.Init.Prescaler = 640-1;//1KHz
-#elif(PROJECTOR_CUBE)
+#else
   htim1.Init.Prescaler = 64-1;//10KHz
 #endif
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -683,7 +698,7 @@ static void MX_TIM1_Init(void)
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
   {
     Error_Handler();
   }
@@ -702,6 +717,106 @@ static void MX_TIM1_Init(void)
 
   HAL_TIM_MspPostInit(&htim1);
 }
+
+/* TIM2 init function */
+static void MX_TIM2_Init(void)
+#if 1
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+  //TIM_OCInitTypeDef TIM_OCInitStructure;
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 0;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 81;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  //htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /*
+  if (HAL_TIM_OnePulse_Init(&htim2, TIM_OPMODE_SINGLE) != HAL_OK)
+  {
+    Error_Handler();
+  }*/
+  
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_ENABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
+
+}
+#else
+{
+
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
+
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 0;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 41;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_ENABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  HAL_TIM_MspPostInit(&htim2);
+
+}
+#endif
 
 /* TIM3 init function */
 static void MX_TIM3_Init(void)
@@ -910,6 +1025,8 @@ void UartDebugControlHandle(uint8_t *key)
         {
             actType = ttt;
         }
+
+        drv_fan_speed(ttt);
     }
 
     if (IR_code) {
@@ -1009,6 +1126,9 @@ void AppControlCubeHandle(uint8_t *key)
             programsType = FILM;
             break;
 
+        case AUTO_ALGORITHM:
+            programsType = AUTO_ALGORITHM;
+            
         default:
             break;
     }

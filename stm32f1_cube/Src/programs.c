@@ -26,7 +26,7 @@ uint8_t                         cube_buff_G[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PA
 uint8_t                         cube_buff_R[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PAGE_SIZE];
 uint8_t                         cube_buff_B[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PAGE_SIZE];
 #elif(PROJECTOR_MBI5124)
-
+//;
 #elif(CUBEPLT_SLAVE)
 uint8_t                         cube_buff_G[IO_SIZE][CHIP_SIZE];
 uint8_t                         cube_buff_R[IO_SIZE][CHIP_SIZE];
@@ -38,7 +38,7 @@ uint8_t                         cube_buff_RGB[IO_SIZE*CHIP_SIZE*3];
 uint8_t                         photoProgramIdx = 0;
 uint8_t                         filmProgramIdx = 0;
 uint8_t                         filmFrameIdx = 0;
-PROGRAMS_TYPE_E                 programsType;
+PROGRAMS_TYPE_E                 programsType = AUTO_ALGORITHM;
 
 FRESULT SD_ReadPhotoData()
 {

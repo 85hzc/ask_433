@@ -60,12 +60,12 @@
 #define PROJECTOR_MCUGPIO   0
 
 //分体系列立体吊灯方案
-#define PROJECTOR_CUBE      0
-#define CUBE_MASTER         0
+#define PROJECTOR_CUBE      1
+#define CUBE_MASTER         1
 #define CUBE_SLAVE          0
 
-#define PROJECTOR_CUBEPLT   1
-#define CUBEPLT_MASTER      1
+#define PROJECTOR_CUBEPLT   0
+#define CUBEPLT_MASTER      0
 #define CUBEPLT_SLAVE       0
 
 
