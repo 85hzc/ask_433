@@ -32,6 +32,7 @@
 "gescontrol_f103\ws2801.o"
 "gescontrol_f103\drv_fan.o"
 "gescontrol_f103\cubeplt.o"
+"gescontrol_f103\drv_motor.o"
 "gescontrol_f103\spi_sd_driver.o"
 "gescontrol_f103\fatspi_test.o"
 "gescontrol_f103\ff.o"

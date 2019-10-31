@@ -118,6 +118,20 @@
 #define EN_H              OSRAM_EN_PORT->BSRR = OSRAM_EN;                      // 输出高电平
 #define EN_L              OSRAM_EN_PORT->BSRR = (uint32_t)OSRAM_EN << 16;      // 输出低电平
 
+#define MOTOR_IN_Pin      GPIO_PIN_8
+#define MOTOR_IN_Port     GPIOB
+#define MOTOR_OUT_Pin     GPIO_PIN_9
+#define MOTOR_OUT_Port    GPIOB
+
+#define MOTOR_AIN1_Pin    GPIO_PIN_3
+#define MOTOR_AIN1_Port   GPIOB
+#define MOTOR_AIN2_Pin    GPIO_PIN_4
+#define MOTOR_AIN2_Port   GPIOB
+#define MOTOR_BIN1_Pin    GPIO_PIN_5
+#define MOTOR_BIN1_Port   GPIOB
+#define MOTOR_BIN2_Pin    GPIO_PIN_15
+#define MOTOR_BIN2_Port   GPIOA
+
 //#elif(PROJECTOR_MCUGPIO)
 
 #define ROW_0             GPIO_PIN_0

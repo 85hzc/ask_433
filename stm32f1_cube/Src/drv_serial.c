@@ -35,7 +35,8 @@ extern PROGRAMS_TYPE_E   programsType;
 extern uint8_t           cubeProgramsType;
 #endif
 
-int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key);
+static int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key);
+static int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param);
 
 
 static cmd_table_t cmd_tbl[] = {
@@ -183,9 +184,13 @@ static void handle_func_MIkeys(uint16_t key)
             break;
         
         case REMOTE_MI_LEFT:
-        case REMOTE_MI_RIGHT:
+            Drv_MOTOR_CMD_Handler(CMD_OP_MOTOR_SET_FORWARD, 4);
             break;
         
+        case REMOTE_MI_RIGHT:
+            Drv_MOTOR_CMD_Handler(CMD_OP_MOTOR_SET_BACKWARD, 4);
+            break;
+
         case REMOTE_MI_OK:
             runFlag = 1;
             //photoIdx=0;
@@ -219,7 +224,24 @@ static void handle_func_MIkeys(uint16_t key)
     }
 }
 
-int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key)
+static int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param)
+{
+    int8_t rc = HAL_OK;
+
+    switch (code)
+    {
+        case CMD_OP_MOTOR_SET_FORWARD:
+            drv_motor_move_forward(4);
+            break;
+        case CMD_OP_MOTOR_SET_BACKWARD:
+            drv_motor_move_reverse(4);
+            break;
+    }
+
+    return rc;
+}
+
+static int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key)
 {
     //printf("Drv_IR_CMD_Handler 0x%x\r\n",key);
     static uint8_t  flag = 0;

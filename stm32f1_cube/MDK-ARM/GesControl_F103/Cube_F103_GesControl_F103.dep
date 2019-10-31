@@ -5,7 +5,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -35,7 +35,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -65,7 +65,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -95,7 +95,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -125,7 +125,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -155,7 +155,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -185,7 +185,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -215,7 +215,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -245,7 +245,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -275,7 +275,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -305,7 +305,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -335,7 +335,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -365,7 +365,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -395,7 +395,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -432,7 +432,7 @@ I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x5CF89C30)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x5CF89CB0)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x5CF89CAE)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x5CF89CAA)
@@ -450,10 +450,10 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h)(0x5CF89CB7)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h)(0x5CF89CB7)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x5CF89CB8)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x5CF89CB8)
-F (../Src/main.c)(0x5DB946C2)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\main.o --omf_browse gescontrol_f103\main.crf --depend gescontrol_f103\main.d)
+F (../Src/main.c)(0x5DBA9A30)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\main.o --omf_browse gescontrol_f103\main.crf --depend gescontrol_f103\main.d)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -483,7 +483,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x5CF89CB8)
 I (../Inc/mbi5153.h)(0x5D5B88C6)
 I (../Inc/delay.h)(0x5D4A3BAA)
 I (../Inc/drv_ir.h)(0x5D3E84E1)
-I (../Inc/drv_serial.h)(0x5D8B1F11)
+I (../Inc/drv_serial.h)(0x5DBA92E9)
 I (../Inc/softspi.h)(0x5D82F59E)
 I (../Inc/programs.h)(0x5DB94482)
 I (..\Drivers\Fat_spi\config.h)(0x5DB93A56)
@@ -497,7 +497,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -527,7 +527,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -556,7 +556,7 @@ I (../Inc/stm32f1xx_it.h)(0x5CF89CCA)
 F (..\Src\softi2c.c)(0x5D8B217B)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\softi2c.o --omf_browse gescontrol_f103\softi2c.crf --depend gescontrol_f103\softi2c.d)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -596,7 +596,7 @@ I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x5CF89C30)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x5CF89CB0)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x5CF89CAE)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x5CF89CAA)
@@ -617,10 +617,10 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x5CF89CB8)
 I (../Inc/mbi5153.h)(0x5D5B88C6)
 I (../Inc/mbi5124.h)(0x5D5B88D7)
 I (../Inc/mcugpio.h)(0x5D5B88E2)
-F (..\Src\gpio.c)(0x5DA58BE9)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\gpio.o --omf_browse gescontrol_f103\gpio.crf --depend gescontrol_f103\gpio.d)
+F (..\Src\gpio.c)(0x5DBA8DC5)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\gpio.o --omf_browse gescontrol_f103\gpio.crf --depend gescontrol_f103\gpio.d)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -659,7 +659,7 @@ I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x5CF89C30)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x5CF89CB0)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x5CF89CAE)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x5CF89CAA)
@@ -691,7 +691,7 @@ I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x5CF89C30)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x5CF89CB0)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x5CF89CAE)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x5CF89CAA)
@@ -721,7 +721,7 @@ I (../Inc/programs.h)(0x5DB94482)
 F (..\Src\drv_ir.c)(0x5D8835A9)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\drv_ir.o --omf_browse gescontrol_f103\drv_ir.crf --depend gescontrol_f103\drv_ir.d)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -749,7 +749,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h)(0x5CF89CB7)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x5CF89CB8)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x5CF89CB8)
 I (../Inc/drv_ir.h)(0x5D3E84E1)
-I (../Inc/drv_serial.h)(0x5D8B1F11)
+I (../Inc/drv_serial.h)(0x5DBA92E9)
 F (..\Src\mbi5124.c)(0x5DA526ED)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\mbi5124.o --omf_browse gescontrol_f103\mbi5124.crf --depend gescontrol_f103\mbi5124.d)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
@@ -762,7 +762,7 @@ I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x5CF89C30)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x5CF89CB0)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x5CF89CAE)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x5CF89CAA)
@@ -800,7 +800,7 @@ I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x5CF89C30)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x5CF89CB0)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x5CF89CAE)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x5CF89CAA)
@@ -823,7 +823,7 @@ I (../Inc/mcugpio.h)(0x5D5B88E2)
 F (..\Src\programs.c)(0x5DA97110)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\programs.o --omf_browse gescontrol_f103\programs.crf --depend gescontrol_f103\programs.d)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -859,10 +859,10 @@ I (..\Drivers\Fat_spi\integer.h)(0x5D2D467F)
 I (..\Drivers\Fat_spi\SPI_SD_driver.h)(0x5D81FA85)
 I (..\Drivers\Fat_spi\ff.h)(0x5D8B30A5)
 I (..\Drivers\Fat_spi\diskio.h)(0x5D2D46A3)
-F (..\Src\drv_serial.c)(0x5DA9706F)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\drv_serial.o --omf_browse gescontrol_f103\drv_serial.crf --depend gescontrol_f103\drv_serial.d)
+F (..\Src\drv_serial.c)(0x5DBA9B14)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\drv_serial.o --omf_browse gescontrol_f103\drv_serial.crf --depend gescontrol_f103\drv_serial.d)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -890,12 +890,12 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h)(0x5CF89CB7)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x5CF89CB8)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x5CF89CB8)
 I (../Inc/drv_ir.h)(0x5D3E84E1)
-I (../Inc/drv_serial.h)(0x5D8B1F11)
+I (../Inc/drv_serial.h)(0x5DBA92E9)
 I (../Inc/programs.h)(0x5DB94482)
 F (..\Src\softspi.c)(0x5D832677)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\softspi.o --omf_browse gescontrol_f103\softspi.crf --depend gescontrol_f103\softspi.d)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -935,7 +935,7 @@ I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x5CF89C30)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x5CF89CB0)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x5CF89CAE)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x5CF89CAA)
@@ -964,7 +964,7 @@ I (../Inc/programs.h)(0x5DB94482)
 F (..\Src\drv_fan.c)(0x5DB9352E)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\drv_fan.o --omf_browse gescontrol_f103\drv_fan.crf --depend gescontrol_f103\drv_fan.d)
 I (../Inc/main.h)(0x5DA97387)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
 I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
@@ -1003,7 +1003,7 @@ I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x5CF89C30)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x5CF89CB0)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x5CF89CAE)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x5CF89CAA)
@@ -1029,6 +1029,38 @@ I (..\Drivers\Fat_spi\ff.h)(0x5D8B30A5)
 I (..\Drivers\Fat_spi\diskio.h)(0x5D2D46A3)
 I (../Inc/programs.h)(0x5DB94482)
 I (../Inc/delay.h)(0x5D4A3BAA)
+F (..\Src\drv_motor.c)(0x5DBA8A6C)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\drv_motor.o --omf_browse gescontrol_f103\drv_motor.crf --depend gescontrol_f103\drv_motor.d)
+I (../Inc/drv_motor.h)(0x5DBA91D7)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
+I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
+I (../Inc/main.h)(0x5DA97387)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
+I (../Inc/gpio.h)(0x5DBA89BF)
+I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
+I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
+I (../Drivers/CMSIS/Include/core_cm3.h)(0x5CF89CA7)
+I (../Drivers/CMSIS/Include/core_cmInstr.h)(0x5CF89CA8)
+I (../Drivers/CMSIS/Include/cmsis_armcc.h)(0x5CF89CA5)
+I (../Drivers/CMSIS/Include/core_cmFunc.h)(0x5CF89CA8)
+I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x5CF89C30)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x5CF89CB0)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x5CF89CAE)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x5CF89CAA)
+I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x588B8344)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio_ex.h)(0x5CF89CB1)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h)(0x5CF89CB5)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc_ex.h)(0x5CF89CB5)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h)(0x5CF89CAF)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma_ex.h)(0x5CF89CAF)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h)(0x5CF89CAD)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h)(0x5CF89CB0)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h)(0x5CF89CB0)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h)(0x5CF89CB4)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h)(0x5CF89CB7)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h)(0x5CF89CB7)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x5CF89CB8)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x5CF89CB8)
+I (../Inc/drv_serial.h)(0x5DBA92E9)
 F (..\Drivers\Fat_spi\SPI_SD_driver.c)(0x5D9165AD)(-c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Drivers\Fat_spi --C99-I.\RTE\_GesControl_F103-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F10X_MD -DUSE_HAL_DRIVER -DSTM32F103xB -DARM_MATH_CM3-o gescontrol_f103\spi_sd_driver.o --omf_browse gescontrol_f103\spi_sd_driver.crf --depend gescontrol_f103\spi_sd_driver.d)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x5CF89C2F)
 I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x5CF89C2D)
@@ -1041,7 +1073,7 @@ I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x5CF89C30)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x5CF89CB0)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x5CF89CAE)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x5CF89CAA)
@@ -1077,7 +1109,7 @@ I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x5CF89C30)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x5CF89CB0)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x5CF89CAE)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x5CF89CAA)
@@ -1114,7 +1146,7 @@ I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x5CF89C30)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x5CF89CB0)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x5CF89CAE)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x5CF89CAA)
@@ -1146,7 +1178,7 @@ I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x5CF89C30)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x5CF89CAB)
 I (../Inc/stm32f1xx_hal_conf.h)(0x5D2C10C0)
 I (../Inc/main.h)(0x5DA97387)
-I (../Inc/gpio.h)(0x5DB934D1)
+I (../Inc/gpio.h)(0x5DBA89BF)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x5CF89CB0)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x5CF89CAE)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x5CF89CAA)

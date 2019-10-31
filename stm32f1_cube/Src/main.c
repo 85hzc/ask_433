@@ -218,7 +218,7 @@ void Drv_SERIAL_Proc(void)
         HAL_UART_Transmit(&DEBUG_UART, UsartType1.RX_pData, UsartType1.RX_Size, 0xffff);
     }
 
-    //ble
+    //uart sub-control interface
     /*
     if(UsartType2.RX_flag)
     {
@@ -324,6 +324,10 @@ int main(void)
     //Drv_IR_Init();
 #endif
 
+#if(PROJECTOR_OSRAM)
+    Drv_MOTOR_Init();
+#endif
+
 #ifdef SUPPORT_FATFS
 #ifdef SPI_HARD
     SPI_Configuration();    //SPI≥ı ºªØ
@@ -396,6 +400,7 @@ int main(void)
 #if(PROJECTOR_MBI5124)
     //reg_config();
 #endif
+
     while (1)
     {
 #if(PROJECTOR_OSRAM)
@@ -440,7 +445,6 @@ int main(void)
 /*
         HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
         Delay_ms(100);
-
         HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
         Delay_ms(100);
 */

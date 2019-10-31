@@ -560,6 +560,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\cubeplt.c</FilePath>
             </File>
+            <File>
+              <FileName>drv_motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\drv_motor.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

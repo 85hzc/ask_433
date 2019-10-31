@@ -163,14 +163,12 @@ void OSRAM_GPIO_Init(void)
     HAL_GPIO_Init(OSRAM_EN_PORT, &GPIO_InitStruct);
     HAL_GPIO_WritePin(OSRAM_EN_PORT,OSRAM_EN,GPIO_PIN_SET);//enable eplos 
 
-
     /*Configure GPIO pins :  */
     GPIO_InitStruct.Pin = QT_CLK;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(OSRAM_PORT_CLK, &GPIO_InitStruct);
-
 
     /*Configure GPIO pins :  */
     GPIO_InitStruct.Pin = Q0_SI;
@@ -179,7 +177,6 @@ void OSRAM_GPIO_Init(void)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(OSRAM_PORT_SI0, &GPIO_InitStruct);
 
-
     /*Configure GPIO pins :  */
     GPIO_InitStruct.Pin = Q1_SI|Q2_SI|Q3_SI;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -187,13 +184,37 @@ void OSRAM_GPIO_Init(void)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(OSRAM_PORT_SI1, &GPIO_InitStruct);
 
-
     /*Configure GPIO pins :  */
     GPIO_InitStruct.Pin = QT_UPD;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(OSRAM_PORT_UPD, &GPIO_InitStruct);
+
+    //init for motor
+    /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(GPIOB, MOTOR_IN_Pin|MOTOR_BIN1_Pin|MOTOR_AIN2_Pin|MOTOR_AIN1_Pin, GPIO_PIN_RESET);
+
+    /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(GPIOA, MOTOR_BIN2_Pin, GPIO_PIN_RESET);
+
+    GPIO_InitStruct.Pin = MOTOR_IN_Pin|MOTOR_BIN1_Pin|MOTOR_AIN2_Pin|MOTOR_AIN1_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = MOTOR_BIN2_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    /*Configure GPIO pin : MOTOR_OUT_Pin */
+    GPIO_InitStruct.Pin = MOTOR_OUT_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(MOTOR_OUT_Port, &GPIO_InitStruct);
 }
 #endif
 
