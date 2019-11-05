@@ -40,7 +40,6 @@
 /* USER CODE END Includes */
 
 static uint32_t          tickstart;
-uint32_t                 turn_off;
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef       huart1;
@@ -50,9 +49,8 @@ TIM_HandleTypeDef        htim3;
 extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
 
-extern uint16_t          brightness;
-uint16_t                 brightness_old = 0;
-
+extern int16_t          brightness,brightness_old;
+extern uint8_t           lighting_switch,lighting_switch_now;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 #define DEBUG_UART          huart1
@@ -96,13 +94,11 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
-  //MX_TIM1_Init();//for pwm schedule
   MX_TIM3_Init();//for pwm schedule
 
   /* USER CODE BEGIN 2 */
   App_Init();
   Drv_PWM_Init();
-  turn_off = 1;
 
   //DEMO_Init();
   /* USER CODE END 2 */
@@ -191,20 +187,15 @@ static void MX_USART1_UART_Init(void)
 
 void init_pwmIO()
 {
-    GPIO_InitTypeDef GPIO_InitStruct;//GPIO结构�?
-    
-    GPIO_InitStruct.Mode=GPIO_MODE_AF_PP;//复用推挽输出
-    GPIO_InitStruct.Pin=GPIO_PIN_6;//PA6
+    GPIO_InitTypeDef GPIO_InitStruct;
+
+    //TIM3 CH3 PB0
+    GPIO_InitStruct.Mode=GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pin=GPIO_PIN_0;
     GPIO_InitStruct.Pull=GPIO_PULLUP;
-    GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_MEDIUM;//翻转速度=10MHZ
+    GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_MEDIUM;
     //GPIO_InitStruct.Alternate = GPIO_AF2_TIM1;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);//TIM3通道1IO�?
-    /*
-    GPIO_InitStruct.Mode=GPIO_MODE_AF_PP;//复用推挽输出
-    GPIO_InitStruct.Pin=GPIO_PIN_0|GPIO_PIN_1;//PB0
-    GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_LOW;//翻转速度=10MHZ
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);//TIM3通道3IO�?
-    */
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 
 /** Configure pins as 
@@ -232,20 +223,20 @@ static void MX_GPIO_Init(void)
 
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED_DOWN_Pin|LED_RIGHT_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOA, LED_RIGHT_Pin|LED_UP_Pin, GPIO_PIN_SET);
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LED_LEFT_Pin|LED_UP_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, LED_DOWN_Pin|LED_LEFT_Pin, GPIO_PIN_SET);
 
 
   /*Configure GPIO pins : LED_DCLK_Pin LED_HOLD_Pin SW1_Pin SW2_Pin */
-  GPIO_InitStruct.Pin = LED_DCLK_Pin|LED_HOLD_Pin|/*LED_DOWN_Pin|*/LED_RIGHT_Pin;
+  GPIO_InitStruct.Pin = LED_DCLK_Pin|LED_HOLD_Pin|LED_RIGHT_Pin|LED_UP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED_LEFT_Pin LED_DOWN_Pin LED_UP_Pin LED_RIGHT_Pin 
                            LED1_Pin */
-  GPIO_InitStruct.Pin = LED_LEFT_Pin|LED_UP_Pin;
+  GPIO_InitStruct.Pin = LED_DOWN_Pin|LED_LEFT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -368,7 +359,7 @@ static void MX_TIM3_Init(void)
   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
 
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 7;
+  htim3.Init.Prescaler = 4-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -404,7 +395,7 @@ static void MX_TIM3_Init(void)
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
   }
@@ -424,23 +415,26 @@ static void MX_TIM3_Init(void)
 
 void Drv_PWM_Init(void)
 {
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 
-  tickstart = HAL_GetTick();
+    tickstart = HAL_GetTick();
 }
 
 void Drv_PWM_Proc(void)
 {
-  if (turn_off && brightness != brightness_old)
-  {
-    if((HAL_GetTick() - tickstart) > 1000)
+    if ((brightness!=brightness_old) && lighting_switch_now)
     {
-      turn_off = 0;
-      brightness_old = brightness;
-      LOG_DEBUG("                                       brightness_old %d\r\n",brightness_old);
-      __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, (uint32_t)brightness_old);
+        brightness_old = brightness;
+        LOG_DEBUG("                                       lighting pwm %d\r\n",brightness_old);
+        __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_3, (uint32_t)brightness_old);
     }
-  }
+
+    if(lighting_switch!=lighting_switch_now)
+    {
+        lighting_switch_now = lighting_switch;
+        LOG_DEBUG("                                       lighting pwm %d\r\n",lighting_switch ? (uint32_t)brightness : 0);
+        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, lighting_switch ? (uint32_t)brightness : 0);
+    }
 }
 /*
 void TIM3_PWM_Init(u16 arr,u16 psc)

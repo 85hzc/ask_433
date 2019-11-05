@@ -5,10 +5,10 @@
 <h2>Tool Versions:</h2>
 IDE-Version: ¦ÌVision V5.24.2.0
 Copyright (C) 2017 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: huang zhicheng, cig, LIC=----
+License Information: huang zhicheng, cig, LIC=UE774-FG7KD-A5HTA-10PN1-92MWT-17L3M
  
 Tool Versions:
-Toolchain:       MDK-Lite  Version: 5.24.1
+Toolchain:       MDK-ARM Basic (256K)  Version: 5.24.1
 Toolchain Path:  C:\Keil_v5\ARM\ARMCC\Bin
 C Compiler:      Armcc.exe V5.06 update 5 (build 528)
 Assembler:       Armasm.exe V5.06 update 5 (build 528)
@@ -22,85 +22,173 @@ Dialog DLL:      TCM.DLL V1.32.0.0
  
 <h2>Project:</h2>
 E:\github\stm32f1\MDK-ARM\GesControl_F103.uvprojx
-Project File Date:  06/28/2019
+Project File Date:  07/15/2019
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'GesControl_F103'
-compiling App.c...
-..\Src\App.h(154): warning:  #1295-D: Deprecated declaration Ges_DynamicCalib - give arg types
+compiling stm32f1xx_hal_cortex.c...
+compiling stm32f1xx_hal_rcc_ex.c...
+compiling stm32f1xx_hal_dma.c...
+compiling stm32f1xx_hal_pwr.c...
+compiling stm32f1xx_hal_tim_ex.c...
+compiling stm32f1xx_hal_rcc.c...
+compiling stm32f1xx_hal_tim.c...
+compiling stm32f1xx_hal_gpio.c...
+compiling stm32f1xx_hal_uart.c...
+compiling stm32f1xx_hal_gpio_ex.c...
+compiling stm32f1xx_hal.c...
+compiling stm32f1xx_hal_flash_ex.c...
+compiling system_stm32f1xx.c...
+compiling stm32f1xx_hal_flash.c...
+compiling main.c...
+../Src/App.h(176): warning:  #1295-D: Deprecated declaration Ges_DynamicCalib - give arg types
+  void Ges_DynamicCalib();
+../Src/main.c(110): warning:  #223-D: function "Drv_SILICON_Proc" declared implicitly
+      Drv_SILICON_Proc();
+../Src/main.c(42): warning:  #550-D: variable "tickstart"  was set but never used
+  static uint32_t          tickstart;
+../Src/main.c: 3 warnings, 0 errors
+compiling stm32f1xx_hal_msp.c...
+compiling siliconSi115x.c...
+../Inc/siliconSi115x.h(165): warning:  #1295-D: Deprecated declaration SILAB_ReadID - give arg types
+  extern SILAB_SENSOR_StatusTypeDef SILAB_ReadID();
+..\Src\siliconSi115x.c(54): warning:  #223-D: function "memset" declared implicitly
+    memset(array, 0, sizeof(array));
+..\Src\siliconSi115x.c(63): warning:  #223-D: function "i2c_write" declared implicitly
+    i2c_write(DeviceAddr, array, NumByteToWrite+1);
+..\Src\siliconSi115x.c(84): warning:  #223-D: function "i2cmsginfo" declared implicitly
+    i2cmsginfo(array, NumByteToWrite+1, NULL, 0);
+..\Src\siliconSi115x.c(96): warning:  #223-D: function "memset" declared implicitly
+    memset(array, 0, sizeof(array));
+..\Src\siliconSi115x.c(105): warning:  #223-D: function "i2c_write" declared implicitly
+    i2c_write(DeviceAddr, array, NumByteToWrite+1);
+..\Src\siliconSi115x.c(124): warning:  #223-D: function "i2cmsginfo" declared implicitly
+    i2cmsginfo(array, NumByteToWrite+1, NULL, 0);
+..\Src\siliconSi115x.c(172): warning:  #223-D: function "memset" declared implicitly
+    memset(pBuffer, 0, NumByteToRead);
+..\Src\siliconSi115x.c(177): warning:  #223-D: function "i2c_write" declared implicitly
+    i2c_write(DeviceAddr, arraytx, 1);
+..\Src\siliconSi115x.c(178): warning:  #223-D: function "i2c_read" declared implicitly
+    i2c_read(DeviceAddr, pBuffer, NumByteToRead);
+..\Src\siliconSi115x.c(212): warning:  #223-D: function "i2cmsginfo" declared implicitly
+    i2cmsginfo(arraytx, 1, pBuffer, NumByteToRead);
+..\Src\siliconSi115x.c(168): warning:  #177-D: variable "iError"  was declared but never referenced
+    int iError = 0;
+..\Src\siliconSi115x.c(312): warning:  #188-D: enumerated type mixed with another type
+      return SILAB_IO_Read(&resp, SILAB_SlaveAddress, 
+ILAB_WHO_AM_I_ADDR, 1);
+..\Src\siliconSi115x.c(559): warning:  #188-D: enumerated type mixed with another type
+      return SILAB_IO_Read(&resp, SILAB_SlaveAddress, regaddr, 1);
+..\Src\siliconSi115x.c: 14 warnings, 0 errors
+compiling softi2c.c...
+..\Src\softi2c.c(38): warning:  #223-D: function "memset" declared implicitly
+    memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
+..\Src\softi2c.c(54): warning:  #223-D: function "memset" declared implicitly
+      memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitTypeDef));
+..\Src\softi2c.c(78): warning:  #188-D: enumerated type mixed with another type
+    HAL_GPIO_WritePin(
+PIOB, I2C_SDA_PIN, 1);
+..\Src\softi2c.c(89): warning:  #188-D: enumerated type mixed with another type
+      HAL_GPIO_WritePin(
+PIOB, I2C_SDA_PIN, 0);
+..\Src\softi2c.c(100): warning:  #188-D: enumerated type mixed with another type
+      HAL_GPIO_WritePin(
+PIOB, I2C_SCL_PIN, 1);
+..\Src\softi2c.c(110): warning:  #188-D: enumerated type mixed with another type
+      HAL_GPIO_WritePin(
+PIOB, I2C_SCL_PIN, 0);
+..\Src\softi2c.c: 6 warnings, 0 errors
+compiling stm32f1xx_it.c...
+../Src/App.h(176): warning:  #1295-D: Deprecated declaration Ges_DynamicCalib - give arg types
+  void Ges_DynamicCalib();
+../Src/stm32f1xx_it.c: 1 warning, 0 errors
+compiling gesture.c...
+..\Src\app.h(176): warning:  #1295-D: Deprecated declaration Ges_DynamicCalib - give arg types
   void Ges_DynamicCalib();
 ../Inc/siliconSi115x.h(165): warning:  #1295-D: Deprecated declaration SILAB_ReadID - give arg types
   extern SILAB_SENSOR_StatusTypeDef SILAB_ReadID();
-..\Src\App.c(81): warning:  #223-D: function "DEMO_Init" declared implicitly
+..\Src\gesture.c(20): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
+      retval = Si115xReadFromRegister(SI115x_REG_RESPONSE0);
+..\Src\gesture.c(38): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
+    response = Si115xReadFromRegister(SI115x_REG_RESPONSE0);
+..\Src\gesture.c(68): warning:  #223-D: function "Si115xWriteToRegister" declared implicitly
+    if(retval = (Si115xWriteToRegister(SI115x_REG_COMMAND, command, 1))!= 0)
+..\Src\gesture.c(68): warning:  #1293-D: assignment in condition
+    if(retval = (Si115xWriteToRegister(
+I115x_REG_COMMAND, command, 1))!= 0)
+..\Src\gesture.c(100): warning:  #223-D: function "SILAB_IO_Write_Block" declared implicitly
+      SILAB_IO_Write_Block(data, SI1153_I2C_ADDR, address, length);
+..\Src\gesture.c(122): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
+                      & Si115xReadFromRegister(SI115x_REG_RESPONSE0);
+..\Src\gesture.c(161): warning:  #223-D: function "Si115xWriteToRegister" declared implicitly
+    retval += Si115xWriteToRegister(SI115x_REG_COMMAND, 1, 1);
+..\Src\gesture.c(238): warning:  #223-D: function "Si115xWriteToRegister" declared implicitly
+          retval += Si115xWriteToRegister(  SI115x_REG_IRQ_ENABLE, 0x01);
+..\Src\gesture.c(257): warning:  #223-D: function "Si115xWriteToRegister" declared implicitly
+          retval += Si115xWriteToRegister(  SI115x_REG_IRQ_ENABLE, 0x0f);
+..\Src\gesture.c(317): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
+      ps[0] = Si115xReadFromRegister (SI115x_REG_HOSTOUT1) +
+..\Src\gesture.c(350): warning:  #223-D: function "Si115xReadFromRegister" declared implicitly
+      data = Si115xReadFromRegister( SI1153_REG_HW_ID);
+..\Src\gesture.c(10): warning:  #177-D: variable "tickstart"  was declared but never referenced
+  static uint32_t tickstart;
+..\Src\gesture.c: 14 warnings, 0 errors
+compiling App.c...
+..\Src\App.h(176): warning:  #1295-D: Deprecated declaration Ges_DynamicCalib - give arg types
+  void Ges_DynamicCalib();
+../Inc/siliconSi115x.h(165): warning:  #1295-D: Deprecated declaration SILAB_ReadID - give arg types
+  extern SILAB_SENSOR_StatusTypeDef SILAB_ReadID();
+..\Src\App.c(102): warning:  #223-D: function "DEMO_Init" declared implicitly
       DEMO_Init();
-..\Src\App.c(203): warning:  #177-D: variable "j"  was declared but never referenced
+..\Src\App.c(211): warning:  #177-D: variable "j"  was declared but never referenced
       uint8_t i,j,k,new_hold_AorL_size;
-..\Src\App.c(203): warning:  #177-D: variable "k"  was declared but never referenced
+..\Src\App.c(211): warning:  #177-D: variable "k"  was declared but never referenced
       uint8_t i,j,k,new_hold_AorL_size;
-..\Src\App.c(203): warning:  #177-D: variable "new_hold_AorL_size"  was declared but never referenced
+..\Src\App.c(211): warning:  #177-D: variable "new_hold_AorL_size"  was declared but never referenced
       uint8_t i,j,k,new_hold_AorL_size;
-..\Src\App.c(204): warning:  #177-D: variable "sum"  was declared but never referenced
+..\Src\App.c(212): warning:  #177-D: variable "sum"  was declared but never referenced
       uint32_t sum;
-..\Src\App.c(509): warning:  #223-D: function "abs" declared implicitly
+..\Src\App.c(517): warning:  #223-D: function "abs" declared implicitly
           if(abs(tt1-total[i])*100/tt1>70)
-..\Src\App.c(514): warning:  #223-D: function "abs" declared implicitly
+..\Src\App.c(522): warning:  #223-D: function "abs" declared implicitly
           if(abs(tt1-total[i])*100/tt1>10)
-..\Src\App.c(528): warning:  #520-D: initialization with "{...}" expected for aggregate object
+..\Src\App.c(536): warning:  #520-D: initialization with "{...}" expected for aggregate object
       uint64_t total[2]=0;
-..\Src\App.c(529): warning:  #520-D: initialization with "{...}" expected for aggregate object
+..\Src\App.c(537): warning:  #520-D: initialization with "{...}" expected for aggregate object
       uint32_t tt1[2]=0;
-..\Src\App.c(527): warning:  #177-D: variable "res"  was declared but never referenced
+..\Src\App.c(535): warning:  #177-D: variable "res"  was declared but never referenced
       uint8_t i,res=0;
-..\Src\App.c(602): warning:  #520-D: initialization with "{...}" expected for aggregate object
+..\Src\App.c(610): warning:  #520-D: initialization with "{...}" expected for aggregate object
       uint64_t total[2]=0;
-..\Src\App.c(603): warning:  #520-D: initialization with "{...}" expected for aggregate object
+..\Src\App.c(611): warning:  #520-D: initialization with "{...}" expected for aggregate object
       uint32_t tt1[2]=0;
-..\Src\App.c(601): warning:  #177-D: variable "res"  was declared but never referenced
+..\Src\App.c(609): warning:  #177-D: variable "res"  was declared but never referenced
       uint8_t i,res=0;
-..\Src\App.c(629): warning:  #520-D: initialization with "{...}" expected for aggregate object
+..\Src\App.c(637): warning:  #520-D: initialization with "{...}" expected for aggregate object
       uint64_t total[2]=0;
-..\Src\App.c(630): warning:  #520-D: initialization with "{...}" expected for aggregate object
+..\Src\App.c(638): warning:  #520-D: initialization with "{...}" expected for aggregate object
       uint32_t tt1[2]=0;
-..\Src\App.c(628): warning:  #177-D: variable "res"  was declared but never referenced
+..\Src\App.c(636): warning:  #177-D: variable "res"  was declared but never referenced
       uint8_t i,res=0;
-..\Src\App.c(928): warning:  #177-D: variable "rise_flag"  was declared but never referenced
+..\Src\App.c(1005): warning:  #177-D: variable "i"  was declared but never referenced
+      uint8_t i,A_C,B_C,B_A;
+..\Src\App.c(1046): warning:  #177-D: variable "i"  was declared but never referenced
+      uint8_t i,basic_ges = GES_NULL;
+..\Src\App.c(1253): warning:  #177-D: variable "rise_flag"  was declared but never referenced
       uint8_t rise_flag = 0;
-..\Src\App.c(929): warning:  #177-D: variable "wave_flag"  was declared but never referenced
+..\Src\App.c(1254): warning:  #177-D: variable "wave_flag"  was declared but never referenced
       uint8_t wave_flag=0,hold_flag=1, hold_section_times;
-..\Src\App.c(1179): warning:  #175-D: subscript out of range
-              gs.last_ges_record[
-ES_CHN_UP]=gs.ges_record[
-ES_CHN_UP];
-..\Src\App.c(1179): warning:  #175-D: subscript out of range
-              gs.last_ges_record[
-ES_CHN_UP]=gs.ges_record[
-ES_CHN_UP];
-..\Src\App.c(1187): warning:  #177-D: variable "left_up"  was declared but never referenced
+..\Src\App.c(1498): warning:  #177-D: variable "left_up"  was declared but never referenced
           uint8_t left_up,left_right,right_up;
-..\Src\App.c(1187): warning:  #177-D: variable "right_up"  was declared but never referenced
+..\Src\App.c(1498): warning:  #177-D: variable "right_up"  was declared but never referenced
           uint8_t left_up,left_right,right_up;
-..\Src\App.c(1488): warning:  #175-D: subscript out of range
-              gs.last_ges_record[
-ES_CHN_UP]=gs.ges_record[
-ES_CHN_UP];
-..\Src\App.c(1488): warning:  #175-D: subscript out of range
-              gs.last_ges_record[
-ES_CHN_UP]=gs.ges_record[
-ES_CHN_UP];
-..\Src\App.c(1496): warning:  #177-D: variable "left_up"  was declared but never referenced
-          uint8_t left_up,left_right,right_up;
-..\Src\App.c(1496): warning:  #177-D: variable "right_up"  was declared but never referenced
-          uint8_t left_up,left_right,right_up;
-..\Src\App.c(1764): warning:  #175-D: subscript out of range
-      
-OG_DEBUG("                                       [%5d %5d %5d]sample[%d]\r\n",gs.sample_base_last[1],gs.sample_base_last[2],gs.sample_base_last[0],gs.sample_size);
-..\Src\App.c(2248): warning:  #223-D: function "getSensorDataByHostout" declared implicitly
+..\Src\App.c(2725): warning:  #223-D: function "getSensorDataByHostout" declared implicitly
       getSensorDataByHostout(ps);
-..\Src\App.c: 30 warnings, 0 errors
+..\Src\App.c: 25 warnings, 0 errors
 linking...
-Program Size: Code=19356 RO-data=1280 RW-data=56 ZI-data=1872  
-"GesControl_F103\GesControl_F103.axf" - 0 Error(s), 30 Warning(s).
+Program Size: Code=20748 RO-data=292 RW-data=56 ZI-data=2184  
+"GesControl_F103\GesControl_F103.axf" - 0 Error(s), 63 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -123,7 +211,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.1
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:25
 </pre>
 </body>
 </html>

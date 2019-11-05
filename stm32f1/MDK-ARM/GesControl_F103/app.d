@@ -27,7 +27,6 @@ gescontrol_f103\app.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
 gescontrol_f103\app.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 gescontrol_f103\app.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 gescontrol_f103\app.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
-gescontrol_f103\app.o: ..\Src\VCNL4035.h
 gescontrol_f103\app.o: ..\Src\I2C.h
 gescontrol_f103\app.o: ..\Src\App.h
 gescontrol_f103\app.o: ../Drivers/CMSIS/Include/arm_math.h

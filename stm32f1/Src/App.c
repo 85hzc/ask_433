@@ -10,7 +10,6 @@
   
 #include "main.h"  
 #include "stm32f1xx_hal.h"
-#include "VCNL4035.h"
 #include "I2C.h"
 #include "App.h"
 #include "stdio.h"
@@ -22,8 +21,8 @@ extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
 
 extern TIM_HandleTypeDef htim3;
-extern uint32_t          turn_off;
-uint16_t                 brightness = 300;
+uint8_t                  lighting_switch,lighting_switch_now;
+int16_t                  brightness, brightness_old = 0;
 static uint32_t          tickstart;
 uint64_t                 sys_tick=0;          //系统tick计数
 gs_struct                gs={0};
@@ -31,10 +30,13 @@ uint16_t                 led_counter=0;
 static uint8_t           overflow_time = 0;
 static uint8_t           firstboot=true;
 
-gs_comb_struct comb_ges;
+gs_comb_struct           comb_ges;
+ADJUST_E                 adjust_type;
 
 void init_counter(void)
 {
+    LOG_DEBUG("init_counter\r\n");
+
     gs.hold_flag=false;
     gs.hold_counter=0;
     gs.approach_counter=0;
@@ -67,6 +69,12 @@ void App_Init(void)
 {
     //uint16_t read_val;
     //uint8_t res;
+
+    //ON lighting
+    adjust_type = ADJUST_INIT;
+    lighting_switch = 1;
+    lighting_switch_now = 0;
+    brightness = 400;
 
     App_Var_Init();
 
@@ -206,7 +214,7 @@ uint8_t Ges_Detect_Sample(uint16_t *ps)
 
     if(!gs.ges_dynamic_start && Ges_Start_Detect(ps))
     {
-        LOG_DEBUG("                                       Start.\r\n");
+        LOG_DEBUG("\r\nStart.\r\n");
         //gs.ges_sample_raw_cur = 0; //基准值数组复位
         gs.ges_dynamic_start = true;
         gs.ges_dynamic_sample_size = 0;
@@ -231,8 +239,8 @@ uint8_t Ges_Detect_Sample(uint16_t *ps)
         gs.ges_dynamic_sample_raw_cur++;
         if (gs.ges_dynamic_sample_raw_cur>=gs.new_hold_AorL_size)
         {
-            LOG_DEBUG("                                       sample overflow! HOLD/AP/LE size[%d] times[%d].\r\n", gs.new_hold_AorL_size,overflow_time);
-            LOG_DEBUG("                                       hold flag[%d].\r\n", gs.hold_flag);
+            LOG_DEBUG("sample overflow! HOLD/AP/LE size[%d] times[%d].\r\n", gs.new_hold_AorL_size,overflow_time);
+            LOG_DEBUG("hold flag[%d].\r\n", gs.hold_flag);
             gs.ges_dynamic_start = false;
             overflow_time++;
             if(overflow_time>2 && !gs.hold_flag)
@@ -247,7 +255,7 @@ uint8_t Ges_Detect_Sample(uint16_t *ps)
 
         if(gs.ges_dynamic_start && Ges_Stop_Detect(ps))
         {
-            LOG_DEBUG("                                       Stop.\r\n");
+            LOG_DEBUG("Stop.\r\n");
             gs.hold_flag = false;
             gs.ges_sample_raw_cur=0;            //基准值计算数组此时重新开始取值
             gs.ges_dynamic_start = false;
@@ -467,18 +475,18 @@ uint8_t Ges_Trend_DynamicFind(uint8_t chn)
             total[i] += gs.ges_dynamic_sample_array[chn][j+i*num_per_section];
         }
     }
-    LOG_DEBUG("                                       chn[%d] leave %d %d %d  %d\r\n",chn,total[0],total[1],total[2],total[0]-total[2]);
+    LOG_DEBUG("chn[%d] leave %d %d %d  %d\r\n",chn,total[0],total[1],total[2],total[0]-total[2]);
 
     if(total[0]>total[1] && total[1]>total[2] &&
         total[0]-total[2]>=80)
     {
-        LOG_DEBUG("                                       Ges_Trend_Find  leave\r\n");
+        LOG_DEBUG("Ges_Trend_Find  leave\r\n");
         return GES_LEVEL1_LEAVE;
     }
     if(total[0]<total[1] && total[1]<total[2] &&
         total[2]-total[0]>=80)
     {
-        LOG_DEBUG("                                       Ges_Trend_Find  appor\r\n");
+        LOG_DEBUG("Ges_Trend_Find  appor\r\n");
         return GES_LEVEL1_APPROACH;
     }
 
@@ -656,6 +664,8 @@ uint8_t Ges_Hold_Height_AorL_Judge()
         if(gs.sample_mode==POSITIVE)
         {
             LOG_DEBUG("Approach!\r\n");
+
+#if(CHN3_GES==0) //do not adjust lighting by approach or leave
 #if(SENSOR3)
             brightness+=50;
             if(brightness>1000)
@@ -671,10 +681,13 @@ uint8_t Ges_Hold_Height_AorL_Judge()
                 //return 1;
             }
 #endif
+#endif
         }
         else if(gs.sample_mode==NEGATIVE)
         {
             LOG_DEBUG("Leave!\r\n");
+
+#if(CHN3_GES==0) //do not adjust lighting by approach or leave
 #if(SENSOR3)
                 brightness-=50;
                 if(brightness<100)
@@ -690,15 +703,18 @@ uint8_t Ges_Hold_Height_AorL_Judge()
                     //return 1;
                 }
 #endif
+#endif
         }
-        __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, (uint32_t)brightness);
     }
     else if(gs.hold_height_start-10>gs.hold_height_stop)
     {
         gs.hold_counter = SAMPLE_HOLD_COUNT+1;
+
         if(gs.sample_mode==POSITIVE)
         {
             LOG_DEBUG("Leave!\r\n");
+
+#if(CHN3_GES==0) //do not adjust lighting by approach or leave
 #if(SENSOR3)
             brightness-=20;
             if(brightness<100)
@@ -713,11 +729,14 @@ uint8_t Ges_Hold_Height_AorL_Judge()
                 brightness = 1000;
                 //return 1;
             }
+#endif
 #endif
         }
         else if(gs.sample_mode==NEGATIVE)
         {
             LOG_DEBUG("Approach!\r\n");
+
+#if(CHN3_GES==0) //do not adjust lighting by approach or leave
 #if(SENSOR3)
             brightness+=20;
             if(brightness>1000)
@@ -733,8 +752,8 @@ uint8_t Ges_Hold_Height_AorL_Judge()
                 //return 1;
             }
 #endif
+#endif
         }
-        __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, (uint32_t)brightness);
     }
     else
     {
@@ -798,7 +817,7 @@ uint8_t Ges_Wave_Search(uint8_t chn,uint16_t *pindex)
     }
     if ((gs.sample_size==GES_SAMPLE_ARRAY_NUM_L)&&(hold_flag==1))
     {
-        LOG_DEBUG("                                       after a hold Ges.\r\n");
+        LOG_DEBUG("after a hold Ges.\r\n");
         res = Ges_Trend_Find(chn);
 
         if(GES_NULL==res)
@@ -868,6 +887,312 @@ uint8_t Ges_Wave_Search(uint8_t chn,uint16_t *pindex)
     return res;
 }
 
+#if(CHN3_GES)
+void Ges_Search_index(DETECT_E detectType, uint8_t *search_start_ch,uint8_t *search_end_ch,uint8_t *start,uint8_t *end)
+{
+    uint8_t i;
+
+    switch(detectType)
+    {
+        case DETECT_PEAK:
+            if(gs.wave[0].peak_index!=GES_INVALID_INDEX&&
+                gs.wave[1].peak_index!=GES_INVALID_INDEX&&
+                gs.wave[2].peak_index!=GES_INVALID_INDEX)
+            {
+                for(i=0;i<GES_CHN_NUM;i++)
+                {
+                    if(*start>gs.wave[i].peak_index)
+                    {
+                        *search_start_ch = i;
+                        *start = gs.wave[i].peak_index;
+                    }
+                    if(*end<gs.wave[i].peak_index)
+                    {
+                        *search_end_ch = i;
+                        *end = gs.wave[i].peak_index;
+                    }
+                }
+                return;
+            }
+            break;
+
+        case DETECT_FALL:
+            if(gs.wave[0].fall_index!=GES_INVALID_INDEX&&
+                gs.wave[1].fall_index!=GES_INVALID_INDEX&&
+                gs.wave[2].fall_index!=GES_INVALID_INDEX)
+            {
+                for(i=0;i<GES_CHN_NUM;i++)
+                {
+                    if(*start>gs.wave[i].fall_index)
+                    {
+                        *search_start_ch = i;
+                        *start = gs.wave[i].fall_index;
+                    }
+                    if(*end<gs.wave[i].fall_index)
+                    {
+                        *search_end_ch = i;
+                        *end = gs.wave[i].fall_index;
+                    }
+                }
+                return;
+            }
+            break;
+                
+        case DETECT_RISE:
+            if(gs.wave[0].rise_index!=GES_INVALID_INDEX&&
+                gs.wave[1].rise_index!=GES_INVALID_INDEX&&
+                gs.wave[2].rise_index!=GES_INVALID_INDEX)
+            {
+                for(i=0;i<GES_CHN_NUM;i++)
+                {
+                    if(*start>gs.wave[i].rise_index)
+                    {
+                        *search_start_ch = i;
+                        *start = gs.wave[i].rise_index;
+                    }
+                    if(*end<gs.wave[i].rise_index)
+                    {
+                        *search_end_ch = i;
+                        *end = gs.wave[i].rise_index;
+                    }
+                }
+                return;
+            }
+            break;
+    }
+
+    return;
+}
+
+uint8_t Ges_Calc_3chn(DETECT_E detectType, uint8_t start, uint8_t end)
+{
+    uint8_t search_start_ch=0,search_end_ch=0;
+
+    Ges_Search_index(detectType,&search_start_ch,&search_end_ch,&start,&end);
+
+    if(search_start_ch == GES_CHN_DOWN_RIGHT)
+    {
+        if(search_end_ch == GES_CHN_DOWN_LEFT)
+        {
+            return GES_LEVEL2_LEFT;
+        }
+        else if(search_end_ch == GES_CHN_UP)
+        {
+            return GES_LEVEL2_UP;
+        }
+    }
+    else if(search_start_ch == GES_CHN_DOWN_LEFT)
+    {
+        if(search_end_ch == GES_CHN_DOWN_RIGHT)
+        {
+            return GES_LEVEL2_RIGHT;
+        }
+        else if(search_end_ch == GES_CHN_UP)
+        {
+            return GES_LEVEL2_UP;
+        }
+    }
+    else
+    {
+        return GES_LEVEL2_DOWN;
+    }
+
+    return GES_NULL;
+}
+
+uint8_t Ges_Calc_2chn_in_one(DETECT_E detectType)
+{
+    uint8_t i,A_C,B_C,B_A;
+
+    B_C=Ges_Wave_Lead_3chn(detectType,GES_CHN_DOWN_LEFT,GES_CHN_UP);
+    B_A=Ges_Wave_Lead_3chn(detectType,GES_CHN_DOWN_LEFT,GES_CHN_DOWN_RIGHT);
+    A_C=Ges_Wave_Lead_3chn(detectType,GES_CHN_DOWN_RIGHT,GES_CHN_UP);
+
+    if(B_C == GES_CHN_isochronal)
+    {
+        if(B_A == GES_CHN_DOWN_LEFT)
+            return GES_LEVEL2_RIGHT;
+        else if(B_A == GES_CHN_DOWN_RIGHT)
+            return GES_LEVEL2_LEFT;
+    }
+    else if(A_C == GES_CHN_isochronal)
+    {
+        if(B_A == GES_CHN_DOWN_LEFT)
+            return GES_LEVEL2_RIGHT;
+        else if(B_A == GES_CHN_DOWN_RIGHT)
+            return GES_LEVEL2_LEFT;
+    }
+    else if(B_A == GES_CHN_isochronal)
+    {
+        if(B_C == GES_CHN_DOWN_LEFT)
+            return GES_LEVEL2_UP;
+        else if(B_C == GES_CHN_UP)
+            return GES_LEVEL2_DOWN;
+    }
+
+    return GES_NULL;
+}
+
+//判断三个信道波形发生的先后关系
+//输入： chn1    --> 第一波形
+//      chn2    --> 第二波形
+//      chn3    --> 第二波形
+//返回： chn1    --> 第一波形领先
+//      chn2    --> 第二波形领先
+//      chn3    --> 第二波形领先
+//      0xFF    --> 无法判断
+uint8_t Ges_Wave_Calc_3chn(uint8_t full_flag)
+{
+    uint8_t i,basic_ges = GES_NULL;
+    uint8_t start = 0xff,end = 0;
+    DETECT_E detectType = DETECT_MAX;
+    uint8_t ges_peak = GES_NULL,ges_fall = GES_NULL,ges_rise = GES_NULL;
+    //判断三个index的分布
+    //1.    111
+    //for (i=0;i<GES_CHN_NUM;i++)
+    //{
+    //    basic_ges=Ges_Wave_Search_3chn(i);
+    //}
+
+    if(!((gs.wave[0].peak_index!=GES_INVALID_INDEX&&
+        gs.wave[1].peak_index!=GES_INVALID_INDEX&&
+        gs.wave[2].peak_index!=GES_INVALID_INDEX) && (
+        gs.wave[0].fall_index!=GES_INVALID_INDEX&&
+        gs.wave[1].fall_index!=GES_INVALID_INDEX&&
+        gs.wave[2].fall_index!=GES_INVALID_INDEX) && (
+        gs.wave[0].rise_index!=GES_INVALID_INDEX&&
+        gs.wave[1].rise_index!=GES_INVALID_INDEX&&
+        gs.wave[2].rise_index!=GES_INVALID_INDEX)
+        ))
+    {
+        LOG_DEBUG("GES Invalid.\r\n");
+        return basic_ges;
+    }
+
+    //3 chn are all of full gesture type
+    if(full_flag >= 2)
+    {
+        if((gs.wave[GES_CHN_DOWN_RIGHT].peak_index != gs.wave[GES_CHN_DOWN_LEFT].peak_index) &&
+            (gs.wave[GES_CHN_DOWN_RIGHT].peak_index != gs.wave[GES_CHN_UP].peak_index) && 
+            (gs.wave[GES_CHN_DOWN_LEFT].peak_index != gs.wave[GES_CHN_UP].peak_index))
+        {
+            //suppose this case
+            start = gs.wave[GES_CHN_DOWN_RIGHT].peak_index;
+            end = gs.wave[GES_CHN_DOWN_RIGHT].peak_index;
+            detectType = DETECT_PEAK;
+        }
+        else if((gs.wave[GES_CHN_DOWN_RIGHT].fall_index != gs.wave[GES_CHN_DOWN_LEFT].fall_index) &&
+            (gs.wave[GES_CHN_DOWN_RIGHT].fall_index != gs.wave[GES_CHN_UP].fall_index) && 
+            (gs.wave[GES_CHN_DOWN_LEFT].fall_index != gs.wave[GES_CHN_UP].fall_index))
+        {
+            //suppose this case
+            start = gs.wave[GES_CHN_DOWN_RIGHT].fall_index;
+            end = gs.wave[GES_CHN_DOWN_RIGHT].fall_index;
+            detectType = DETECT_FALL;
+        }
+        else if((gs.wave[GES_CHN_DOWN_RIGHT].rise_index != gs.wave[GES_CHN_DOWN_LEFT].rise_index) &&
+            (gs.wave[GES_CHN_DOWN_RIGHT].rise_index != gs.wave[GES_CHN_UP].rise_index) && 
+            (gs.wave[GES_CHN_DOWN_LEFT].rise_index != gs.wave[GES_CHN_UP].rise_index))
+        {
+            //suppose this case
+            start = gs.wave[GES_CHN_DOWN_RIGHT].rise_index;
+            end = gs.wave[GES_CHN_DOWN_RIGHT].rise_index;
+            detectType = DETECT_RISE;
+        }
+
+        if(detectType!=DETECT_MAX)
+            return Ges_Calc_3chn(detectType,start,end);
+    }
+
+    //2.有两个通道信号在相同相位
+    ges_peak = Ges_Calc_2chn_in_one(DETECT_PEAK);
+    ges_fall = Ges_Calc_2chn_in_one(DETECT_FALL);
+    ges_rise = Ges_Calc_2chn_in_one(DETECT_RISE);
+
+    LOG_DEBUG("2 position in 1[%x %x %x]\r\n",ges_peak,ges_fall,ges_rise);
+
+    if(ges_peak!=GES_NULL && ges_peak==ges_fall)
+        basic_ges = ges_peak;
+    else if(ges_peak!=GES_NULL && ges_peak==ges_rise)
+        basic_ges = ges_peak;
+    else if(ges_fall!=GES_NULL && ges_fall==ges_rise)
+        basic_ges = ges_fall;
+    else if(ges_peak!=GES_NULL)
+        basic_ges = ges_peak;
+    else if(ges_fall!=GES_NULL)
+        basic_ges = ges_fall;
+    else if(ges_rise!=GES_NULL)
+        basic_ges = ges_rise;
+
+    return basic_ges;
+}
+
+uint8_t Ges_Wave_Lead_3chn(DETECT_E detectType,uint8_t chn1,uint8_t chn2)
+{
+    //highest priority
+    if(detectType==DETECT_PEAK)
+    {
+        if ((gs.wave[chn1].peak_index!=GES_INVALID_INDEX)&&
+            (gs.wave[chn2].peak_index!=GES_INVALID_INDEX))
+        {
+            if (gs.wave[chn1].peak_index<gs.wave[chn2].peak_index)
+                return chn1;
+            else if (gs.wave[chn1].peak_index>gs.wave[chn2].peak_index)
+                return chn2;
+            else
+                return GES_CHN_isochronal;
+            }
+    }
+    
+    if(detectType==DETECT_FALL)
+    {
+        //Second priority 
+        if ((gs.wave[chn1].fall_index!=GES_INVALID_INDEX)&&
+            (gs.wave[chn2].fall_index!=GES_INVALID_INDEX))
+        {
+            if (gs.wave[chn1].fall_index<gs.wave[chn2].fall_index)
+                return chn1;
+            else if (gs.wave[chn1].fall_index>gs.wave[chn2].fall_index)
+                return chn2;
+            else
+                return GES_CHN_isochronal;
+        }
+    }
+    
+    if(detectType==DETECT_RISE)
+    {
+        //Third priority 
+        if ((gs.wave[chn1].rise_index!=GES_INVALID_INDEX)&&
+            (gs.wave[chn2].rise_index!=GES_INVALID_INDEX))
+        {
+            if (gs.wave[chn1].rise_index<gs.wave[chn2].rise_index)
+                return chn1;
+            else if (gs.wave[chn1].rise_index>gs.wave[chn2].rise_index)
+                return chn2;
+            else
+                return GES_CHN_isochronal;
+        }
+    }
+    /*
+    if((gs.wave[chn1].rise_index==gs.wave[chn2].rise_index) &&
+        (gs.wave[chn1].peak_index==gs.wave[chn2].peak_index) &&
+        (gs.wave[chn1].fall_index==gs.wave[chn2].fall_index))
+    {
+        return GES_CHN_isochronal;
+    }
+    if ((gs.wave[chn1].rise_index!=GES_INVALID_INDEX)&&
+        ((gs.wave[chn2].fall_index!=GES_INVALID_INDEX)||
+        (gs.wave[chn2].peak_index!=GES_INVALID_INDEX)))
+        return chn2;
+    if ((gs.wave[chn2].rise_index!=GES_INVALID_INDEX)&&
+        ((gs.wave[chn1].fall_index!=GES_INVALID_INDEX)||
+        (gs.wave[chn1].peak_index!=GES_INVALID_INDEX)))
+        return chn1;
+    */
+    return GES_CHN_INVALID;
+}
+#endif
+
 //判断两个波形发生的先后关系
 //输入： chn1    --> 第一波形
 //      chn2    --> 第二波形
@@ -920,7 +1245,7 @@ uint8_t Ges_Wave_Lead(uint8_t chn1,uint8_t chn2)
 //对某一帧进行波形寻找
 //输入： chn     --> 寻边沿的通道号
 //      pindex  --> 峰值index指针
-//返回：             在此帧中具有的手势类型
+//返回：             在此帧中具有的手势类型,一级手势（接近、远离、HOLD、FULL）
 uint8_t Ges_Wave_DynamicSearch(uint8_t chn,uint16_t *pindex)
 {
     uint16_t i,res=GES_NULL;
@@ -974,7 +1299,7 @@ uint8_t Ges_Wave_DynamicSearch(uint8_t chn,uint16_t *pindex)
 */
         if (i<gs.ges_dynamic_sample_size-1)
         {
-            if (i==0) //动态采用的数组，第一个元素已经符合采样阈值
+            if (i==0) //动态采样的数组，第一个元素已经符合采样阈值
             {
                 if (gs.ges_dynamic_sample_array[chn][i]>=gs.sample_down_limit[chn])
                 {
@@ -1002,16 +1327,16 @@ uint8_t Ges_Wave_DynamicSearch(uint8_t chn,uint16_t *pindex)
         }
     }
 
-/*
-    LOG_DEBUG("ch%d limit:%d  rise:%d %d, fall:%d %d, peak:%d %d.\r\n",chn,gs.sample_down_limit[chn],
-                gs.wave[chn].rise_index,gs.wave[chn].rise_value,
+#if (LOG_ENABLE)
+    LOG_DEBUG("ch%d limit:%d P:%5d %5d, F:%5d %5d, R:%5d %5d.\r\n",chn,gs.sample_down_limit[chn],
+                gs.wave[chn].peak_index,gs.wave[chn].peak_value,
                 gs.wave[chn].fall_index,gs.wave[chn].fall_value,
-                gs.wave[chn].peak_index,gs.wave[chn].peak_value);
-*/
+                gs.wave[chn].rise_index,gs.wave[chn].rise_value);
+#endif
 
     if ((gs.ges_dynamic_sample_size==gs.new_hold_AorL_size/*32*/)&&(hold_flag))
     {
-        LOG_DEBUG("                                       after a hold Judge.\r\n");
+        LOG_DEBUG("Suppose hold\r\n");
 /*
         if(gs.hold_flag)
         {
@@ -1020,20 +1345,6 @@ uint8_t Ges_Wave_DynamicSearch(uint8_t chn,uint16_t *pindex)
 */
         if(GES_NULL==res)
             res=GES_LEVEL1_HOLD;
-/*
-        if (gs.wave[chn].peak_index==(gs.sample_size-1) &&
-            gs.ges_sample_array[chn][gs.sample_size-1]-gs.ges_sample_array[chn][0]>200)
-        {
-            LOG_DEBUG("hold {apporach}\r\n");
-            res=GES_LEVEL1_APPROACH;
-        }
-        else if (gs.wave[chn].peak_index==0 &&
-            gs.ges_sample_array[chn][0]-gs.ges_sample_array[chn][gs.sample_size-1]>200)
-        {
-            LOG_DEBUG("hold {leave}\r\n");
-            res=GES_LEVEL1_LEAVE;
-        }
-*/
         *pindex=GES_SAMPLE_ARRAY_NUM_S-1;
         return res;
     }
@@ -1042,12 +1353,12 @@ uint8_t Ges_Wave_DynamicSearch(uint8_t chn,uint16_t *pindex)
     {
     
 #if (LOG_ENABLE)
-        LOG_DEBUG("                                       after not hold or less %d.\r\n",GES_SAMPLE_ARRAY_NUM_L);
+        LOG_DEBUG("Not hold OR Not AorL size %d.\r\n",gs.new_hold_AorL_size);
 #endif
 
-        if(GES_SAMPLE_ARRAY_NUM_L == gs.ges_dynamic_sample_size)//采样队列满
+        if (GES_SAMPLE_ARRAY_NUM_L == gs.ges_dynamic_sample_size)//采样队列满
         {
-            if(gs.hold_flag)
+            if (gs.hold_flag)
             {
                 res = Ges_Trend_DynamicFind(chn);
             }
@@ -1109,7 +1420,7 @@ uint8_t Ges_Analysis(void)
             chn|=(1<<i);
 //          res=1;
 #if (LOG_ENABLE)
-            LOG_DEBUG("                                       tick: %lld, CHN%d ges: approach!\r\n",gs.ges_record[i].add_time,i);
+            LOG_DEBUG("tick: %lld, CHN%d ges: approach!\r\n",gs.ges_record[i].add_time,i);
 #endif
         }
         else if (basic_ges==GES_LEVEL1_LEAVE)
@@ -1119,7 +1430,7 @@ uint8_t Ges_Analysis(void)
             chn|=(1<<i);
 //          res=1;
 #if (LOG_ENABLE)
-            LOG_DEBUG("                                       tick: %lld, CHN%d ges: leave!\r\n",gs.ges_record[i].add_time,i);
+            LOG_DEBUG("tick: %lld, CHN%d ges: leave!\r\n",gs.ges_record[i].add_time,i);
 #endif
         }
         else if (basic_ges==GES_LEVEL1_FULL)
@@ -1129,7 +1440,7 @@ uint8_t Ges_Analysis(void)
             chn|=(1<<i);
 //          res=1;
 #if (LOG_ENABLE)
-            LOG_DEBUG("                                       tick: %lld, CHN%d ges: full!\r\n",gs.ges_record[i].add_time,i);
+            LOG_DEBUG("tick: %lld, CHN%d ges: full!\r\n",gs.ges_record[i].add_time,i);
 #endif
         }
         else if (basic_ges==GES_LEVEL1_HOLD)
@@ -1138,7 +1449,7 @@ uint8_t Ges_Analysis(void)
             //gs.ges_record[i].add_time=gs.frame_start_tick+(index*SAMPLE_FREQUENCY_DEF*GES_SAMPLE_AVE_NUM);
             chn|=(1<<i);
 #if (LOG_ENABLE)
-            LOG_DEBUG("                                       tick: %lld, CHN%d ges: hold!\r\n",gs.ges_record[i].add_time,i);
+            LOG_DEBUG("tick: %lld, CHN%d ges: hold!\r\n",gs.ges_record[i].add_time,i);
 #endif
 #if(HOLD_GES==1)
             hold_flag++;
@@ -1350,16 +1661,23 @@ uint8_t Ges_Analysis(void)
 //返回：         在此帧中具有的手势类型
 uint8_t Ges_DynamicAnalysis(void)
 {
-    uint8_t i,basic_ges,res,chn=0,hold_flag,full_flag;
+    uint8_t i,basic_ges,ges_type,chn=0,hold_flag,full_flag;
     uint16_t index;
-    
-    res=GES_NULL;
+
+    ges_type=GES_NULL;
     chn=0;
     hold_flag=0;
     full_flag=0;
 
-    if(gs.ges_dynamic_sample_size<3)
-        return res;
+#if (LOG_ENABLE)
+    LOG_DEBUG("Ges_DynamicAnalysis sample:%d\r\n",gs.ges_dynamic_sample_size);
+#endif
+
+    if(gs.ges_dynamic_sample_size<10)
+    {
+        overflow_time = 0;
+        return ges_type;
+    }
 
     //标准化手势数组
     Ges_DynamicNormalize();
@@ -1374,7 +1692,7 @@ uint8_t Ges_DynamicAnalysis(void)
             gs.ges_record[i].ges=basic_ges;
             chn|=(1<<i);
 #if (LOG_ENABLE)
-            LOG_DEBUG("                                       ick: %lld, CHN%d ges: approach!\r\n",gs.ges_record[i].add_time,i);
+            LOG_DEBUG("tick: %lld, CHN%d ges: approach!\r\n",gs.ges_record[i].add_time,i);
 #endif
         }
         else if (basic_ges==GES_LEVEL1_LEAVE)
@@ -1382,7 +1700,7 @@ uint8_t Ges_DynamicAnalysis(void)
             gs.ges_record[i].ges=basic_ges;
             chn|=(1<<i);
 #if (LOG_ENABLE)
-            LOG_DEBUG("                                       tick: %lld, CHN%d ges: leave!\r\n",gs.ges_record[i].add_time,i);
+            LOG_DEBUG("tick: %lld, CHN%d ges: leave!\r\n",gs.ges_record[i].add_time,i);
 #endif
         }
         else if (basic_ges==GES_LEVEL1_FULL)
@@ -1391,7 +1709,7 @@ uint8_t Ges_DynamicAnalysis(void)
             chn|=(1<<i);
             full_flag++;
 #if (LOG_ENABLE)
-            LOG_DEBUG("                                       tick: %lld, CHN%d ges: full!\r\n",gs.ges_record[i].add_time,i);
+            LOG_DEBUG("tick: %lld, CHN%d ges: full!\r\n",gs.ges_record[i].add_time,i);
 #endif
         }
         else if (basic_ges==GES_LEVEL1_HOLD)
@@ -1399,7 +1717,7 @@ uint8_t Ges_DynamicAnalysis(void)
             gs.ges_record[i].ges=basic_ges;
             chn|=(1<<i);
 #if (LOG_ENABLE)
-            LOG_DEBUG("                                       tick: %lld, CHN%d ges: hold!\r\n",gs.ges_record[i].add_time,i);
+            LOG_DEBUG("tick: %lld, CHN%d ges: hold!\r\n",gs.ges_record[i].add_time,i);
 #endif
 #if(HOLD_GES==1)
             hold_flag++;
@@ -1410,9 +1728,13 @@ uint8_t Ges_DynamicAnalysis(void)
     }
     
     //有新的手势
+#if(CHN3_GES==0)
     if (chn==0x3)
+#else
+    if (chn==0x7)
+#endif
     {
-        LOG_DEBUG("                                       hold %d,full %d,apC %d,leC %d\r\n",hold_flag,full_flag,gs.approach_counter,gs.leave_counter);
+        LOG_DEBUG("hold %d,full %d,apC %d,leC %d\r\n",hold_flag,full_flag,gs.approach_counter,gs.leave_counter);
 
 #if(HOLD_GES==1)
 #if 0//有hold的chn，均判定hold
@@ -1433,8 +1755,7 @@ uint8_t Ges_DynamicAnalysis(void)
         if (hold_flag>=2)
 #endif
         {
-            res=GES_LEVEL2_HOLD;
-            return res;
+            return GES_LEVEL2_HOLD;
         }
 #endif
         //接近和远离判断
@@ -1443,34 +1764,29 @@ uint8_t Ges_DynamicAnalysis(void)
             if(gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_APPROACH &&
                 gs.ges_record[GES_CHN_DOWN_RIGHT].ges==GES_LEVEL1_APPROACH)
             {
-                res=GES_LEVEL2_APPROACH;
-                return res;
+                return GES_LEVEL2_APPROACH;
             }
             else if(gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_LEAVE &&
                 gs.ges_record[GES_CHN_DOWN_RIGHT].ges==GES_LEVEL1_LEAVE)
             {
-                res=GES_LEVEL2_LEAVE;
-                return res;
+                return GES_LEVEL2_LEAVE;
             }
             
             //一个接近，一个远离，去除抖动
             else if(((gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_APPROACH)||
                 (gs.ges_record[GES_CHN_DOWN_RIGHT].ges==GES_LEVEL1_APPROACH)) && gs.approach_counter)
             {
-                res=GES_LEVEL2_APPROACH;
-                return res;
+                return GES_LEVEL2_APPROACH;
             }
             else if(((gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_LEAVE)||
                 (gs.ges_record[GES_CHN_DOWN_RIGHT].ges==GES_LEVEL1_LEAVE)) && gs.leave_counter)
             {
-                res=GES_LEVEL2_LEAVE;
-                return res;
+                return GES_LEVEL2_LEAVE;
             }
             else if(gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_HOLD ||
                 gs.ges_record[GES_CHN_DOWN_RIGHT].ges==GES_LEVEL1_HOLD)
             {
-                res=GES_NULL;
-                return res;
+                return GES_NULL;
             }
                 //只要有接近或者远离的手型，就不做左右判断
             else if((gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_LEAVE)||
@@ -1478,8 +1794,7 @@ uint8_t Ges_DynamicAnalysis(void)
                 (gs.ges_record[GES_CHN_DOWN_LEFT].ges==GES_LEVEL1_APPROACH) ||
                 (gs.ges_record[GES_CHN_DOWN_RIGHT].ges==GES_LEVEL1_APPROACH))
             {
-                res=GES_NULL;
-                return res;
+                return GES_NULL;
             }
         }
 
@@ -1492,8 +1807,13 @@ uint8_t Ges_DynamicAnalysis(void)
         if (chn&(1<<GES_CHN_DOWN_RIGHT))
             //重置last_ges_record
             gs.last_ges_record[GES_CHN_DOWN_RIGHT]=gs.ges_record[GES_CHN_DOWN_RIGHT];
-        
+
+#if(CHN3_GES)
+        ges_type = Ges_Wave_Calc_3chn(full_flag);
+#else
         uint8_t left_up,left_right,right_up;
+
+        //2.two chn lead
         //left_up=Ges_Wave_Lead(GES_CHN_DOWN_LEFT,GES_CHN_UP);
         left_right=Ges_Wave_Lead(GES_CHN_DOWN_LEFT,GES_CHN_DOWN_RIGHT);
         //right_up=Ges_Wave_Lead(GES_CHN_DOWN_RIGHT,GES_CHN_UP);
@@ -1501,59 +1821,188 @@ uint8_t Ges_DynamicAnalysis(void)
         //从左到右
         if ((left_up==GES_CHN_DOWN_LEFT)&&(right_up==GES_CHN_UP))
         {
-            res=GES_LEVEL2_RIGHT;
-            return res;
+            return GES_LEVEL2_RIGHT;
         }
         //从右到左
         if ((left_up==GES_CHN_UP)&&(right_up==GES_CHN_DOWN_RIGHT))
         {
-            res=GES_LEVEL2_LEFT;
-            return res;
+            return GES_LEVEL2_LEFT;
         }
         //从上到下
         if ((left_up==GES_CHN_UP)||(right_up==GES_CHN_UP))
         {
-            res=GES_LEVEL2_DOWN;
-            return res;
+            ges_type=GES_LEVEL2_DOWN;
+            return ges_type;
         }
         //从下到上
         if ((left_up==GES_CHN_DOWN_LEFT)||(right_up==GES_CHN_DOWN_RIGHT))
         {
-            res=GES_LEVEL2_UP;
-            return res;
+            return GES_LEVEL2_UP;
         }
 #endif
         //从左到右
         if (left_right==GES_CHN_DOWN_LEFT)
         {
-            res=GES_LEVEL2_RIGHT;
-            return res;
+            return GES_LEVEL2_RIGHT;
         }
         //从右到左
         if (left_right==GES_CHN_DOWN_RIGHT)
         {
-            res=GES_LEVEL2_LEFT;
-            return res;
+            return GES_LEVEL2_LEFT;
         }
+#endif
     }
-
-    return res;
+    return ges_type;
 }
 
 #if(COMB_GES==1)
+#if(CHN3_GES)
 void Ges_Comb(uint8_t ges)
 {
     uint64_t tick=Systick_Get();
 
     if(tick>comb_ges.start_ges_time+MULTIGES_DISTANCE_MIN)
     {
-        LOG_DEBUG("                                       combination geste tick time lease %d ms, reset.\r\n",MULTIGES_DISTANCE_MIN);
+        LOG_DEBUG("combination geste tick time lease %d ms, reset.\r\n",MULTIGES_DISTANCE_MIN);
         memset(&comb_ges, 0, sizeof(gs_comb_struct));
     }
 
     if(comb_ges.gesid==0)//the first ges of combination
         comb_ges.start_ges_time = tick;
 
+    if(comb_ges.gesid<2)
+    {
+        comb_ges.ges[comb_ges.gesid] = ges;
+    }
+
+    LOG_DEBUG("----gesid=%d[0x%x 0x%x] ----\r\n",comb_ges.gesid,comb_ges.ges[0],comb_ges.ges[1]);
+
+    comb_ges.gesid++;
+
+    if(comb_ges.ges[0]==GES_LEVEL2_LEFT&&
+        comb_ges.ges[1]==GES_LEVEL2_RIGHT)
+    {
+        LOG_DEBUG("----left right----\r\n");
+        memset(&comb_ges, 0, sizeof(gs_comb_struct));
+        //HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
+        //led_counter=LED_FLASH_DELAY;
+        overflow_time = 0;
+
+        if(adjust_type == ADJUST_DOWN)
+        {
+            adjust_type = ADJUST_UP;
+            comb_ges.start_adjust_ges_time = tick;
+        }
+        else
+            lighting_switch = !lighting_switch;
+    }
+    else if(comb_ges.ges[0]==GES_LEVEL2_RIGHT&&
+        comb_ges.ges[1]==GES_LEVEL2_LEFT)
+    {
+        LOG_DEBUG("----right left----\r\n");
+        memset(&comb_ges, 0, sizeof(gs_comb_struct));
+        //HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
+        //led_counter=LED_FLASH_DELAY;
+        overflow_time = 0;
+
+        if(adjust_type == ADJUST_UP)
+        {
+            adjust_type = ADJUST_DOWN;
+            comb_ges.start_adjust_ges_time = tick;
+        }
+        else
+            lighting_switch = !lighting_switch;
+    }
+    else if(comb_ges.ges[0]==GES_LEVEL2_LEFT&&
+        comb_ges.ges[1]==GES_LEVEL2_LEFT)
+    {
+        LOG_DEBUG("----left left----\r\n");
+        memset(&comb_ges, 0, sizeof(gs_comb_struct));
+        //HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
+        //led_counter=LED_FLASH_DELAY*5;
+        overflow_time = 0;
+        adjust_type = ADJUST_DOWN;
+        comb_ges.start_adjust_ges_time = tick;
+    }
+    else if(comb_ges.ges[0]==GES_LEVEL2_RIGHT&&
+        comb_ges.ges[1]==GES_LEVEL2_RIGHT)
+    {
+        LOG_DEBUG("----right right----\r\n");
+        memset(&comb_ges, 0, sizeof(gs_comb_struct));
+        //HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
+        //led_counter=LED_FLASH_DELAY*5;
+        overflow_time = 0;
+        adjust_type = ADJUST_UP;
+        comb_ges.start_adjust_ges_time = tick;
+    }
+    else if(comb_ges.ges[0]==GES_LEVEL2_UP&&
+        comb_ges.ges[1]==GES_LEVEL2_UP)
+    {
+        LOG_DEBUG("----up up----\r\n");
+        memset(&comb_ges, 0, sizeof(gs_comb_struct));
+        //HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
+        //led_counter=LED_FLASH_DELAY*5;
+        overflow_time = 0;
+        adjust_type = ADJUST_UP;
+        comb_ges.start_adjust_ges_time = tick;
+    }
+    else if(comb_ges.ges[0]==GES_LEVEL2_DOWN&&
+        comb_ges.ges[1]==GES_LEVEL2_DOWN)
+    {
+        LOG_DEBUG("----down down----\r\n");
+        memset(&comb_ges, 0, sizeof(gs_comb_struct));
+        //HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
+        //led_counter=LED_FLASH_DELAY*5;
+        overflow_time = 0;
+        adjust_type = ADJUST_DOWN;
+        comb_ges.start_adjust_ges_time = tick;
+    }
+    else if(comb_ges.ges[0]==GES_LEVEL2_UP&&
+        comb_ges.ges[1]==GES_LEVEL2_DOWN)
+    {
+        LOG_DEBUG("----up down----\r\n");
+        memset(&comb_ges, 0, sizeof(gs_comb_struct));
+        //HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
+        //led_counter=LED_FLASH_DELAY*5;
+        overflow_time = 0;
+        if(adjust_type == ADJUST_UP)
+        {
+            adjust_type = ADJUST_DOWN;
+            comb_ges.start_adjust_ges_time = tick;
+        }
+        else
+            lighting_switch = !lighting_switch;
+    }
+    else if(comb_ges.ges[0]==GES_LEVEL2_DOWN&&
+        comb_ges.ges[1]==GES_LEVEL2_UP)
+    {
+        LOG_DEBUG("----down up----\r\n");
+        memset(&comb_ges, 0, sizeof(gs_comb_struct));
+        //HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
+        //led_counter=LED_FLASH_DELAY*5;
+        overflow_time = 0;
+        if(adjust_type == ADJUST_DOWN)
+        {
+            adjust_type = ADJUST_UP;
+            comb_ges.start_adjust_ges_time = tick;
+        }
+        else
+            lighting_switch = !lighting_switch;
+    }
+}
+#else
+void Ges_Comb(uint8_t ges)
+{
+    uint64_t tick=Systick_Get();
+
+    if(tick>comb_ges.start_ges_time+MULTIGES_DISTANCE_MIN)
+    {
+        LOG_DEBUG("combination geste tick time lease %d ms, reset.\r\n",MULTIGES_DISTANCE_MIN);
+        memset(&comb_ges, 0, sizeof(gs_comb_struct));
+    }
+
+    if(comb_ges.gesid==0)//the first ges of combination
+        comb_ges.start_ges_time = tick;
 
 #if 0
     if(comb_ges.gesid<3)
@@ -1561,14 +2010,14 @@ void Ges_Comb(uint8_t ges)
         comb_ges.ges[comb_ges.gesid] = ges;
     }
 
-    LOG_DEBUG("                                               ----gesid=%d %x %x %x----\r\n",comb_ges.gesid,comb_ges.ges[0],comb_ges.ges[1],comb_ges.ges[2]);
+    LOG_DEBUG("        ----gesid=%d %x %x %x----\r\n",comb_ges.gesid,comb_ges.ges[0],comb_ges.ges[1],comb_ges.ges[2]);
     comb_ges.gesid++;
 
     if(comb_ges.ges[0]==GES_LEVEL2_LEFT&&
         comb_ges.ges[1]==GES_LEVEL2_RIGHT&&
         comb_ges.ges[2]==GES_LEVEL2_LEFT)
     {
-        LOG_DEBUG("                                               ----left----\r\n");
+        LOG_DEBUG("        ----left----\r\n");
         memset(&comb_ges, 0, sizeof(gs_comb_struct));
         HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
         led_counter=LED_FLASH_DELAY;
@@ -1577,7 +2026,7 @@ void Ges_Comb(uint8_t ges)
         comb_ges.ges[1]==GES_LEVEL2_LEFT&&
         comb_ges.ges[2]==GES_LEVEL2_RIGHT)
     {
-        LOG_DEBUG("                                               ----right----\r\n");
+        LOG_DEBUG("        ----right----\r\n");
         memset(&comb_ges, 0, sizeof(gs_comb_struct));
         HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
         led_counter=LED_FLASH_DELAY;
@@ -1588,58 +2037,68 @@ void Ges_Comb(uint8_t ges)
         comb_ges.ges[comb_ges.gesid] = ges;
     }
     
-#if (LOG_ENABLE)
-    LOG_DEBUG("                                       ----gesid=%d %x %x ----\r\n",comb_ges.gesid,comb_ges.ges[0],comb_ges.ges[1]);
-#endif
+    LOG_DEBUG("----gesid=%x %x ----\r\n",comb_ges.ges[0],comb_ges.ges[1]);
 
     comb_ges.gesid++;
 
     if(comb_ges.ges[0]==GES_LEVEL2_LEFT&&
         comb_ges.ges[1]==GES_LEVEL2_RIGHT)
     {
-#if (LOG_ENABLE)
-        LOG_DEBUG("                                       ----left----\r\n");
-#endif
+        LOG_DEBUG("----left right----\r\n");
         memset(&comb_ges, 0, sizeof(gs_comb_struct));
-        HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
-        led_counter=LED_FLASH_DELAY;
+        //HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
+        //led_counter=LED_FLASH_DELAY;
         overflow_time = 0;
+        if(adjust_type == ADJUST_DOWN)
+        {
+            adjust_type = ADJUST_UP;
+            comb_ges.start_adjust_ges_time = tick;
+        }
+        else
+            lighting_switch = !lighting_switch;
     }
     else if(comb_ges.ges[0]==GES_LEVEL2_RIGHT&&
         comb_ges.ges[1]==GES_LEVEL2_LEFT)
     {
-#if (LOG_ENABLE)
-        LOG_DEBUG("                                       ----right----\r\n");
-#endif
+        LOG_DEBUG("----right left----\r\n");
         memset(&comb_ges, 0, sizeof(gs_comb_struct));
-        HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
-        led_counter=LED_FLASH_DELAY;
+        //HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
+        //led_counter=LED_FLASH_DELAY;
         overflow_time = 0;
+        if(adjust_type == ADJUST_UP)
+        {
+            adjust_type = ADJUST_DOWN;
+            comb_ges.start_adjust_ges_time = tick;
+        }
+        else
+            lighting_switch = !lighting_switch;
+
     }
     else if(comb_ges.ges[0]==GES_LEVEL2_LEFT&&
         comb_ges.ges[1]==GES_LEVEL2_LEFT)
     {
-#if (LOG_ENABLE)
-        LOG_DEBUG("                                       ----left left----\r\n");
-#endif
+        LOG_DEBUG("----left left----\r\n");
         memset(&comb_ges, 0, sizeof(gs_comb_struct));
-        HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
-        led_counter=LED_FLASH_DELAY*5;
+        //HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
+        //led_counter=LED_FLASH_DELAY*5;
         overflow_time = 0;
+        adjust_type = ADJUST_DOWN;
+        comb_ges.start_adjust_ges_time = tick;
     }
     else if(comb_ges.ges[0]==GES_LEVEL2_RIGHT&&
         comb_ges.ges[1]==GES_LEVEL2_RIGHT)
     {
-#if (LOG_ENABLE)
-        LOG_DEBUG("                                       ----right right----\r\n");
-#endif
+        LOG_DEBUG("----right right----\r\n");
         memset(&comb_ges, 0, sizeof(gs_comb_struct));
-        HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
-        led_counter=LED_FLASH_DELAY*5;
+        //HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
+        //led_counter=LED_FLASH_DELAY*5;
         overflow_time = 0;
+        adjust_type = ADJUST_UP;
+        comb_ges.start_adjust_ges_time = tick;
     }
 #endif
 }
+#endif
 #endif
 
 #if(!CALIB_OBO)
@@ -1649,6 +2108,10 @@ void Ges_Calib(uint8_t firstboot)
     uint8_t i;
     uint16_t j,delta;
     uint32_t sum;
+
+#if (LOG_ENABLE)
+    LOG_DEBUG("Ges_Calib");
+#endif
 
 #if 1
     if(gs.sample_size == GES_SAMPLE_ARRAY_NUM_S)
@@ -1671,13 +2134,18 @@ void Ges_Calib(uint8_t firstboot)
             gs.sample_base[i]=delta;
             //gs.sample_down_limit[i]=SAMPLE_DOWN_LIMIT_DEF+delta;
             //gs.sample_up_limit[i]=SAMPLE_UP_LIMIT_DEF+delta;
-#if (LOG_ENABLE)
-            //LOG_DEBUG("CHN %d-> base: %d,down_limit: %d,up limit: %d\r\n",i,gs.sample_base[i],gs.sample_down_limit[i],gs.sample_up_limit[i]);
-            //LOG_DEBUG("                                       CHN%d: cur[%d] new[%d]\r\n",i,gs.sample_base_last[i],gs.sample_base[i]);
-            LOG_DEBUG("                                       CHN%d: cur[%d]\r\n",i,gs.sample_base_last[i]);
-#endif
         }
+#if (LOG_ENABLE)
+        //LOG_DEBUG("CHN %d-> base: %d,down_limit: %d,up limit: %d\r\n",i,gs.sample_base[i],gs.sample_down_limit[i],gs.sample_up_limit[i]);
+        //LOG_DEBUG("CHN%d: cur[%d] new[%d]\r\n",i,gs.sample_base_last[i],gs.sample_base[i]);
+        LOG_DEBUG("[%d %d %d]",gs.sample_base_last[1],gs.sample_base_last[2],gs.sample_base_last[0]);
+#endif
     }
+
+#if (LOG_ENABLE)
+    LOG_DEBUG("\r\n");
+#endif
+
 #else
     for (i=0;i<GES_CHN_NUM;i++)
     {
@@ -1719,6 +2187,10 @@ void Ges_DynamicCalib()
     uint16_t j,delta;
     uint32_t sum;
 
+#if (LOG_ENABLE)
+    LOG_DEBUG("Ges_DynamicCalib\r\n");
+#endif
+
     for (i=0;i<GES_CHN_NUM;i++)
     {
         sum=0;
@@ -1731,7 +2203,7 @@ void Ges_DynamicCalib()
         gs.sample_base[i]=delta;
         gs.sample_base_last[i] = delta;
 #if (LOG_ENABLE)
-        LOG_DEBUG("                                       CHN%d: cur[%d]\r\n",i,gs.sample_base_last[i]);
+        LOG_DEBUG("CHN%d[%d]\r\n",i,gs.sample_base_last[i]);
 #endif
     }
 }
@@ -1761,7 +2233,7 @@ void Ges_Normalize(void)
         //LOG_DEBUG(" %5d %5d %5d\r\n",
     //        gs.ges_sample_array[1][j],gs.ges_sample_array[2][j],gs.ges_sample_array[0][j]);
     }
-    LOG_DEBUG("                                       [%5d %5d %5d]sample[%d]\r\n",gs.sample_base_last[1],gs.sample_base_last[2],gs.sample_base_last[0],gs.sample_size);
+    LOG_DEBUG("base[%5d %5d %5d] sample[%d]\r\n",gs.sample_base_last[1],gs.sample_base_last[2],gs.sample_base_last[0],gs.sample_size);
 #endif
 }
 #endif
@@ -1792,12 +2264,17 @@ void Ges_DynamicNormalize(void)
 /*
     for (j=0;j<gs.ges_dynamic_sample_size;j++)
     {
-        LOG_DEBUG("                                            ges[%d]:[ %5d  %5d]\r\n",j,
+        LOG_DEBUG("     ges[%d]:[ %5d  %5d]\r\n",j,
             gs.ges_dynamic_sample_array[1][j],gs.ges_dynamic_sample_array[0][j]);
     }
 */
-    LOG_DEBUG("                                       [%5d  %5d] DynamicNormalize sample[%d]\r\n",
-        gs.sample_base_last[1],gs.sample_base_last[0],gs.ges_dynamic_sample_size);
+#if(CHN3_GES)
+    LOG_DEBUG("base[%5d %5d %5d]\r\n",
+        gs.sample_base_last[1],gs.sample_base_last[2],gs.sample_base_last[0]);
+#else
+    LOG_DEBUG("base[%5d %5d]\r\n",
+        gs.sample_base_last[1],gs.sample_base_last[0]);
+#endif
 #endif
 }
 
@@ -1935,11 +2412,11 @@ void Ges_Log(void)
             LOG_DEBUG("LEFT  array:");
         else if (i==GES_CHN_DOWN_RIGHT)
             LOG_DEBUG("RIGHT array:");
-        for (j=0;j<gs.sample_size;j++)
+        for (j=0;j<gs.ges_dynamic_sample_size;j++)
         {
             //打印去除基准值的归一化数组
-            if (gs.ges_sample_array[i][j]>=gs.sample_down_limit[i])
-                LOG_DEBUG("%d ",gs.ges_sample_array[i][j]-gs.sample_down_limit[i]);
+            if (gs.ges_dynamic_sample_array[i][j]>=gs.sample_down_limit[i])
+                LOG_DEBUG("%d ",gs.ges_dynamic_sample_array[i][j]-gs.sample_down_limit[i]);
             else
                 LOG_DEBUG("%d ",0);
 //              LOG_DEBUG("%d ",gs.ges_sample_array[i][j]);
@@ -2074,7 +2551,7 @@ void App_Task(void)
                         gs.last_ges_time=tick;
                         if(!(gs.last_ges == GES_LEVEL2_HOLD && res == GES_LEVEL2_LEAVE))
                         {
-                            LOG_DEBUG("                                                 tick time lease %d ms\r\n",GES_DISTANCE_MIN);
+                            LOG_DEBUG("          tick time lease %d ms\r\n",GES_DISTANCE_MIN);
                         //    return;
                         }
                     #endif
@@ -2084,7 +2561,7 @@ void App_Task(void)
                 {
                     HAL_GPIO_WritePin(LED_UP_GPIO_Port, LED_UP_Pin, GPIO_PIN_RESET);
                     led_counter=LED_FLASH_DELAY;
-                    LOG_DEBUG("                                                 Ges: UP!\r\n");
+                    LOG_DEBUG("          Ges: UP!\r\n");
                     Ges_Log();
                     //开SW2
                     //HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_SET);
@@ -2093,7 +2570,7 @@ void App_Task(void)
                 {
                     HAL_GPIO_WritePin(LED_DOWN_GPIO_Port, LED_DOWN_Pin, GPIO_PIN_RESET);
                     led_counter=LED_FLASH_DELAY;
-                    LOG_DEBUG("                                                 Ges: DOWN!\r\n");
+                    LOG_DEBUG("          Ges: DOWN!\r\n");
                     Ges_Log();
                     //关SW2
                     //HAL_GPIO_WritePin(SW2_GPIO_Port, SW2_Pin, GPIO_PIN_RESET);
@@ -2104,7 +2581,7 @@ void App_Task(void)
                     HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
                     led_counter=LED_FLASH_DELAY;
 #endif
-                    LOG_DEBUG("                                                 Ges: LEFT!\r\n");
+                    LOG_DEBUG("          Ges: LEFT!\r\n");
 #if(COMB_GES==1)
                     Ges_Comb(GES_LEVEL2_LEFT);
 #endif
@@ -2118,7 +2595,7 @@ void App_Task(void)
                     HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
                     led_counter=LED_FLASH_DELAY;
 #endif
-                    LOG_DEBUG("                                                 Ges: RIGHT!\r\n");
+                    LOG_DEBUG("          Ges: RIGHT!\r\n");
 #if(COMB_GES==1)
                     Ges_Comb(GES_LEVEL2_RIGHT);
 #endif
@@ -2259,13 +2736,9 @@ void App_Task(void)
         //一次数组填充完毕
         if (res==1)
         {
-//#if (LOG_ENABLE)
-            LOG_DEBUG("                                       Ges_Calib sample[%d]\r\n",gs.sample_size);
-//#endif
             if (gs.hold_flag && 
                 (gs.frame_start_tick>gs.last_ges_time+GES_TREND_CLEARUP_MIN))
             {
-                LOG_DEBUG(">>>>>>>>>>>>>>>>>init_counter>>>>>>>>>>>>>>\r\n");
                 gs.last_ges = GES_NULL;
                 init_counter();
             }
@@ -2290,9 +2763,16 @@ void App_Task(void)
         return;
 
     res=Ges_DynamicAnalysis();
-    if (res)//else return to 10 samples
+    if (res != GES_NULL)//else return to 10 samples
     {
         uint64_t tick=Systick_Get();
+
+        // keep 2000ms 
+        if(tick>comb_ges.start_adjust_ges_time+MULTIGES_DISTANCE_MIN)
+        {
+            LOG_DEBUG("start_adjust_ges_time lease %d ms, reset.\r\n",MULTIGES_DISTANCE_MIN);
+            adjust_type = ADJUST_INIT;
+        }
 
         //上次是HOLD手势,此次不是HOLD且不为空，避免误触发,但是hold之后，要允许leave和approach
         if ((gs.last_ges==GES_LEVEL2_HOLD)&&(res!=GES_LEVEL2_HOLD)&&
@@ -2361,55 +2841,85 @@ void App_Task(void)
                 gs.last_ges_time=tick;
                 if(!(gs.last_ges == GES_LEVEL2_HOLD && res == GES_LEVEL2_LEAVE))
                 {
-                    LOG_DEBUG("                                       tick time lease %d ms, and go on.\r\n",GES_DISTANCE_MIN);
-                //    return;
+                    LOG_DEBUG("tick time lease less than %d ms, and go on.\r\n",GES_DISTANCE_MIN);
+                    //return;
                 }
             #endif
         }
 
         if (res==GES_LEVEL2_UP)
         {
+            LOG_DEBUG("[UP] adjust:%d\r\n",adjust_type);
+#if(COMB_GES==0)
             HAL_GPIO_WritePin(LED_UP_GPIO_Port, LED_UP_Pin, GPIO_PIN_RESET);
             led_counter=LED_FLASH_DELAY;
-            LOG_DEBUG("                                       Ges: UP!\r\n");
+#else
+            Ges_Comb(GES_LEVEL2_UP);
+#endif
+
+            if(adjust_type == ADJUST_UP)
+            {
+                PLUS(brightness,STEP);
+                comb_ges.start_adjust_ges_time = tick;
+            }
             Ges_Log();
         }
         else if (res==GES_LEVEL2_DOWN)
         {
+            LOG_DEBUG("[DOWN] adjust:%d\r\n",adjust_type);
+#if(COMB_GES==0)
             HAL_GPIO_WritePin(LED_DOWN_GPIO_Port, LED_DOWN_Pin, GPIO_PIN_RESET);
             led_counter=LED_FLASH_DELAY;
-            LOG_DEBUG("                                       Ges: DOWN!\r\n");
+#else
+            Ges_Comb(GES_LEVEL2_DOWN);
+#endif
+
+            if(adjust_type == ADJUST_DOWN)
+            {
+                MINUS(brightness,STEP);
+                comb_ges.start_adjust_ges_time = tick;
+            }
             Ges_Log();
         }
         else if (res==GES_LEVEL2_LEFT)
         {
+            LOG_DEBUG("[LEFT] adjust:%d\r\n",adjust_type);
 #if(COMB_GES==0)
             HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
             led_counter=LED_FLASH_DELAY;
-#endif
-            LOG_DEBUG("                                       Ges: LEFT!\r\n");
-#if(COMB_GES==1)
+#else
             Ges_Comb(GES_LEVEL2_LEFT);
 #endif
+
+            if(adjust_type == ADJUST_DOWN)
+            {
+                MINUS(brightness,STEP);
+                comb_ges.start_adjust_ges_time = tick;
+            }
             Ges_Log();
         }
         else if (res==GES_LEVEL2_RIGHT)
         {
+            LOG_DEBUG("[RIGHT] adjust:%d\r\n",adjust_type);
 #if(COMB_GES==0)
             HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
             led_counter=LED_FLASH_DELAY;
-#endif
-            LOG_DEBUG("                                       Ges: RIGHT!\r\n");
-#if(COMB_GES==1)
+#else
             Ges_Comb(GES_LEVEL2_RIGHT);
 #endif
+
+            if(adjust_type == ADJUST_UP)
+            {
+                PLUS(brightness,STEP);
+                comb_ges.start_adjust_ges_time = tick;
+            }
             Ges_Log();
         }
 #if(HOLD_GES==1)
         else if (res==GES_LEVEL2_HOLD)
         {
-            LOG_DEBUG("                                       hold_flag:%d,hold_counter:%d,pwm:%d\r\n",
-                                                        gs.hold_flag,gs.hold_counter,brightness/10);
+            LOG_DEBUG("hold_flag:%d,hold_counter:%d,pwm:%d\r\n",
+                 gs.hold_flag,gs.hold_counter,brightness/10);
             gs.hold_counter++;
             if (gs.hold_counter==SAMPLE_HOLD_COUNT)
             {
@@ -2423,7 +2933,7 @@ void App_Task(void)
                     HAL_GPIO_WritePin(LED_DOWN_GPIO_Port, LED_DOWN_Pin, GPIO_PIN_RESET);
                     led_counter=LED_HOLD_FLASH_DELAY;
                     //Ges_Hold_Height_Judge();
-                    LOG_DEBUG("                                       Ges: HOLD!\r\n");
+                    LOG_DEBUG("[HOLD]\r\n");
                     Ges_Log();
                     //gs.hold_flag = 1;
                     gs.new_hold_AorL_size = GES_SAMPLE_RAW_ARRAY_NUM_S;
@@ -2458,7 +2968,7 @@ void App_Task(void)
             }
         }
 #endif
-/*
+        /*
         else if (res==GES_LEVEL2_DCLK)
         {
             HAL_GPIO_WritePin(LED_DCLK_GPIO_Port, LED_DCLK_Pin, GPIO_PIN_RESET);
@@ -2466,29 +2976,7 @@ void App_Task(void)
             LOG_DEBUG("                         Ges: DCLK!\r\n");
             Ges_Log();
         }
-
-        else if (res==GES_LEVEL2_APPROACH)
-        {
-            //if(gs.approach_counter)
-            {
-                LOG_DEBUG("                         Ges: APPROACH!\r\n");
-                HAL_GPIO_WritePin(LED_UP_GPIO_Port, LED_UP_Pin, GPIO_PIN_RESET);
-                led_counter=50;
-                Ges_Log();
-            }
-            gs.approach_counter++;
-            gs.leave_counter = 0;
-        }
-        else if (res==GES_LEVEL2_LEAVE)
-        {
-            LOG_DEBUG("                         Ges: LEAVE!\r\n");
-            HAL_GPIO_WritePin(LED_DOWN_GPIO_Port, LED_DOWN_Pin, GPIO_PIN_RESET);
-            led_counter=50;
-            Ges_Log();
-            gs.leave_counter++;
-            gs.approach_counter=0;
-        }
-*/
+        */
         /*
         //准备接受下一手势动作
         if (gs.sample_size==GES_SAMPLE_ARRAY_NUM_L)
@@ -2520,7 +3008,7 @@ void App_Task(void)
         }
     }
 #if (LOG_ENABLE)
-    LOG_DEBUG("\r\n\n");
+    LOG_DEBUG("\r\n");
 #endif
     //}
 }

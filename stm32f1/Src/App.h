@@ -15,11 +15,12 @@
 #define SAMPLE_HOLD_LIST_NUM        10              //hold数组的最大元素个数
 //#define SAMPLE_HOLD_START
 
-#define GES_CHN_NUM                 2               //手势采样的通道数，3
 #define GES_CHN_UP                  2               //上通道
 #define GES_CHN_DOWN_LEFT           1               //下左通道
 #define GES_CHN_DOWN_RIGHT          0               //下右通道
 #define GES_CHN_INVALID             0xFF            //无效通道
+
+#define GES_CHN_isochronal          0xF            //两信道相位处于相同时刻
 
 #define GES_SAMPLE_AVE_NUM          1               //用以平均的数据大小：1
 #define GES_SAMPLE_ARRAY_NUM_S      8               //手势采样的短数组大小：8
@@ -62,6 +63,26 @@
 #define CALIB_OBO                   0
 #define SECTION_NUM                 3
 
+#define STEP                        100
+#define MINUS(a,b)                  (a = ((a-b<STEP)?0:a-b))
+#define PLUS(a,b)                   (a = ((a+b>1000)?1000:a+b))
+
+typedef enum
+{
+    ADJUST_INIT = 0,
+    ADJUST_UP,
+    ADJUST_DOWN
+}ADJUST_E;
+
+typedef enum
+{
+    DETECT_PEAK = 0,
+    DETECT_FALL,
+    DETECT_RISE,
+
+    DETECT_MAX,
+}DETECT_E;
+
 typedef struct
 {
     uint16_t rise_index;            //上升沿坐标索引，刚大于触发上限的点
@@ -74,7 +95,7 @@ typedef struct
 
 typedef struct
 {
-    uint8_t ges;                            //手势类型
+    uint8_t ges;                    //手势类型
     uint64_t add_time;              //加入时间
 }ges_struct;
 
@@ -134,6 +155,7 @@ typedef struct
     uint8_t ges[3];
     uint8_t gesid;
     uint64_t start_ges_time;
+    uint64_t start_adjust_ges_time;
 
     //uint64_t last_ges_time;
 }gs_comb_struct;
@@ -159,5 +181,6 @@ void Ges_Log(void);
 void App_Task(void);
 void Systick_Inc(void);
 uint64_t Systick_Get(void);
+uint8_t Ges_Wave_Lead_3chn(DETECT_E detectType,uint8_t chn1,uint8_t chn2);
 
 #endif  //__APP_H

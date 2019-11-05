@@ -41,18 +41,13 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define SENSOR3             1
+#define SENSOR3             0
 
 #define LED_DCLK_Pin        GPIO_PIN_4
 #define LED_DCLK_GPIO_Port  GPIOA
 #define LED_HOLD_Pin        GPIO_PIN_5
 #define LED_HOLD_GPIO_Port  GPIOA
-/*
-#define SW1_Pin GPIO_PIN_6
-#define SW1_GPIO_Port GPIOA
-#define SW2_Pin GPIO_PIN_7
-#define SW2_GPIO_Port GPIOA
-*/
+
 #if(SENSOR3==1)
 #define LED_LEFT_Pin        GPIO_PIN_0
 #define LED_LEFT_GPIO_Port  GPIOB
@@ -96,11 +91,19 @@
 #define DEBUG_ENABLE        1                   //debug输出开启
 #define SYS_FREQUENCY       32000000            //32MHz主频
 #define LOG_ENABLE          1                   //使能输出记录
+#define SERSOR_LOG_ENABLE   1                   //使能输出记录
 
 #define HWI2C               0
 #define HOLD_GES            1
 #define COMB_GES            1
 
+#if 0
+#define CHN3_GES            0
+#define GES_CHN_NUM         2               //手势采样的通道数，2
+#else
+#define CHN3_GES            1
+#define GES_CHN_NUM         3               //手势采样的通道数，3
+#endif
 
 #if DEBUG_ENABLE
 #define LOG_DEBUG(format, args...)    do { \
