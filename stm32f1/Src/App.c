@@ -129,13 +129,15 @@ void LED_Tick_Check(void)
 uint8_t Ges_Start_Detect(uint16_t *ps)
 {
     if((ps[0]>gs.sample_base_last[0] && (ps[0]-gs.sample_base_last[0]>SAMPLE_DOWN_LIMIT_DEF)) || 
-        (ps[1]>gs.sample_base_last[1] && (ps[1]-gs.sample_base_last[1]>SAMPLE_DOWN_LIMIT_DEF)))
+        (ps[1]>gs.sample_base_last[1] && (ps[1]-gs.sample_base_last[1]>SAMPLE_DOWN_LIMIT_DEF)) || 
+        (ps[2]>gs.sample_base_last[2] && (ps[2]-gs.sample_base_last[2]>SAMPLE_DOWN_LIMIT_DEF)))
     {
         gs.sample_mode = POSITIVE;
         return true;
     }
     else if((ps[0]<gs.sample_base_last[0] && (gs.sample_base_last[0]-ps[0]>SAMPLE_DOWN_LIMIT_DEF)) || 
-        (ps[1]<gs.sample_base_last[1] && (gs.sample_base_last[1]-ps[1]>SAMPLE_DOWN_LIMIT_DEF)))
+        (ps[1]<gs.sample_base_last[1] && (gs.sample_base_last[1]-ps[1]>SAMPLE_DOWN_LIMIT_DEF)) || 
+        (ps[2]<gs.sample_base_last[2] && (gs.sample_base_last[2]-ps[2]>SAMPLE_DOWN_LIMIT_DEF)))
     {
         gs.sample_mode = NEGATIVE;
         return true;
@@ -147,12 +149,14 @@ uint8_t Ges_Start_Detect(uint16_t *ps)
 uint8_t Ges_Stop_Detect(uint16_t *ps)
 {
     if((ps[0]>gs.sample_base_last[0] && (ps[0]-gs.sample_base_last[0]<SAMPLE_DOWN_LIMIT_DEF)) && 
-        (ps[1]>gs.sample_base_last[1] && (ps[1]-gs.sample_base_last[1]<SAMPLE_DOWN_LIMIT_DEF)))
+        (ps[1]>gs.sample_base_last[1] && (ps[1]-gs.sample_base_last[1]<SAMPLE_DOWN_LIMIT_DEF)) && 
+        (ps[2]>gs.sample_base_last[2] && (ps[2]-gs.sample_base_last[2]<SAMPLE_DOWN_LIMIT_DEF)))
     {
         return true;
     }
     else if((ps[0]<gs.sample_base_last[0] && (gs.sample_base_last[0]-ps[0]<SAMPLE_DOWN_LIMIT_DEF)) && 
-        (ps[1]<gs.sample_base_last[1] && (gs.sample_base_last[1]-ps[1]<SAMPLE_DOWN_LIMIT_DEF)))
+        (ps[1]<gs.sample_base_last[1] && (gs.sample_base_last[1]-ps[1]<SAMPLE_DOWN_LIMIT_DEF)) && 
+        (ps[2]<gs.sample_base_last[2] && (gs.sample_base_last[2]-ps[2]<SAMPLE_DOWN_LIMIT_DEF)))
     {
         return true;
     }
@@ -1328,7 +1332,7 @@ uint8_t Ges_Wave_DynamicSearch(uint8_t chn,uint16_t *pindex)
     }
 
 #if (LOG_ENABLE)
-    LOG_DEBUG("ch%d limit:%d P:%5d %5d, F:%5d %5d, R:%5d %5d.\r\n",chn,gs.sample_down_limit[chn],
+    LOG_DEBUG("ch%d limit:%5d  P[%5d %5d]  F[%5d %5d]  R[%5d %5d]\r\n",chn,gs.sample_down_limit[chn],
                 gs.wave[chn].peak_index,gs.wave[chn].peak_value,
                 gs.wave[chn].fall_index,gs.wave[chn].fall_value,
                 gs.wave[chn].rise_index,gs.wave[chn].rise_value);

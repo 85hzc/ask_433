@@ -7,7 +7,7 @@
 #define LED_HOLD_FLASH_DELAY        100             //LED指示的点亮状态延续时间，100ms
 
 #define SAMPLE_FREQUENCY_DEF        10              //手势采样频率，10ms
-#define SAMPLE_DOWN_LIMIT_DEF       0x000A          //采样阈值下限
+#define SAMPLE_DOWN_LIMIT_DEF       0x0010          //采样阈值下限
 #define SAMPLE_UP_LIMIT_DEF         0x0020          //采样触发阈值
 #define SAMPLE_HOLD_LIMIT_DEF       0x0020//0x0040  //hold的触发阈值
 #define SAMPLE_HOLD_END_SHIFT       GES_SAMPLE_ARRAY_NUM_S  //从采样数组末尾起10个作为检测基准
