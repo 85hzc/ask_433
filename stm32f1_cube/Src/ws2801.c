@@ -454,7 +454,7 @@ void ScenceLayering()
     static uint32_t GRB=0x32FA32;
     static RGB_Switch_E rgbsw = RGB_G_plus;
 
-    printf("RGB:%x %x %x\r\n",(GRB>>8)&0xff,(GRB>>16)&0xff,(GRB)&0xff);
+    //LOG_DEBUG("RGB:%x %x %x\r\n",(GRB>>8)&0xff,(GRB>>16)&0xff,(GRB)&0xff);
 
     gcolor = (GRB>>16)&0xff;
     rcolor = (GRB>>8)&0xff;
@@ -593,7 +593,7 @@ void ScenceWaving()
     static uint32_t GRB=0xFFFFFF;
     static RGB_Switch_E rgbsw = RGB_B_minus;
 
-    LOG_DEBUG("RGB:%x %x %x\r\n",(GRB>>8)&0xff,(GRB>>16)&0xff,(GRB)&0xff);
+    //LOG_DEBUG("RGB:%x %x %x\r\n",(GRB>>8)&0xff,(GRB>>16)&0xff,(GRB)&0xff);
 
     gcolor = (GRB>>16)&0xff;
     rcolor = (GRB>>8)&0xff;

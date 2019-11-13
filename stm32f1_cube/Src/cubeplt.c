@@ -737,7 +737,7 @@ void ColorSchedule()
     static uint32_t GRB=0xFFFFFF;
     static RGB_Switch_E rgbsw = RGB_B_minus;
 
-    printf("RGB:%x %x %x\r\n",(GRB>>8)&0xff,(GRB>>16)&0xff,(GRB)&0xff);
+    //printf("RGB:%x %x %x\r\n",(GRB>>8)&0xff,(GRB>>16)&0xff,(GRB)&0xff);
 
     gcolor = (GRB>>16)&0xff;
     rcolor = (GRB>>8)&0xff;

@@ -30,6 +30,7 @@ extern uint8_t           eplosSLPxen;
 extern uint8_t           currentAdjustment;
 #endif
 extern PROGRAMS_TYPE_E   programsType;
+extern uint8_t           powerFlag;
 
 #if(PROJECTOR_CUBE)
 extern uint8_t           cubeProgramsType;
@@ -38,14 +39,12 @@ extern uint8_t           cubeProgramsType;
 static int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key);
 static int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param);
 
-
 static cmd_table_t cmd_tbl[] = {
-  {CMD_CODE_MASK_IR,    Drv_IR_CMD_Handler},
-  //{CMD_CODE_MASK_HDMI,  Drv_HDMI_RCVR_CMD_Handler},
-  //{CMD_CODE_MASK_MOTOR, Drv_MOTOR_CMD_Handler},
-  //{CMD_CODE_MASK_FAN,   Drv_FAN_CMD_Handler},
+    {CMD_CODE_MASK_IR,    Drv_IR_CMD_Handler},
+    //{CMD_CODE_MASK_HDMI,  Drv_HDMI_RCVR_CMD_Handler},
+    //{CMD_CODE_MASK_MOTOR, Drv_MOTOR_CMD_Handler},
+    //{CMD_CODE_MASK_FAN,   Drv_FAN_CMD_Handler},
 };
-
 
 void Drv_SERIAL_Init(void)
 {
@@ -100,12 +99,12 @@ uint8_t Drv_SERIAL_Read_Act(uint8_t * pData)
 
 uint8_t Drv_SERIAL_Act(uint8_t code, uint16_t param)
 {
-  uint8_t cmd[CMD_LEN_MAX];
-  cmd[0] = CMD_HEADER_REQ;
-  cmd[1] = code;
-  cmd[2] = ((uint8_t*)&param)[0];
-  cmd[3] = ((uint8_t*)&param)[1];
-  return Drv_SERIAL_Write_Act(cmd);
+    uint8_t cmd[CMD_LEN_MAX];
+    cmd[0] = CMD_HEADER_REQ;
+    cmd[1] = code;
+    cmd[2] = ((uint8_t*)&param)[0];
+    cmd[3] = ((uint8_t*)&param)[1];
+    return Drv_SERIAL_Write_Act(cmd);
 }
 
 static void handle_func_MIkeys(uint16_t key)
@@ -120,7 +119,8 @@ static void handle_func_MIkeys(uint16_t key)
             
         case REMOTE_MI_POWER:
 #if(PROJECTOR_OSRAM)
-            eplosSLPxen = !eplosSLPxen;
+            //eplosSLPxen = !eplosSLPxen; //one power key
+            eplosSLPxen = !powerFlag;
             eplosCfgFlag = 1;
 #endif
             runFlag = 1;
@@ -184,11 +184,15 @@ static void handle_func_MIkeys(uint16_t key)
             break;
         
         case REMOTE_MI_LEFT:
+#if(PROJECTOR_OSRAM)
             Drv_MOTOR_CMD_Handler(CMD_OP_MOTOR_SET_FORWARD, 4);
+#endif
             break;
         
         case REMOTE_MI_RIGHT:
+#if(PROJECTOR_OSRAM)
             Drv_MOTOR_CMD_Handler(CMD_OP_MOTOR_SET_BACKWARD, 4);
+#endif
             break;
 
         case REMOTE_MI_OK:
@@ -199,6 +203,7 @@ static void handle_func_MIkeys(uint16_t key)
             break;
 
         case REMOTE_MI_BACK:
+            break;
         case REMOTE_MI_PLUS:
 #if(PROJECTOR_OSRAM)
             if(currentAdjustment<0x1f)
@@ -243,34 +248,38 @@ static int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param)
 
 static int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key)
 {
-    //printf("Drv_IR_CMD_Handler 0x%x\r\n",key);
-    static uint8_t  flag = 0;
-    static uint16_t lastKey = 0;
+    //static uint8_t  repeatflag = 0;
+    //static uint16_t lastKey = 0;
 
     if (code == CMD_OP_IR_CODE)
     {
-
-        if(key>>8 == 0xff) {// MI controler
-
-            if(lastKey != key) {
-
+        // MI controler
+        if(key>>8 == 0xff) 
+        {
+            /*
+            if(lastKey != key) 
+            {
                 lastKey = key;
-                flag = 1;
+                repeatflag = 1;
                 tickstart = HAL_GetTick();
-            } else {
+            }
+            else 
+            {
 
                 if((HAL_GetTick() - tickstart) > ((REMOTE_MI_POWER == key) ? 1000000 : 150000)) //repeat press
                 {
                     tickstart = HAL_GetTick();
-                    flag = 1;
-                } else {
+                    repeatflag = 1;
+                }
+                else 
+                {
                     //printf("repeat escap\r\n");
                 }
             }
 
-            if(flag) {
-                //printf("IR key:%x\r\n",key);
-                flag = 0;
+            if(repeatflag) */
+            {
+                //repeatflag = 0;
                 handle_func_MIkeys(key);
             }
         }
@@ -282,6 +291,7 @@ static int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key)
                 case REMOTE_NEC_POWER:
                     //handle_power_key();
                     break;
+
                 default:
                     //handle_func_keys(key);
             }

@@ -634,9 +634,19 @@ void OSRAM_play(void)
             res = SD_ReadFilmData();
             filmFrameIdx++;
         }
-        else
+        else if(programsType==PHOTO)
         {
             res = SD_ReadPhotoData();
+        }
+        else
+        {
+            for( i=0; i<MATRIX_SIZE; i++ )
+            {
+                for( j=0; j<MATRIX_SIZE; j++ )
+                {
+                    osram_buff[i][j] = fileBuffer[i*(64+2)+j*2]-'0';
+                }
+            }
         }
         if(res != FR_OK)
         {

@@ -46,10 +46,10 @@
 #define MAX_FILE_SIZE       (IO_SIZE*16*CHIP_SIZE*3)       //256 must be % comfort
 #endif
 
-#define MAX_FILM_FRAME      64
+#define MAX_FILM_FRAME      1024
 #define MAX_FILM_FOLDER     8
 
-#define FILE_NAME_LEN       16
+#define FILE_NAME_LEN       8
 #define FILE_PATH_LEN       64
 
 #define SW_period_2ms                               1
