@@ -97,7 +97,7 @@
 #define HOLD_GES            1
 #define COMB_GES            1
 
-#if 0
+#if 1
 #define CHN3_GES            0
 #define GES_CHN_NUM         2               //手势采样的通道数，2
 #else

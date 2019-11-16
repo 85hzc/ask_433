@@ -21,8 +21,8 @@ extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
 
 extern TIM_HandleTypeDef htim3;
-uint8_t                  lighting_switch,lighting_switch_now;
-int16_t                  brightness, brightness_old = 0;
+uint8_t                  lighting_switch,lighting_status_now;
+int16_t                  brightness, brightness_original = 0;
 static uint32_t          tickstart;
 uint64_t                 sys_tick=0;          //系统tick计数
 gs_struct                gs={0};
@@ -73,8 +73,9 @@ void App_Init(void)
     //ON lighting
     adjust_type = ADJUST_INIT;
     lighting_switch = 1;
-    lighting_switch_now = 0;
-    brightness = 400;
+    lighting_status_now = 0;
+    brightness = 250+STEP;
+    brightness_original = 0;
 
     App_Var_Init();
 
@@ -128,20 +129,47 @@ void LED_Tick_Check(void)
 //检测start开始标志
 uint8_t Ges_Start_Detect(uint16_t *ps)
 {
-    if((ps[0]>gs.sample_base_last[0] && (ps[0]-gs.sample_base_last[0]>SAMPLE_DOWN_LIMIT_DEF)) || 
-        (ps[1]>gs.sample_base_last[1] && (ps[1]-gs.sample_base_last[1]>SAMPLE_DOWN_LIMIT_DEF)) || 
-        (ps[2]>gs.sample_base_last[2] && (ps[2]-gs.sample_base_last[2]>SAMPLE_DOWN_LIMIT_DEF)))
+    if(ps[GES_CHN_DOWN_RIGHT]>gs.sample_base_last[GES_CHN_DOWN_RIGHT] && (ps[GES_CHN_DOWN_RIGHT]-gs.sample_base_last[GES_CHN_DOWN_RIGHT]>SAMPLE_DOWN_LIMIT_DEF))
     {
+        gs.ges_dynamic_start_chn = GES_CHN_DOWN_RIGHT;
         gs.sample_mode = POSITIVE;
         return true;
     }
-    else if((ps[0]<gs.sample_base_last[0] && (gs.sample_base_last[0]-ps[0]>SAMPLE_DOWN_LIMIT_DEF)) || 
-        (ps[1]<gs.sample_base_last[1] && (gs.sample_base_last[1]-ps[1]>SAMPLE_DOWN_LIMIT_DEF)) || 
-        (ps[2]<gs.sample_base_last[2] && (gs.sample_base_last[2]-ps[2]>SAMPLE_DOWN_LIMIT_DEF)))
+#if CHN3_GES
+    else if(ps[GES_CHN_UP]>gs.sample_base_last[GES_CHN_UP] && (ps[GES_CHN_UP]-gs.sample_base_last[GES_CHN_UP]>SAMPLE_DOWN_LIMIT_DEF))
     {
+        gs.ges_dynamic_start_chn = GES_CHN_UP;
+        gs.sample_mode = POSITIVE;
+        return true;
+    }
+#endif
+    else if(ps[GES_CHN_DOWN_LEFT]>gs.sample_base_last[GES_CHN_DOWN_LEFT] && (ps[GES_CHN_DOWN_LEFT]-gs.sample_base_last[GES_CHN_DOWN_LEFT]>SAMPLE_DOWN_LIMIT_DEF))
+    {
+        gs.ges_dynamic_start_chn = GES_CHN_DOWN_LEFT;
+        gs.sample_mode = POSITIVE;
+        return true;
+    }
+    else if(ps[GES_CHN_DOWN_RIGHT]<gs.sample_base_last[GES_CHN_DOWN_RIGHT] && (gs.sample_base_last[GES_CHN_DOWN_RIGHT]-ps[GES_CHN_DOWN_RIGHT]>SAMPLE_DOWN_LIMIT_DEF))
+    {
+        gs.ges_dynamic_start_chn = GES_CHN_DOWN_RIGHT;
         gs.sample_mode = NEGATIVE;
         return true;
     }
+#if CHN3_GES
+    else if(ps[GES_CHN_UP]<gs.sample_base_last[GES_CHN_UP] && (gs.sample_base_last[GES_CHN_UP]-ps[GES_CHN_UP]>SAMPLE_DOWN_LIMIT_DEF))
+    {
+        gs.ges_dynamic_start_chn = GES_CHN_UP;
+        gs.sample_mode = NEGATIVE;
+        return true;
+    }
+#endif
+    else if(ps[GES_CHN_DOWN_LEFT]<gs.sample_base_last[GES_CHN_DOWN_LEFT] && (gs.sample_base_last[GES_CHN_DOWN_LEFT]-ps[GES_CHN_DOWN_LEFT]>SAMPLE_DOWN_LIMIT_DEF))
+    {
+        gs.ges_dynamic_start_chn = GES_CHN_DOWN_LEFT;
+        gs.sample_mode = NEGATIVE;
+        return true;
+    }
+    gs.ges_dynamic_start_chn = GES_CHN_INVALID;
     return false;
 }
 
@@ -149,14 +177,18 @@ uint8_t Ges_Start_Detect(uint16_t *ps)
 uint8_t Ges_Stop_Detect(uint16_t *ps)
 {
     if((ps[0]>gs.sample_base_last[0] && (ps[0]-gs.sample_base_last[0]<SAMPLE_DOWN_LIMIT_DEF)) && 
-        (ps[1]>gs.sample_base_last[1] && (ps[1]-gs.sample_base_last[1]<SAMPLE_DOWN_LIMIT_DEF)) && 
-        (ps[2]>gs.sample_base_last[2] && (ps[2]-gs.sample_base_last[2]<SAMPLE_DOWN_LIMIT_DEF)))
+#if CHN3_GES
+        (ps[2]>gs.sample_base_last[2] && (ps[2]-gs.sample_base_last[2]<SAMPLE_DOWN_LIMIT_DEF)) && 
+#endif
+        (ps[1]>gs.sample_base_last[1] && (ps[1]-gs.sample_base_last[1]<SAMPLE_DOWN_LIMIT_DEF)))
     {
         return true;
     }
     else if((ps[0]<gs.sample_base_last[0] && (gs.sample_base_last[0]-ps[0]<SAMPLE_DOWN_LIMIT_DEF)) && 
-        (ps[1]<gs.sample_base_last[1] && (gs.sample_base_last[1]-ps[1]<SAMPLE_DOWN_LIMIT_DEF)) && 
-        (ps[2]<gs.sample_base_last[2] && (gs.sample_base_last[2]-ps[2]<SAMPLE_DOWN_LIMIT_DEF)))
+#if CHN3_GES
+        (ps[2]<gs.sample_base_last[2] && (gs.sample_base_last[2]-ps[2]<SAMPLE_DOWN_LIMIT_DEF)) && 
+#endif
+        (ps[1]<gs.sample_base_last[1] && (gs.sample_base_last[1]-ps[1]<SAMPLE_DOWN_LIMIT_DEF)))
     {
         return true;
     }
@@ -194,7 +226,7 @@ uint8_t Ges_Add_Sample(uint16_t *ps)
     }
     //在每一帧的开始记录时间
     if (gs.ges_sample_raw_cur==0)
-        gs.frame_start_tick=Systick_Get();
+        gs.frame_start_tick=HAL_GetTick();//Systick_Get();
 
     gs.ges_sample_raw_cur++;
     if (gs.ges_sample_raw_cur>=gs.sample_size_raw)
@@ -1233,14 +1265,17 @@ uint8_t Ges_Wave_Lead(uint8_t chn1,uint8_t chn2)
     }
 
     if ((gs.wave[chn1].rise_index!=GES_INVALID_INDEX)&&
-        ((gs.wave[chn2].fall_index!=GES_INVALID_INDEX)||
-        (gs.wave[chn2].peak_index!=GES_INVALID_INDEX)))
-        return chn2;
-
-    if ((gs.wave[chn2].rise_index!=GES_INVALID_INDEX)&&
-        ((gs.wave[chn1].fall_index!=GES_INVALID_INDEX)||
-        (gs.wave[chn1].peak_index!=GES_INVALID_INDEX)))
-        return chn1;
+        (gs.wave[chn2].rise_index!=GES_INVALID_INDEX)&&
+        (gs.wave[chn1].fall_index!=GES_INVALID_INDEX)&&
+        (gs.wave[chn1].fall_index!=GES_INVALID_INDEX))
+    {
+        if(gs.ges_dynamic_start_chn != GES_CHN_INVALID && 
+            gs.ges_dynamic_start_chn==chn1)
+            return chn1;
+        else if(gs.ges_dynamic_start_chn != GES_CHN_INVALID && 
+            gs.ges_dynamic_start_chn==chn2)
+            return chn2;
+    }
 
     return GES_CHN_INVALID;
 }
@@ -1332,7 +1367,7 @@ uint8_t Ges_Wave_DynamicSearch(uint8_t chn,uint16_t *pindex)
     }
 
 #if (LOG_ENABLE)
-    LOG_DEBUG("ch%d limit:%5d  P[%5d %5d]  F[%5d %5d]  R[%5d %5d]\r\n",chn,gs.sample_down_limit[chn],
+    LOG_DEBUG("ch%d limit:%5d  P[%2d %5d]  F[%2d %5d]  R[%2d %5d]\r\n",chn,gs.sample_down_limit[chn],
                 gs.wave[chn].peak_index,gs.wave[chn].peak_value,
                 gs.wave[chn].fall_index,gs.wave[chn].fall_value,
                 gs.wave[chn].rise_index,gs.wave[chn].rise_value);
@@ -1861,9 +1896,9 @@ uint8_t Ges_DynamicAnalysis(void)
 
 #if(COMB_GES==1)
 #if(CHN3_GES)
-void Ges_Comb(uint8_t ges)
+void Ges_Comb(uint8_t ges) //3 chn
 {
-    uint64_t tick=Systick_Get();
+    uint64_t tick=HAL_GetTick();//Systick_Get();
 
     if(tick>comb_ges.start_ges_time+MULTIGES_DISTANCE_MIN)
     {
@@ -1879,7 +1914,7 @@ void Ges_Comb(uint8_t ges)
         comb_ges.ges[comb_ges.gesid] = ges;
     }
 
-    LOG_DEBUG("----gesid=%d[0x%x 0x%x] ----\r\n",comb_ges.gesid,comb_ges.ges[0],comb_ges.ges[1]);
+    LOG_DEBUG("----gesid=[0x%x 0x%x] ----\r\n",comb_ges.ges[0],comb_ges.ges[1]);
 
     comb_ges.gesid++;
 
@@ -1993,11 +2028,23 @@ void Ges_Comb(uint8_t ges)
         else
             lighting_switch = !lighting_switch;
     }
+    else if(comb_ges.ges[0]!=comb_ges.ges[1] &&
+            comb_ges.ges[0]!=GES_NULL && 
+            comb_ges.ges[1]!=GES_NULL)
+    {
+        LOG_DEBUG("------------------any case----------------\r\n");
+        memset(&comb_ges, 0, sizeof(gs_comb_struct));
+        overflow_time = 0;
+        if(adjust_type == ADJUST_INIT)
+        {
+            lighting_switch = !lighting_switch;
+        }
+    }
 }
 #else
 void Ges_Comb(uint8_t ges)
 {
-    uint64_t tick=Systick_Get();
+    uint64_t tick=HAL_GetTick();//Systick_Get();
 
     if(tick>comb_ges.start_ges_time+MULTIGES_DISTANCE_MIN)
     {
@@ -2040,9 +2087,8 @@ void Ges_Comb(uint8_t ges)
     {
         comb_ges.ges[comb_ges.gesid] = ges;
     }
-    
-    LOG_DEBUG("----gesid=%x %x ----\r\n",comb_ges.ges[0],comb_ges.ges[1]);
 
+    LOG_DEBUG("----gesid=[0x%x 0x%x] ----\r\n",comb_ges.ges[0],comb_ges.ges[1]);
     comb_ges.gesid++;
 
     if(comb_ges.ges[0]==GES_LEVEL2_LEFT&&
@@ -2050,8 +2096,6 @@ void Ges_Comb(uint8_t ges)
     {
         LOG_DEBUG("----left right----\r\n");
         memset(&comb_ges, 0, sizeof(gs_comb_struct));
-        //HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
-        //led_counter=LED_FLASH_DELAY;
         overflow_time = 0;
         if(adjust_type == ADJUST_DOWN)
         {
@@ -2066,8 +2110,6 @@ void Ges_Comb(uint8_t ges)
     {
         LOG_DEBUG("----right left----\r\n");
         memset(&comb_ges, 0, sizeof(gs_comb_struct));
-        //HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
-        //led_counter=LED_FLASH_DELAY;
         overflow_time = 0;
         if(adjust_type == ADJUST_UP)
         {
@@ -2083,8 +2125,6 @@ void Ges_Comb(uint8_t ges)
     {
         LOG_DEBUG("----left left----\r\n");
         memset(&comb_ges, 0, sizeof(gs_comb_struct));
-        //HAL_GPIO_WritePin(LED_LEFT_GPIO_Port, LED_LEFT_Pin, GPIO_PIN_RESET);
-        //led_counter=LED_FLASH_DELAY*5;
         overflow_time = 0;
         adjust_type = ADJUST_DOWN;
         comb_ges.start_adjust_ges_time = tick;
@@ -2094,8 +2134,6 @@ void Ges_Comb(uint8_t ges)
     {
         LOG_DEBUG("----right right----\r\n");
         memset(&comb_ges, 0, sizeof(gs_comb_struct));
-        //HAL_GPIO_WritePin(LED_RIGHT_GPIO_Port, LED_RIGHT_Pin, GPIO_PIN_RESET);
-        //led_counter=LED_FLASH_DELAY*5;
         overflow_time = 0;
         adjust_type = ADJUST_UP;
         comb_ges.start_adjust_ges_time = tick;
@@ -2142,7 +2180,11 @@ void Ges_Calib(uint8_t firstboot)
 #if (LOG_ENABLE)
         //LOG_DEBUG("CHN %d-> base: %d,down_limit: %d,up limit: %d\r\n",i,gs.sample_base[i],gs.sample_down_limit[i],gs.sample_up_limit[i]);
         //LOG_DEBUG("CHN%d: cur[%d] new[%d]\r\n",i,gs.sample_base_last[i],gs.sample_base[i]);
+#if CHN3_GES
         LOG_DEBUG("[%d %d %d]",gs.sample_base_last[1],gs.sample_base_last[2],gs.sample_base_last[0]);
+#else
+        LOG_DEBUG("[%d %d]",gs.sample_base_last[1],gs.sample_base_last[0]);
+#endif
 #endif
     }
 
@@ -2273,10 +2315,10 @@ void Ges_DynamicNormalize(void)
     }
 */
 #if(CHN3_GES)
-    LOG_DEBUG("base[%5d %5d %5d]\r\n",
+    LOG_DEBUG("Normalize[%5d %5d %5d]\r\n",
         gs.sample_base_last[1],gs.sample_base_last[2],gs.sample_base_last[0]);
 #else
-    LOG_DEBUG("base[%5d %5d]\r\n",
+    LOG_DEBUG("Normalize[%5d %5d]\r\n",
         gs.sample_base_last[1],gs.sample_base_last[0]);
 #endif
 #endif
@@ -2769,12 +2811,12 @@ void App_Task(void)
     res=Ges_DynamicAnalysis();
     if (res != GES_NULL)//else return to 10 samples
     {
-        uint64_t tick=Systick_Get();
+        uint64_t tick=HAL_GetTick();//Systick_Get();
 
         // keep 2000ms 
-        if(tick>comb_ges.start_adjust_ges_time+MULTIGES_DISTANCE_MIN)
+        if(tick>comb_ges.start_adjust_ges_time+ADJUSTIGES_DISTANCE_MIN)
         {
-            LOG_DEBUG("start_adjust_ges_time lease %d ms, reset.\r\n",MULTIGES_DISTANCE_MIN);
+            LOG_DEBUG("start_adjust_ges_time lease %d ms, reset.\r\n",ADJUSTIGES_DISTANCE_MIN);
             adjust_type = ADJUST_INIT;
         }
 
@@ -2861,11 +2903,19 @@ void App_Task(void)
             Ges_Comb(GES_LEVEL2_UP);
 #endif
 
-            if(adjust_type == ADJUST_UP)
+            if(adjust_type != ADJUST_INIT)
             {
-                PLUS(brightness,STEP);
+                if(lighting_status_now)
+                    PLUS(brightness,STEP);
                 comb_ges.start_adjust_ges_time = tick;
+                comb_ges.gesid = 0;
             }
+            /*else if(adjust_type == ADJUST_DOWN)
+            {
+                if(lighting_status_now)
+                    MINUS(brightness,STEP);
+                comb_ges.start_adjust_ges_time = tick;
+            }*/
             Ges_Log();
         }
         else if (res==GES_LEVEL2_DOWN)
@@ -2878,11 +2928,19 @@ void App_Task(void)
             Ges_Comb(GES_LEVEL2_DOWN);
 #endif
 
-            if(adjust_type == ADJUST_DOWN)
+            if(adjust_type != ADJUST_INIT)
             {
-                MINUS(brightness,STEP);
+                if(lighting_status_now)
+                    MINUS(brightness,STEP);
                 comb_ges.start_adjust_ges_time = tick;
+                comb_ges.gesid = 0;
             }
+            /*else if(adjust_type == ADJUST_UP)
+            {
+                if(lighting_status_now)
+                    PLUS(brightness,STEP);
+                comb_ges.start_adjust_ges_time = tick;
+            }*/
             Ges_Log();
         }
         else if (res==GES_LEVEL2_LEFT)
@@ -2895,11 +2953,19 @@ void App_Task(void)
             Ges_Comb(GES_LEVEL2_LEFT);
 #endif
 
-            if(adjust_type == ADJUST_DOWN)
+            if(adjust_type != ADJUST_INIT)
             {
-                MINUS(brightness,STEP);
+                if(lighting_status_now)
+                    MINUS(brightness,STEP);
                 comb_ges.start_adjust_ges_time = tick;
+                comb_ges.gesid = 0;
             }
+            /*else if(adjust_type == ADJUST_UP)
+            {
+                if(lighting_status_now)
+                    PLUS(brightness,STEP);
+                comb_ges.start_adjust_ges_time = tick;
+            }*/
             Ges_Log();
         }
         else if (res==GES_LEVEL2_RIGHT)
@@ -2912,11 +2978,19 @@ void App_Task(void)
             Ges_Comb(GES_LEVEL2_RIGHT);
 #endif
 
-            if(adjust_type == ADJUST_UP)
+            if(adjust_type != ADJUST_INIT)
             {
-                PLUS(brightness,STEP);
+                if(lighting_status_now)
+                    PLUS(brightness,STEP);
                 comb_ges.start_adjust_ges_time = tick;
+                comb_ges.gesid = 0;
             }
+            /*else if(adjust_type == ADJUST_DOWN)
+            {
+                if(lighting_status_now)
+                    MINUS(brightness,STEP);
+                comb_ges.start_adjust_ges_time = tick;
+            }*/
             Ges_Log();
         }
 #if(HOLD_GES==1)
@@ -3005,9 +3079,9 @@ void App_Task(void)
         gs.last_ges = GES_NULL;
         init_counter();
         gs.analy_fail_counter++;
-        if(gs.analy_fail_counter>5)
+        if(gs.analy_fail_counter>=3)
         {
-            Ges_Calib(firstboot);
+            Ges_Calib(false);
             gs.analy_fail_counter = 0;
         }
     }
@@ -3017,7 +3091,7 @@ void App_Task(void)
     //}
 }
 #endif
-
+/*
 //系统时钟自加
 void Systick_Inc(void)
 {
@@ -3031,3 +3105,4 @@ uint64_t Systick_Get(void)
 {
     return sys_tick;
 }
+*/

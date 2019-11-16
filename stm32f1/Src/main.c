@@ -49,8 +49,8 @@ TIM_HandleTypeDef        htim3;
 extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
 
-extern int16_t          brightness,brightness_old;
-extern uint8_t           lighting_switch,lighting_switch_now;
+extern int16_t           brightness,brightness_original;
+extern uint8_t           lighting_switch,lighting_status_now;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 #define DEBUG_UART          huart1
@@ -359,7 +359,7 @@ static void MX_TIM3_Init(void)
   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
 
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 4-1;
+  htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -422,18 +422,41 @@ void Drv_PWM_Init(void)
 
 void Drv_PWM_Proc(void)
 {
-    if ((brightness!=brightness_old) && lighting_switch_now)
-    {
-        brightness_old = brightness;
-        LOG_DEBUG("                                       lighting pwm %d\r\n",brightness_old);
-        __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_3, (uint32_t)brightness_old);
-    }
+    int i;
 
-    if(lighting_switch!=lighting_switch_now)
+    //adjust lighting
+    if(((lighting_switch != lighting_status_now)||(brightness_original != brightness)) && lighting_switch == 1)
     {
-        lighting_switch_now = lighting_switch;
-        LOG_DEBUG("                                       lighting pwm %d\r\n",lighting_switch ? (uint32_t)brightness : 0);
-        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, lighting_switch ? (uint32_t)brightness : 0);
+        if(brightness_original>brightness)
+        {
+            for(i=1;i<=brightness_original-brightness;i++)
+            {
+                __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, brightness_original-i);
+                //HAL_Delay(1);
+            }
+        }
+        else if(brightness_original<brightness)
+        {
+            for(i=1;i<=brightness-brightness_original;i++)
+            {
+                __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, brightness_original+i);
+                //HAL_Delay(1);
+            }
+        }
+        lighting_status_now = 1;
+        brightness_original = brightness;
+        LOG_DEBUG("                                       lighting pwm %d\r\n",brightness_original);
+    }
+    else if(lighting_switch != lighting_status_now && lighting_switch == 0)
+    {
+        for(i=1;i<=brightness_original;i++)
+        {
+            __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, brightness_original-i);
+            //HAL_Delay(1);
+        }
+        brightness_original = 0;
+        lighting_status_now = 0;
+        LOG_DEBUG("                                       lighting off\r\n");
     }
 }
 /*

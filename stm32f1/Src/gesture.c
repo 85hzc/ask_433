@@ -200,10 +200,10 @@ int16_t Si115xInitLongRangeProx(  )
     retval += Si115xParamSet( SI115x_PARAM_LED3_A, 0x3f);
 #endif
 
-    retval += Si115xParamSet( SI115x_PARAM_ADCCONFIG0, 0x02);//0x62
+    retval += Si115xParamSet( SI115x_PARAM_ADCCONFIG0, 0x62);//0x02
     retval += Si115xParamSet( SI115x_PARAM_MEASCONFIG0, 0x01);
 
-    retval += Si115xParamSet( SI115x_PARAM_ADCCONFIG1, 0x02);//0x62
+    retval += Si115xParamSet( SI115x_PARAM_ADCCONFIG1, 0x62);//0x62
     retval += Si115xParamSet( SI115x_PARAM_MEASCONFIG1, 0x02);
 #if(CHN3_GES)
     retval += Si115xParamSet( SI115x_PARAM_ADCCONFIG2, 0x02);//0x62

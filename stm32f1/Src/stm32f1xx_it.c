@@ -170,9 +170,10 @@ void SysTick_Handler(void)
 
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
-  HAL_SYSTICK_IRQHandler();
+  //HAL_SYSTICK_IRQHandler();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-  Systick_Inc();
+  
+  //Systick_Inc();
   //Ges_Tick_Check();
   //LED_Tick_Check();
   /* USER CODE END SysTick_IRQn 1 */

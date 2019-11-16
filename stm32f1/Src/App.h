@@ -35,9 +35,9 @@
 #define GES_TIME_DIF_MIN            10              //手势时间差的最小值，10ms
 #define GES_TIME_DIF_MAX            1000            //手势时间差的最大值，1000ms
 #define GES_DISTANCE_MIN            700             //相邻手势的最小值，700ms
-#define MULTIGES_DISTANCE_MIN       2000            //组合相邻手势的最小值，2.5s
-
-#define GES_TREND_CLEARUP_MIN       300            //相邻手势的最小值，1000ms
+#define MULTIGES_DISTANCE_MIN       1500            //组合相邻手势的最小值，2.5s
+#define ADJUSTIGES_DISTANCE_MIN     1000            //连续调光手势超时时间，1.5s
+#define GES_TREND_CLEARUP_MIN       300             //接近手势初始化的最小值
 
 #define POSITIVE                    1               //手势数据监测值大于基准值
 #define NEGATIVE                    2               //手势数据监测值小于基准值
@@ -63,8 +63,8 @@
 #define CALIB_OBO                   0
 #define SECTION_NUM                 3
 
-#define STEP                        100
-#define MINUS(a,b)                  (a = ((a-b<STEP)?0:a-b))
+#define STEP                        375
+#define MINUS(a,b)                  (a = ((a-b<250)?250:a-b))
 #define PLUS(a,b)                   (a = ((a+b>1000)?1000:a+b))
 
 typedef enum
@@ -122,7 +122,8 @@ typedef struct
     uint16_t ges_dynamic_sample_raw_cur;                                            //手势raw数组当前元素
     uint8_t  ges_dynamic_sample_size;
     uint8_t  ges_dynamic_start;
-    
+    uint8_t  ges_dynamic_start_chn;                                                 //触发手势采样的通道号
+
     uint16_t ges_sample_Calib_array[GES_CHN_NUM][GES_SAMPLE_ARRAY_NUM_L];           //手势采样数组
     
     uint64_t frame_start_tick;                                              //当前帧采样的起始时间
@@ -179,8 +180,8 @@ void Ges_DynamicNormalize(void);
 void Ges_Log(void);
 //uint8_t Ges_SampleSize_Switch(void);
 void App_Task(void);
-void Systick_Inc(void);
-uint64_t Systick_Get(void);
+//void Systick_Inc(void);
+//uint64_t Systick_Get(void);
 uint8_t Ges_Wave_Lead_3chn(DETECT_E detectType,uint8_t chn1,uint8_t chn2);
 
 #endif  //__APP_H
