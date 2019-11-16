@@ -3,6 +3,8 @@
 
 #include <iostm8s103f3.h>
 
+#define         READ_REALTIME
+
 #define         SW_K1    PA_IDR_IDR1
 
 void Key_Init();

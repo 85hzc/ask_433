@@ -1,5 +1,10 @@
 #include "ALL_Includes.h"
 
+#ifdef THERMOELECTRIC_SENSOR
+uint8_t   sensor_status = 0;
+uint32_t  delay_off_times = 0;
+#endif
+
 void Key_Init()
 {
 #if 1
@@ -73,14 +78,41 @@ void Key_Init()
 
 unsigned char key_scan()
 {
-  unsigned char key_value=0x00;
+  unsigned char key_value=KEY_NULL;
 
+  #ifdef THERMOELECTRIC_SENSOR
+  if(SW_SENSOR==1 && !sensor_status)
+  {
+    delay_off_times = 0;
+    delay_ms(10);
+    if(SW_SENSOR==1)
+    {
+      key_value=LIGHT_ON;
+      sensor_status = 1;
+      Led_on(1);
+    }
+  }
+  else if(SW_SENSOR==0 && sensor_status)
+  {
+    delay_ms(10);
+    if(SW_SENSOR==0)
+    {
+      delay_off_times++;
+      if(delay_off_times >= 500)
+      {
+        key_value=LIGHT_OFF;
+        sensor_status = 0;
+        Led_off(1);
+      }
+    }
+  }
+  #else
   if(SW_K1==1)
   {
     delay_ms(10);
     if(SW_K1==1)
     {
-      key_value=0x01;
+      key_value=LIGHT_ON;
       Led_on(1);
     }
   }
@@ -89,7 +121,7 @@ unsigned char key_scan()
     delay_ms(10);
     if(SW_K2==1)
     {
-      key_value=0x02;
+      key_value=LIGHT_OFF;
       Led_on(2);
     }
   }
@@ -98,7 +130,7 @@ unsigned char key_scan()
     delay_ms(10);
     if(SW_K3==1)
     {
-      key_value=0x03;
+      key_value=LIGHT_UP;
       Led_on(3);
     }
   }
@@ -107,7 +139,7 @@ unsigned char key_scan()
     delay_ms(10);
     if(SW_K4==1)
     {
-      key_value=0x04;
+      key_value=LIGHT_DOWN;
       Led_on(4);
     }
   }
@@ -116,7 +148,7 @@ unsigned char key_scan()
     delay_ms(10);
     if(SW_K5==1)
     {
-      key_value=0x05;
+      key_value=SCENE_1;
       Led_on(5);
     }
   }
@@ -125,7 +157,7 @@ unsigned char key_scan()
     delay_ms(10);
     if(SW_K6==1)
     {
-      key_value=0x06;
+      key_value=SCENE_2;
       Led_on(6);
     }
   }
@@ -134,7 +166,7 @@ unsigned char key_scan()
     delay_ms(10);
     if(SW_K7==1)
     {
-      key_value=0x07;
+      key_value=SCENE_3;
       Led_on(7);
     }
   }
@@ -143,9 +175,10 @@ unsigned char key_scan()
     delay_ms(10);
     if(SW_K8==1)
     {
-      key_value=0x08;
+      key_value=SCENE_4;
       Led_on(8);
     }
   }
+  #endif
   return key_value;
 }

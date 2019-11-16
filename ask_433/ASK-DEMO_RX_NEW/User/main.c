@@ -19,7 +19,6 @@ void CLOCK_Config(u8 SYS_CLK);
 void All_Congfig(void);
 void Pwrup_Indicate();
 
-unsigned char page[FM24C_PAGE_SIZE];
 FM24C_Data_S fm24c_data;
 
 int main(void)
@@ -32,59 +31,12 @@ int main(void)
   Uart_Sendbyte(1);
 
   I2C_Init();
-#if 0
+#if 1
   //FM24C_Reset();
-  memset(&fm24c_data, 0, sizeof(FM24C_Data_S));
-  delay_ms(20);
-  fm24c_data.cardType = 0x11;
-  fm24c_data.instNum = 1;
-  fm24c_data.assoAddr[0] = 0xA;
-  fm24c_data.assoAddr[1] = 0xB;
-  fm24c_store_addr=0;
-  FM24C_WriteData(&fm24c_data);
-
-  delay_ms(20);
-  fm24c_data.dev[0].devType = 0x01;
-  fm24c_data.dev[0].devAddr = 0x28;
-  fm24c_store_addr=0x10;
-  FM24C_WriteData(&fm24c_data.dev[0]);
-
-  delay_ms(20);
-  fm24c_data.dev[0].keyValue[0] = 0x10|LIGHT_ON;
-  fm24c_data.dev[0].keyValue[1] = 0x20|LIGHT_OFF;
-  fm24c_data.dev[0].keyValue[2] = 0x30|LIGHT_UP;
-  fm24c_data.dev[0].keyValue[3] = 0x40|LIGHT_DOWN;
-  fm24c_store_addr=0x18;
-  FM24C_WriteData(&fm24c_data.dev[0].keyValue[0]);
+  FM24C_SetDevInfo(0);
 #endif
 
-  memset(&fm24c_data, 0, sizeof(FM24C_Data_S));
-  delay_ms(10);
-
-  fm24c_store_addr=0;
-  FM24C_ReadData(page);
-  fm24c_data.cardType = page[0];
-  fm24c_data.instNum = page[1];
-  fm24c_data.assoAddr[0] = page[2];
-  fm24c_data.assoAddr[1] = page[3];
-  
-  delay_ms(20);
-  fm24c_store_addr=0x10;
-  FM24C_ReadData(page);
-  fm24c_data.dev[0].devType = page[0];
-  fm24c_data.dev[0].devAddr = page[1];
-
-  delay_ms(20);
-  fm24c_store_addr=0x18;
-  FM24C_ReadData(page);
-  fm24c_data.dev[0].keyValue[0] = page[0];
-  fm24c_data.dev[0].keyValue[1] = page[1];
-  fm24c_data.dev[0].keyValue[2] = page[2];
-  fm24c_data.dev[0].keyValue[3] = page[3];
-  fm24c_data.dev[0].keyValue[4] = page[4];
-  fm24c_data.dev[0].keyValue[5] = page[5];
-  fm24c_data.dev[0].keyValue[6] = page[6];
-  fm24c_data.dev[0].keyValue[7] = page[7];
+  FM24C_ReadDevInfo(0);
 
   ReadSelfAddr();
   Set_Pwm(pwm_duty);

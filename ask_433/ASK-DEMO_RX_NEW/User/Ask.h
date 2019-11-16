@@ -16,6 +16,7 @@
 #define     RECV_BIT_NUMBER     32       //设定接收的位数
 #define     inport              PD_IDR_IDR3
 //#define       ASK             PD_IDR_IDR4
+#define ASK_SEND_LEN            5
 
 void Ask_Init();
 void Ask_process();

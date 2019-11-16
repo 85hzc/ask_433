@@ -7,11 +7,18 @@
 #define         LED_L1    PC_ODR_ODR6
 
 
-#define         LIGHT_ON    0x01
-#define         LIGHT_OFF   0x02
-#define         LIGHT_UP    0x03
-#define         LIGHT_DOWN  0x04
-
+enum
+{
+    KEY_NULL = 0,
+    LIGHT_ON,
+    LIGHT_OFF,
+    LIGHT_UP,
+    LIGHT_DOWN,
+    SCENE_1,
+    SCENE_2,
+    SCENE_3,
+    SCENE_4,
+};
 
 void Led_Init(void);
 void Led_on(unsigned char m);

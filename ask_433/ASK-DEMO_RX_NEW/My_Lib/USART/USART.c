@@ -29,12 +29,12 @@ void Uart_Init(u8 SYS_Clk, u32 baud)
     u16 UART_Temp;
   
     UART_IOConfig();//UART IO引脚初始化 
-  
+    
     UART1_CR2 = 0;// 禁止UART发送和接收
     UART1_CR1 = 0;// b5 = 0,允许UART  b2 = 0,禁止校验
-                                                      
+    
     UART1_CR3 = 0;// b5,b4 = 00,1个停止位
-                            
+    
 /************************************************** 
     设置波特率，必须注意以下几点：
     (1) 必须先写BRR2
@@ -48,8 +48,8 @@ void Uart_Init(u8 SYS_Clk, u32 baud)
     
     UART1_BRR2 = (u8)((UART_Temp&0x000F)|((UART_Temp&0xF000)>>8));
     UART1_BRR1 = (u8)((UART_Temp&0x0FF0)>>4);
-                                                                                
-    UART1_CR2 = 0x2C; // b3 = 1,允许发送
+    
+    UART1_CR2 = 0x28;//C; // b3 = 1,允许发送
                        // b2 = 1,允许接收
                        // b5 = 1,允许产生接收中断 
 }
@@ -111,9 +111,11 @@ int fputc(int ch, FILE *f)
 #pragma vector = UART1_R_RXNE_vector
 __interrupt __root void UART1_Recv_IRQHandler()
 {
+/*
   unsigned char ch;
   ch=UART1_DR;
   Uart_Sendbyte(ch);
+  */
 }
 
 

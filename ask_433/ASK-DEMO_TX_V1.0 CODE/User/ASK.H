@@ -3,6 +3,9 @@
 #include "ALL_Includes.h"
 
 #define ASK PD_ODR_ODR3
+
+#define ASK_SEND_LEN        5
+
 void rf_delay_long();
 void rf_delay_short();
 void rf_delay_15ms();

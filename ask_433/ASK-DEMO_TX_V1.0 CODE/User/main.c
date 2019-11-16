@@ -16,7 +16,6 @@ void CLOCK_Config(u8 SYS_CLK);
 void All_Congfig(void);
 void Pwrup_Indicate();
 
-unsigned char page[FM24C_PAGE_SIZE];
 FM24C_Data_S fm24c_data;
 
 int main(void)
@@ -30,36 +29,7 @@ int main(void)
 
   I2C_Init();
 
-  memset(&fm24c_data, 0, sizeof(FM24C_Data_S));
-  delay_ms(10);
-
-  fm24c_store_addr=0;
-  FM24C_ReadData(page);
-  fm24c_data.cardType = page[0];
-  fm24c_data.instNum = page[1];
-  fm24c_data.assoAddr[0] = page[2];
-  fm24c_data.assoAddr[1] = page[3];
-  
-  delay_ms(20);
-  fm24c_store_addr=0x10;
-  FM24C_ReadData(page);
-  fm24c_data.dev[0].devType = page[0];
-  fm24c_data.dev[0].devAddr = page[1];
-
-  delay_ms(20);
-  fm24c_store_addr=0x18;
-  FM24C_ReadData(page);
-
-  for(i=0;i<fm24c_data.instNum && fm24c_data.instNum<MAX_DEV_NUM;i++)
-  {
-    fm24c_store_addr=0x10*(i+1) | 0x08;
-    FM24C_ReadData(page);
-
-    for(j=0;j<8;j++)
-    {
-      fm24c_data.dev[i].keyValue[j] = page[j];
-    }
-  }
+  FM24C_ReadDevInfo();
 
   ReadSelfAddr();
 

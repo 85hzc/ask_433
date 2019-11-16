@@ -7,7 +7,7 @@
 ***********************************************************/
 #include"ASK.h"
 
-unsigned char Ask_send_buf[4]={0};
+unsigned char Ask_send_buf[ASK_SEND_LEN]={0};
 extern FM24C_Data_S fm24c_data;
 
 FM24C_Data_S EE_dev_data;
@@ -103,9 +103,34 @@ void Ask_process()
   while(1)
   {
     key_value=key_scan();
-    if(key_value != 0)
+    if(key_value != KEY_NULL)
     {
+      #ifdef READ_REALTIME
+      FM24C_ReadDevInfo(0);
+      
+      Ask_send_buf[0]=fm24c_data.assoAddr[0];
+      Ask_send_buf[1]=fm24c_data.assoAddr[1];
 
+      for(i=0;i<fm24c_data.instNum;i++)
+      {
+        for(j=0;j<8;j++)
+        {
+          //if(fm24c_data.dev[i].key[j].keyType==key_value)
+          {
+            //Ask_send_buf[2] = fm24c_data.dev[i].devAddr;
+            Ask_send_buf[3] = key_value;//fm24c_data.dev[i].key[j].keyType;
+            //Ask_send_buf[4] = fm24c_data.dev[i].key[j].scene;
+
+            ask_send(Ask_send_buf, ASK_SEND_LEN);
+            ask_send(Ask_send_buf, ASK_SEND_LEN);
+            ask_send(Ask_send_buf, ASK_SEND_LEN);
+            ask_send(Ask_send_buf, ASK_SEND_LEN);
+            break;
+          }
+        }
+      }
+
+      #else
       Ask_send_buf[0]=EE_dev_data.assoAddr[0];
       Ask_send_buf[1]=EE_dev_data.assoAddr[1];
 
@@ -113,20 +138,24 @@ void Ask_process()
       {
         for(j=0;j<8;j++)
         {
-          if(((EE_dev_data.dev[i].keyValue[j]>>4)&0x0f)==key_value)
+          if(EE_dev_data.dev[i].key[j].keyType==key_value)
           {
             Ask_send_buf[2] = EE_dev_data.dev[i].devAddr;
-            Ask_send_buf[3] = EE_dev_data.dev[i].keyValue[j];
-  
-            ask_send(Ask_send_buf, 4);
-            ask_send(Ask_send_buf, 4);
-            ask_send(Ask_send_buf, 4);
-            ask_send(Ask_send_buf, 4);
+            Ask_send_buf[3] = EE_dev_data.dev[i].key[j].keyType;
+            Ask_send_buf[4] = EE_dev_data.dev[i].key[j].scene;
+
+            ask_send(Ask_send_buf, ASK_SEND_LEN);
+            ask_send(Ask_send_buf, ASK_SEND_LEN);
+            ask_send(Ask_send_buf, ASK_SEND_LEN);
+            ask_send(Ask_send_buf, ASK_SEND_LEN);
             break;
           }
         }
       }
+      #endif
+      #ifndef THERMOELECTRIC_SENSOR
       Led_off_all();
+      #endif
       delay_ms(10);
     }
   }
@@ -151,7 +180,8 @@ void ReadSelfAddr()
     for(i=0;i<8;i++)
     {
       delay_ms(1);
-      EE_dev_data.dev[j].keyValue[i] = EEPROM_Byte_Read(EE_ADDR_KeyVal+j*0x10+i);
+      EE_dev_data.dev[j].key[i].keyType = EEPROM_Byte_Read(EE_ADDR_KeyVal+j*0x10+i*4);
+      EE_dev_data.dev[0].key[i].scene = EEPROM_Byte_Read(EE_ADDR_KeyVal+j*0x10+i*4+2);
     }
   }
 }
@@ -178,7 +208,8 @@ void Write_Coder()
     for(i=0;i<8;i++)
     {
       delay_ms(1);
-      EEPROM_Byte_Write(EE_ADDR_KeyVal+j*0x10+i, fm24c_data.dev[j].keyValue[i]);
+      EEPROM_Byte_Write(EE_ADDR_KeyVal+j*0x10+i*4, fm24c_data.dev[j].key[i].keyType);
+      EEPROM_Byte_Write(EE_ADDR_KeyVal+j*0x10+i*4+2, fm24c_data.dev[j].key[i].scene);
     }
   }
 }

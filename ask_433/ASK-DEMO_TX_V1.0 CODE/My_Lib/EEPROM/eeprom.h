@@ -18,8 +18,9 @@
 #define         FM24C_COMM_W        0xA0        //FM24C的I2C地址,写
 #define         FM24C_COMM_R        0xA1        //FM24C的I2C地址,读
 #define         FM24C_STORE_ADDR    0x00        //存储地址
-#define         MAX_DEV_NUM         8          //遥控支持的最大设备数目
 #define         FM24C_PAGE_SIZE     8
+
+#define         MAX_DEV_NUM         8          //遥控支持的最大设备数目
 
 #define         CARDTYPE_OFFSET     0
 #define         IDCODE_OFFSET       1
@@ -30,17 +31,25 @@ void EEPROM_Byte_Write(unsigned int address , unsigned char date);
 unsigned char EEPROM_Byte_Read(unsigned int addr);
 void EEPROM_EREASE();
 
+
+typedef struct {
+  unsigned char keyType;
+  unsigned char scene;
+}FM24C_Key_S;
+
 typedef struct {
   unsigned char devType;
   unsigned char devAddr;
-  unsigned char keyValue[8];
+  unsigned char Reserved[6];
+  FM24C_Key_S   key[8];
 } FM24C_DevData_S;
 
 typedef struct {
   unsigned char cardType;
   unsigned char instNum;
   unsigned char assoAddr[2];
-  FM24C_DevData_S dev[MAX_DEV_NUM];
+  unsigned char Reserved[4];
+  FM24C_DevData_S dev[3];
 } FM24C_Data_S;
 
 #endif
