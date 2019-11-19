@@ -22,9 +22,9 @@ char                            fileBuffer[MAX_FILE_SIZE];
 #if(PROJECTOR_OSRAM)
 uint8_t                         osram_buff[MATRIX_SIZE][MATRIX_SIZE];
 #elif(PROJECTOR_CUBE)
-uint8_t                         cube_buff_G[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PAGE_SIZE];
-uint8_t                         cube_buff_R[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PAGE_SIZE];
-uint8_t                         cube_buff_B[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PAGE_SIZE];
+uint8_t                         cube_buff_G[CUBE_ROW_SIZE][CUBE_COL_SIZE];
+uint8_t                         cube_buff_R[CUBE_ROW_SIZE][CUBE_COL_SIZE];
+uint8_t                         cube_buff_B[CUBE_ROW_SIZE][CUBE_COL_SIZE];
 #elif(PROJECTOR_MBI5124)
 //;
 #elif(CUBEPLT_SLAVE)
@@ -76,7 +76,7 @@ FRESULT SD_ReadPhotoData()
 #elif(PROJECTOR_CUBE)
     for( i=0; i<CUBE_ROW_SIZE; i++ )
     {
-        for( j=0; j<CUBE_COL_SIZE*CUBE_PAGE_SIZE; j++ )
+        for( j=0; j<CUBE_COL_SIZE; j++ )
         {
             cube_buff_G[i][j] = fileBuffer[i*36+j*3];
             cube_buff_R[i][j] = fileBuffer[i*36+j*3+1];
@@ -125,7 +125,7 @@ FRESULT SD_ReadFilmData()
 #elif(PROJECTOR_CUBE)
     for( i=0; i<CUBE_ROW_SIZE; i++ )
     {
-        for( j=0; j<CUBE_COL_SIZE*CUBE_PAGE_SIZE; j++ )
+        for( j=0; j<CUBE_COL_SIZE; j++ )
         {
             cube_buff_G[i][j] = fileBuffer[i*36+j*3];
             cube_buff_R[i][j] = fileBuffer[i*36+j*3+1];

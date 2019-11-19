@@ -10,31 +10,36 @@ extern uint8_t                  runFlag;
 extern uint16_t                 actType;
 extern uint8_t                  usartTxFlag;
 extern char                     fileBuffer[MAX_FILE_SIZE];
-extern uint8_t                  cube_buff_G[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PAGE_SIZE];
-extern uint8_t                  cube_buff_R[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PAGE_SIZE];
-extern uint8_t                  cube_buff_B[CUBE_ROW_SIZE][CUBE_COL_SIZE*CUBE_PAGE_SIZE];
+extern uint8_t                  cube_buff_G[CUBE_ROW_SIZE][CUBE_COL_SIZE];
+extern uint8_t                  cube_buff_R[CUBE_ROW_SIZE][CUBE_COL_SIZE];
+extern uint8_t                  cube_buff_B[CUBE_ROW_SIZE][CUBE_COL_SIZE];
 
 //extern USART_TransmiteTYPE      Usart1Tx;
 extern PROGRAMS_TYPE_E          programsType;
 extern uint8_t                  filmFrameIdx;
 extern SPI_HandleTypeDef        hspi1;
 
-uint8_t                         GData1[CHIP_SIZE], RData1[CHIP_SIZE], BData1[CHIP_SIZE];
-uint8_t                         GData2[CHIP_SIZE], RData2[CHIP_SIZE], BData2[CHIP_SIZE];
-uint8_t                         GData3[CHIP_SIZE], RData3[CHIP_SIZE], BData3[CHIP_SIZE];
-uint8_t                         GData4[CHIP_SIZE], RData4[CHIP_SIZE], BData4[CHIP_SIZE];
+//static uint8_t                  GData1[CHIP_SIZE], RData1[CHIP_SIZE], BData1[CHIP_SIZE];
+//static uint8_t                  GData2[CHIP_SIZE_DOWN], RData2[CHIP_SIZE_DOWN], BData2[CHIP_SIZE_DOWN];
+//uint8_t                         GData3[CHIP_SIZE], RData3[CHIP_SIZE], BData3[CHIP_SIZE];
+//uint8_t                         GData4[CHIP_SIZE], RData4[CHIP_SIZE], BData4[CHIP_SIZE];
 
-uint8_t                         cubeProgramsType = 1;
+uint8_t                         cubeProgramsType = 0;
 //uint8_t                         cubeSoftFrameId = 0;
+uint8_t                         newReqFlag = 1;
 
 static uint64_t                 systime = 0;
 
-/*
-uint8_t displayMatrix1[CUBE_ROW_SIZE][CUBE_COL_SIZE] = {0};
-uint8_t displayMatrix2[CUBE_ROW_SIZE][CUBE_COL_SIZE] = {0};
-uint8_t displayMatrix3[CUBE_ROW_SIZE][CUBE_COL_SIZE] = {0};
-uint8_t displayMatrix4[CUBE_ROW_SIZE][CUBE_COL_SIZE] = {0};
-*/
+static uint32_t GRB[32]={0xFFFF00,0xE6FF1E,0xCDFF37,0xB4FF50,0x9BFF69,
+                         0x82FF82,0x69FF9B,0x50FFB4,0x37FFCD,0x1EFFE6,
+
+                         0x00FFFF,0x1EE6FF,0x37CDFF,0x50B4FF,0x699BFF,
+                         0x8282FF,0x9B69FF,0xB450FF,0xCD37FF,0xE61EFF,
+
+                         0xFF00FF,0xFF1EE6,0xFF37CD,0xFF50B4,0xFF699B,
+                         0xFF8282,0xFF9B69,0xFFB450,0xFFCD37,0xFFE61E,
+
+                         0xFFFF00,0xE6FF1E};
 
 /*
 void Din_1(void)
@@ -237,31 +242,39 @@ void Send_2811_oneString(uint8_t *g,uint8_t *r,uint8_t *b)        //传送16位灰度
 }
 
 
-void Send_2811_totalPixels1(uint8_t *g,uint8_t *r,uint8_t *b)
+void Send_2811_totalPixels1()
 {
-    uint8_t i=0;
+    unsigned short fixel;
+    uint8_t        row, col;
 
-    for(i=0;i<CHIP_SIZE;i++)
+    for(col = 0; col < CUBE_PILLAR_SIZE; col++)
     {
-        __disable_irq();
-        Send_8bits1(g[i]);
-        Send_8bits1(r[i]);
-        Send_8bits1(b[i]);
-        __enable_irq();
+        for(row = 0; row < CUBE_ROW_SIZE; row++)
+        {
+            __disable_irq();
+            Send_8bits1(cube_buff_G[row][col]);
+            Send_8bits1(cube_buff_R[row][col]);
+            Send_8bits1(cube_buff_B[row][col]);
+            __enable_irq();
+        }
     }
 }
 
-void Send_2811_totalPixels2(uint8_t *g,uint8_t *r,uint8_t *b)
+void Send_2811_totalPixels2()
 {
-    uint8_t i=0;
+    unsigned short fixel;
+    uint8_t        row, col;
 
-    for(i=0;i<CHIP_SIZE;i++)
+    for(col = 0; col < CUBE_PILLAR_DOWN_SIZE; col++)
     {
-        __disable_irq();
-        Send_8bits2(g[i]);
-        Send_8bits2(r[i]);
-        Send_8bits2(b[i]);
-        __enable_irq();
+        for(row = 0; row < CUBE_ROW_SIZE; row++)
+        {
+            __disable_irq();
+            Send_8bits2(cube_buff_G[row][CUBE_PILLAR_SIZE+col]);
+            Send_8bits2(cube_buff_R[row][CUBE_PILLAR_SIZE+col]);
+            Send_8bits2(cube_buff_B[row][CUBE_PILLAR_SIZE+col]);
+            __enable_irq();
+        }
     }
 }
 
@@ -313,32 +326,25 @@ void UartDataHandle(uint8_t *data)
     }
 }
 */
+
 void ScenceGradualChange()
 {
-    int16_t rcolor,gcolor,bcolor,row,col;
-    uint16_t IR_code = 0;
-    static uint32_t GRB=0xFFFFFF;
+    uint32_t GRB;
+    uint8_t row,col;
+    static uint8_t rcolor = 0xff,gcolor = 0xff,bcolor = 0xff;
     static RGB_Switch_E rgbsw = RGB_B_minus;
 
-    //printf("RGB:%x %x %x\r\n",(GRB>>8)&0xff,(GRB>>16)&0xff,(GRB)&0xff);
+    //printf("RGB:%2x%2x%2x\r\n",gcolor,rcolor,bcolor);
 
-    gcolor = (GRB>>16)&0xff;
-    rcolor = (GRB>>8)&0xff;
-    bcolor = GRB&0xff;
-    /*
-    gcolor = 0xf0;
-    rcolor = 0xf0;
-    bcolor = 0xf0;
-    for( row=0; row<CUBE_ROW_SIZE; row++ )
+    if(newReqFlag)
     {
-        for( col=0; col<CUBE_COL_SIZE*CUBE_PAGE_SIZE; col++ )
-        {
-            cube_buff_G[row][col] = (GRB>>16)&0xff;
-            cube_buff_R[row][col] = (GRB>>8)&0xff;
-            cube_buff_B[row][col] = GRB&0xff;
-        }
-    }return ;
-    */
+        newReqFlag = 0;
+        rcolor = 0xff;
+        gcolor = 0xff;
+        bcolor = 0xff;
+        rgbsw = RGB_B_minus;
+    }
+
     switch(rgbsw)
     {
         case RGB_B_minus:
@@ -433,355 +439,176 @@ void ScenceGradualChange()
 
     for( row=0; row<CUBE_ROW_SIZE; row++ )
     {
-        for( col=0; col<CUBE_COL_SIZE*CUBE_PAGE_SIZE; col++ )
-        {
-            /*
-            cube_buff_G[row][col] = (GRB>>16)&0xff;
-            cube_buff_R[row][col] = (GRB>>8)&0xff;
-            cube_buff_B[row][col] = GRB&0xff;
-            */
-            cube_buff_G[row][col] = gcolor;
-            cube_buff_R[row][col] = rcolor;
-            cube_buff_B[row][col] = bcolor;
-        }
+        memset(cube_buff_G[row], gcolor, CUBE_COL_SIZE);
+        memset(cube_buff_R[row], rcolor, CUBE_COL_SIZE);
+        memset(cube_buff_B[row], bcolor, CUBE_COL_SIZE);
     }
 }
 
 void ScenceLayering()
 {
-    int16_t rcolor,gcolor,bcolor;
-    uint16_t row,col;
-    static uint32_t GRB=0x32FA32;
-    static RGB_Switch_E rgbsw = RGB_G_plus;
+    uint8_t     row=0,col=0;
+    uint32_t    g[CUBE_COL_SIZE];
+    uint8_t     r[CUBE_COL_SIZE];
+    uint8_t     b[CUBE_COL_SIZE];
 
-    //LOG_DEBUG("RGB:%x %x %x\r\n",(GRB>>8)&0xff,(GRB>>16)&0xff,(GRB)&0xff);
-
-    gcolor = (GRB>>16)&0xff;
-    rcolor = (GRB>>8)&0xff;
-    bcolor = GRB&0xff;
-
-    switch(rgbsw)
+    if(newReqFlag)
     {
-        case RGB_B_minus:
-            if(bcolor>50)
-                bcolor = MINUS(bcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_R_plus;
-            break;
-
-        case RGB_G_minus:
-            if(gcolor>50)
-                gcolor = MINUS(gcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_G_plus;
-            break;
-
-        case RGB_R_minus:
-            if(rcolor>50){
-                rcolor = MINUS(rcolor,GRAY_STEP);
-                //gcolor = PLUS(gcolor,GRAY_STEP);
-                //bcolor = PLUS(bcolor,GRAY_STEP);
-            }
-            else
-                rgbsw = RGB_B_plus;
-            break;
-
-
-        case RGB_B_plus:
-            if(bcolor<250)
-                bcolor = PLUS(bcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_B_minus;
-            break;
-
-        case RGB_G_plus:
-            if(gcolor<250)
-                gcolor = PLUS(gcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_R_minus;
-            break;
-
-        case RGB_R_plus:
-            if(rcolor<250)
-                rcolor = PLUS(rcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_G_minus;
-            break;
-
-        case RGB_G1_minus:
-            if(gcolor>50)
-                gcolor = MINUS(gcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_B1_minus;
-            break;
-
-        case RGB_B1_minus:
-            if(bcolor>50)
-                bcolor = MINUS(bcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_G1_plus;
-            break;
-
-        case RGB_G1_plus:
-            if(gcolor<250)
-                gcolor = PLUS(gcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_R1_minus;
-            break;
-
-        case RGB_R1_minus:
-            if(rcolor>50)
-                rcolor = MINUS(rcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_B1_plus;
-            break;
-        
-        case RGB_B1_plus:
-            if( bcolor<250)
-                bcolor = PLUS(bcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_R1_plus;
-            break;
-
-        case RGB_R1_plus:
-            if(rcolor<250)
-                rcolor = PLUS(rcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_B_minus;
-            break;
+        newReqFlag = 0;
+        for( row=0; row<CUBE_ROW_SIZE; row++ )
+        {
+            //初始化颜色组
+            memset(cube_buff_G[row], (GRB[row]>>16)&0xff, CUBE_COL_SIZE);
+            memset(cube_buff_R[row], (GRB[row]>>8) &0xff, CUBE_COL_SIZE);
+            memset(cube_buff_B[row], (GRB[row])    &0xff, CUBE_COL_SIZE);
+        }
     }
-    GRB = gcolor<<16 | rcolor<<8 | bcolor;
-
-    //颜色上升
-    for( row=0; row<CUBE_ROW_SIZE-1; row++ )
+    else
     {
-        memcpy(cube_buff_G[row], cube_buff_G[row+1],CUBE_COL_SIZE*CUBE_PAGE_SIZE);
-        memcpy(cube_buff_R[row], cube_buff_R[row+1],CUBE_COL_SIZE*CUBE_PAGE_SIZE);
-        memcpy(cube_buff_B[row], cube_buff_B[row+1],CUBE_COL_SIZE*CUBE_PAGE_SIZE);
+        memcpy(g, cube_buff_G[0],CUBE_COL_SIZE);
+        memcpy(r, cube_buff_R[0],CUBE_COL_SIZE);
+        memcpy(b, cube_buff_B[0],CUBE_COL_SIZE);
+
+        //颜色上升
+        for( row=0; row<CUBE_ROW_SIZE-1; row++ )
+        {
+            memcpy(cube_buff_G[row], cube_buff_G[row+1],CUBE_COL_SIZE);
+            memcpy(cube_buff_R[row], cube_buff_R[row+1],CUBE_COL_SIZE);
+            memcpy(cube_buff_B[row], cube_buff_B[row+1],CUBE_COL_SIZE);
+        }
+
+        //新导入的一行颜色
+        memcpy(cube_buff_G[CUBE_ROW_SIZE-1], g, CUBE_COL_SIZE);
+        memcpy(cube_buff_R[CUBE_ROW_SIZE-1], r, CUBE_COL_SIZE);
+        memcpy(cube_buff_B[CUBE_ROW_SIZE-1], b, CUBE_COL_SIZE);
     }
-
-    //新导入的一行颜色
-    memset(cube_buff_G[row], (GRB>>16)&0xff,CUBE_COL_SIZE*CUBE_PAGE_SIZE);
-    memset(cube_buff_R[row], (GRB>>8)&0xff, CUBE_COL_SIZE*CUBE_PAGE_SIZE);
-    memset(cube_buff_B[row], GRB&0xff,      CUBE_COL_SIZE*CUBE_PAGE_SIZE);
-
     /*
     for( row=0; row<CUBE_ROW_SIZE; row++ )
     {
-        for( col=0; col<CUBE_COL_SIZE*CUBE_PAGE_SIZE; col++ )
+        printf("---------------------------\r\n");
+        for( col=0; col<CUBE_COL_SIZE; col++ )
         {
-            cube_buff_G[row][col] = (GRB>>16)&0xff;
-            cube_buff_R[row][col] = (GRB>>8)&0xff;
-            cube_buff_B[row][col] = GRB&0xff;
+            printf("[%d %d]:%x  ",row,col,
+                    cube_buff_GRB[row][col]);
         }
-    }
-    */
+        printf("\r\n");
+    }*/
 }
 
 void ScenceWaving()
 {
+    uint32_t    GRB = 0xffffff;
+    uint8_t     col,row;
 
-    /*row  R G B        
-    *led1* 1 2 3
-    *led2* 2 3 4
-    *led3* 3 4 5
-    *led4* 4 5 6
-    */
-
-    int16_t rcolor,gcolor,bcolor;
-    uint16_t row,col;
-    static uint32_t GRB=0xFFFFFF;
-    static RGB_Switch_E rgbsw = RGB_B_minus;
-
-    //LOG_DEBUG("RGB:%x %x %x\r\n",(GRB>>8)&0xff,(GRB>>16)&0xff,(GRB)&0xff);
-
-    gcolor = (GRB>>16)&0xff;
-    rcolor = (GRB>>8)&0xff;
-    bcolor = GRB&0xff;
-
-    switch(rgbsw)
+    for( col = 0; col < CUBE_COL_SIZE; col++ )
     {
-        case RGB_B_minus:
-            if(bcolor>0)
-                bcolor = MINUS(bcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_G_minus;
-            break;
+        for( row=0; row<CUBE_ROW_SIZE; row++ )
+        {
+            //初始化颜色组
+            cube_buff_G[row][col] = (GRB>>16)&0xff;
+            cube_buff_R[row][col] = (GRB>>8) &0xff;
+            cube_buff_B[row][col] = (GRB)    &0xff;
+        }
+    }
+}
 
-        case RGB_G_minus:
-            if(gcolor>0)
-                gcolor = MINUS(gcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_R_minus;
-            break;
+void ScenceCycle()
+{
+    static uint8_t  calc = 0;
+    uint8_t         row=0,col=0,base;
 
-        case RGB_R_minus:
-            if(rcolor>0){
-                rcolor = MINUS(rcolor,GRAY_STEP);
-                gcolor = PLUS(gcolor,GRAY_STEP);
-                bcolor = PLUS(bcolor,GRAY_STEP);
+    if(newReqFlag)
+    {
+        newReqFlag = 0;
+        calc = 0;
+    }
+
+    base = calc%CUBE_COL_SIZE;
+    //printf("base=%d\r\n",base);
+
+    for( col = 0; col < CUBE_COL_SIZE; col++ )
+    {
+        for( row=0; row<CUBE_ROW_SIZE; row++ )
+        {
+            //初始化颜色组
+            if(col+base < CUBE_COL_SIZE)
+            {
+                cube_buff_G[row][col] = (GRB[col+base]>>16)&0xff;
+                cube_buff_R[row][col] = (GRB[col+base]>>8) &0xff;
+                cube_buff_B[row][col] = (GRB[col+base])    &0xff;
+                //printf("<<< %x\r\n",cube_buff_GRB[row][col]);
             }
             else
-                rgbsw = RGB_B_plus;
-            break;
-
-
-        case RGB_B_plus:
-            if(bcolor<0xff)
-                bcolor = PLUS(bcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_G_plus;
-            break;
-
-        case RGB_G_plus:
-            if(gcolor<0xff)
-                gcolor = PLUS(gcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_R_plus;
-            break;
-
-        case RGB_R_plus:
-            if(rcolor<0xff)
-                rcolor = PLUS(rcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_G1_minus;
-            break;
-
-        case RGB_G1_minus:
-            if(gcolor>0)
-                gcolor = MINUS(gcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_B1_minus;
-            break;
-
-        case RGB_B1_minus:
-            if(bcolor>0)
-                bcolor = MINUS(bcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_G1_plus;
-            break;
-
-        case RGB_G1_plus:
-            if(gcolor<0xff)
-                gcolor = PLUS(gcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_R1_minus;
-            break;
-
-        case RGB_R1_minus:
-            if(rcolor>0)
-                rcolor = MINUS(rcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_B1_plus;
-            break;
-        
-        case RGB_B1_plus:
-            if( bcolor<0XFF)
-                bcolor = PLUS(bcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_R1_plus;
-            break;
-
-        case RGB_R1_plus:
-            if(rcolor<0xff)
-                rcolor = PLUS(rcolor,GRAY_STEP);
-            else
-                rgbsw = RGB_B_minus;
-            break;
-
+            {
+                cube_buff_G[row][col] = (GRB[(col+base)-(CUBE_COL_SIZE)]>>16)&0xff;
+                cube_buff_R[row][col] = (GRB[(col+base)-(CUBE_COL_SIZE)]>>8) &0xff;
+                cube_buff_B[row][col] = (GRB[(col+base)-(CUBE_COL_SIZE)])    &0xff;
+                //printf(">>> %x\r\n",cube_buff_GRB[row][col]);
+            }
+        }
     }
-    GRB = gcolor<<16 | rcolor<<8 | bcolor;
-
-    //颜色上升
-    for( row=0; row<CUBE_ROW_SIZE-1; row++ )
-    {
-        memcpy(cube_buff_G[row], cube_buff_G[row+1],CUBE_COL_SIZE*CUBE_PAGE_SIZE);
-        memcpy(cube_buff_R[row], cube_buff_R[row+1],CUBE_COL_SIZE*CUBE_PAGE_SIZE);
-        memcpy(cube_buff_B[row], cube_buff_B[row+1],CUBE_COL_SIZE*CUBE_PAGE_SIZE);
-    }
-
-    //新导入的一行颜色
-    memset(cube_buff_G[row], (GRB>>16)&0xff,CUBE_COL_SIZE*CUBE_PAGE_SIZE);
-    memset(cube_buff_R[row], (GRB>>8)&0xff, CUBE_COL_SIZE*CUBE_PAGE_SIZE);
-    memset(cube_buff_B[row], GRB&0xff,      CUBE_COL_SIZE*CUBE_PAGE_SIZE);
-
     /*
     for( row=0; row<CUBE_ROW_SIZE; row++ )
     {
-        for( col=0; col<CUBE_COL_SIZE*CUBE_PAGE_SIZE; col++ )
+        printf("---------------------------\r\n");
+        for( col=0; col<CUBE_COL_SIZE; col++ )
         {
-            cube_buff_G[row][col] = (GRB>>16)&0xff;
-            cube_buff_R[row][col] = (GRB>>8)&0xff;
-            cube_buff_B[row][col] = GRB&0xff;
+            printf("[%d %d]:%x %x %x",row,col,
+                    cube_buff_G[row][col],cube_buff_R[row][col],cube_buff_B[row][col]);
         }
-    }
-    */
-
+        printf("\r\n");
+    }*/
+    
+    calc++;
 }
 
-void WS2801_QuadrantConvert(void)
-{
-    unsigned short k,fixel;
-    uint8_t        row, col;
-
-    //写入 288*24 bits数据
-    for(fixel = 0; fixel < CUBE_ROW_SIZE*CUBE_COL_SIZE; fixel++)
-    {
-        row = fixel/CUBE_ROW_SIZE;
-        col = fixel%CUBE_ROW_SIZE;
-        
-        GData1[fixel] = cube_buff_G[row][col];
-        RData1[fixel] = cube_buff_R[row][col];
-        BData1[fixel] = cube_buff_B[row][col];
-
-        GData2[fixel] = cube_buff_G[row][col+CUBE_COL_SIZE];
-        RData2[fixel] = cube_buff_R[row][col+CUBE_COL_SIZE];
-        BData2[fixel] = cube_buff_B[row][col+CUBE_COL_SIZE];
-
-        GData3[fixel] = cube_buff_G[row][col+CUBE_COL_SIZE*2];
-        RData3[fixel] = cube_buff_R[row][col+CUBE_COL_SIZE*2];
-        BData3[fixel] = cube_buff_B[row][col+CUBE_COL_SIZE*2];
-
-        GData4[fixel] = cube_buff_G[row][col+CUBE_COL_SIZE*3];
-        RData4[fixel] = cube_buff_R[row][col+CUBE_COL_SIZE*3];
-        BData4[fixel] = cube_buff_B[row][col+CUBE_COL_SIZE*3];
-    }
-}
 
 void WS2801_framRefresh(void)
 {
-
-    Send_2811_totalPixels1(GData1,RData1,BData1);
-    Send_2811_totalPixels2(GData2,RData2,BData2);
-    Send_2811_totalPixels3(GData3,RData3,BData3);
-    Send_2811_totalPixels4(GData4,RData4,BData4);
+    Send_2811_totalPixels1();
+    Send_2811_totalPixels2();
 }
 
 FRESULT WS2801_softScen()
 {
-    FRESULT res = FR_OK;
+    FRESULT res = FR_TIMEOUT;
 
     if(cubeProgramsType%4==0)
     {
-        ScenceGradualChange();
+        //if(HAL_GetTick() - systime>1000)
+        {
+            ScenceGradualChange();
+            //systime = HAL_GetTick();
+            res = FR_OK;
+        }
     }
     else if(cubeProgramsType%4==1)
     {
-        //if(HAL_GetTick() - systime>10000)
+        //if(HAL_GetTick() - systime>1000)
         {
             //printf("Layering\r\n");
             ScenceLayering();
-        //    systime = HAL_GetTick();
+            //systime = HAL_GetTick();
+            res = FR_OK;
         }
     }
     else if(cubeProgramsType%4==2)
     {
-        ScenceWaving();
+        //if(HAL_GetTick() - systime>50000)
+        {
+            ScenceCycle();
+            //systime = HAL_GetTick();
+            res = FR_OK;
+        }
     }
     else if(cubeProgramsType%4==3)
     {
-
-        //cubeSoftFrameId++;
+        //if(HAL_GetTick() - systime>50000)
+        {
+            ScenceWaving();
+            //systime = HAL_GetTick();
+            res = FR_OK;
+        }
     }
 
     return res;
@@ -790,6 +617,7 @@ FRESULT WS2801_softScen()
 void WS2801_play(void)
 {
     FRESULT res = FR_OK;
+    uint8_t flash_flag = 0;
 
     if(runFlag || ((programsType!=PHOTO)/* && (HAL_GetTick() - systime>100000)*/))
     {
@@ -803,34 +631,48 @@ void WS2801_play(void)
         Usart1Tx.TX_flag = 1;
 #else
         runFlag = 0;
-        //printf("cubeProgramsType=%d,programsType=%d\r\n",cubeProgramsType,programsType);
+        //printf("cubept=%d,pt=%d\r\n",cubeProgramsType,programsType);
         if(programsType==FILM)
         {
             res = SD_ReadFilmData();
-            filmFrameIdx++;
+            if(res==FR_OK)
+            {
+                filmFrameIdx++;
+                flash_flag = 1;
+            }
         }
         else if(programsType==AUTO_ALGORITHM)
         {
             res = WS2801_softScen();
+            if(res==FR_OK)
+                flash_flag = 1;
+            else
+                return;
         }
         else
         {
             res = SD_ReadPhotoData();
+            if(res==FR_OK)
+                flash_flag = 1;
         }
         if(res != FR_OK)
         {
             printf("Read [%s] file failed!\r\n",programsType==PHOTO?"photo":"film");
             return;
         }
-        usartTxFlag = 1;
-        WS2801_QuadrantConvert();
-        WS2801_framRefresh();
+
+        if(flash_flag)
+        {
+            //usartTxFlag = 1;
+            //WS2801_QuadrantConvert();
+            WS2801_framRefresh();
+        }
 #endif
         //systime = HAL_GetTick();
     }
 }
 
-
+#if 0
 void Compose_RGB(RGB_Type_E RGB, uint8_t index, uint8_t gray)
 {
     memset(GData1, 0, sizeof(GData1));
@@ -844,7 +686,6 @@ void Compose_RGB(RGB_Type_E RGB, uint8_t index, uint8_t gray)
     if(RGB&B)
         BData1[index] = gray;
 }
-
 
 void STRIP_RunningByPort(RGB_Type_E rgb)
 {
@@ -894,5 +735,6 @@ void STRIP_RunningByPort(RGB_Type_E rgb)
 #endif
     }
 }
+#endif
 #endif
 

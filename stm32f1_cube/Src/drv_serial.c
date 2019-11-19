@@ -34,6 +34,7 @@ extern uint8_t           powerFlag;
 
 #if(PROJECTOR_CUBE)
 extern uint8_t           cubeProgramsType;
+extern uint8_t           newReqFlag;
 #endif
 
 static int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key);
@@ -136,7 +137,7 @@ static void handle_func_MIkeys(uint16_t key)
 
                 filmFrameIdx = 0;//切换影片频道，从片头开始
             }
-            else
+            else if(programsType==PHOTO)
             {
                 if(photoProgramIdx<0xff)
                     photoProgramIdx++;
@@ -147,7 +148,7 @@ static void handle_func_MIkeys(uint16_t key)
             }
 
 #if(CUBE_MASTER)
-            cubeProgramsType++;
+            newReqFlag = 1;
             if(cubeProgramsType<0xff)
                 cubeProgramsType++;
             else
@@ -165,7 +166,7 @@ static void handle_func_MIkeys(uint16_t key)
 
                 filmFrameIdx = 0;//切换影片频道，从片头开始
             }
-            else
+            else if(programsType==PHOTO)
             {
                 if(photoProgramIdx>0)
                     photoProgramIdx--;
@@ -176,10 +177,13 @@ static void handle_func_MIkeys(uint16_t key)
             }
 
 #if(CUBE_MASTER)
+            esle if
+            {
             if(cubeProgramsType>0)
                 cubeProgramsType--;
             else
                 cubeProgramsType=0xff;
+}
 #endif
             break;
         
