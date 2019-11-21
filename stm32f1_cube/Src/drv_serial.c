@@ -117,16 +117,16 @@ static void handle_func_MIkeys(uint16_t key)
         
         case REMOTE_MI_MENU:
             break;
-            
+
         case REMOTE_MI_POWER:
-#if(PROJECTOR_OSRAM)
+            #if(PROJECTOR_OSRAM)
             //eplosSLPxen = !eplosSLPxen; //one power key
             eplosSLPxen = !powerFlag;
             eplosCfgFlag = 1;
-#endif
+            #endif
             runFlag = 1;
             break;
-            
+
         case REMOTE_MI_UP:
             if(programsType==FILM)
             {
@@ -146,14 +146,16 @@ static void handle_func_MIkeys(uint16_t key)
 
                 runFlag = 1;
             }
-
-#if(CUBE_MASTER)
-            newReqFlag = 1;
-            if(cubeProgramsType<0xff)
-                cubeProgramsType++;
+            #if(CUBE_MASTER)
             else
-                cubeProgramsType = 0;
-#endif
+            {
+                newReqFlag = 1;
+                if(cubeProgramsType<0xff)
+                    cubeProgramsType++;
+                else
+                    cubeProgramsType = 0;
+            }
+            #endif
             break;
 
         case REMOTE_MI_DOWN:
@@ -175,28 +177,27 @@ static void handle_func_MIkeys(uint16_t key)
 
                 runFlag = 1;
             }
-
-#if(CUBE_MASTER)
-            esle if
-            {
-            if(cubeProgramsType>0)
-                cubeProgramsType--;
+            #if(CUBE_MASTER)
             else
-                cubeProgramsType=0xff;
-}
-#endif
+            {
+                if(cubeProgramsType>0)
+                    cubeProgramsType--;
+                else
+                    cubeProgramsType=0xff;
+            }
+            #endif
             break;
-        
+
         case REMOTE_MI_LEFT:
-#if(PROJECTOR_OSRAM)
+            #if(PROJECTOR_OSRAM)
             Drv_MOTOR_CMD_Handler(CMD_OP_MOTOR_SET_FORWARD, 4);
-#endif
+            #endif
             break;
         
         case REMOTE_MI_RIGHT:
-#if(PROJECTOR_OSRAM)
+            #if(PROJECTOR_OSRAM)
             Drv_MOTOR_CMD_Handler(CMD_OP_MOTOR_SET_BACKWARD, 4);
-#endif
+            #endif
             break;
 
         case REMOTE_MI_OK:
@@ -209,23 +210,23 @@ static void handle_func_MIkeys(uint16_t key)
         case REMOTE_MI_BACK:
             break;
         case REMOTE_MI_PLUS:
-#if(PROJECTOR_OSRAM)
+            #if(PROJECTOR_OSRAM)
             if(currentAdjustment<0x1f)
             {
                 currentAdjustment++;
                 eplosCfgFlag = 1;
             }
-#endif
+            #endif
             break;
 
         case REMOTE_MI_MINUS:
-#if(PROJECTOR_OSRAM)
+            #if(PROJECTOR_OSRAM)
             if(currentAdjustment>0)
             {
                 currentAdjustment--;
                 eplosCfgFlag = 1;
             }
-#endif
+            #endif
             break;
 
         default:

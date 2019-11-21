@@ -66,6 +66,7 @@ uint8_t                  usartTxData[1024];
 #endif
 
 oppRfFlag_t             gOppRfFlag;
+ST_OPP_BLE_MsgBuf_t     gOppBleMsg;
 uint8_t                 msgBuf[128];
 
 /* Private variables ---------------------------------------------------------*/
@@ -113,9 +114,13 @@ void I2C_init(void);
 void UartDebugControlHandle(uint8_t *key);
 #if PROJECTOR_CUBE
 void AppControlCubeHandle(uint8_t *key);
+void oppRFMsgSendProc();
+void oppRFMsgRecvCallBack(uint8_t *data);
 #endif
 #if PROJECTOR_OSRAM
 void AppControlEplosHandle(uint8_t *key);
+void oppRFMsgSendProc();
+void oppRFMsgRecvCallBack(uint8_t *data);
 #endif
 #if CUBEPLT_SLAVE
 void AppControlCubePltHandle(uint8_t *key,uint16_t len);
@@ -190,10 +195,13 @@ void appInit(void)
     photoProgramIdx = 0;
     
     Drv_SERIAL_Init();
-//#if(PROJECTOR_OSRAM)
+#if(PROJECTOR_OSRAM || PROJECTOR_CUBE)
     //for fan or led lighting
     Drv_FAN_Init();
-//#endif
+#endif
+#if(PROJECTOR_OSRAM)
+    Drv_MOTOR_Init();
+#endif
 
     oppRFTaskInit();
 }
@@ -266,10 +274,11 @@ void Drv_SERIAL_Proc(void)
         //HAL_UART_Transmit(&DEBUG_UART, UsartType3.RX_pData, UsartType3.RX_Size, 0xffff);
     }
 
-#if(CUBE_MASTER)
+    #if(CUBE_MASTER)
     if(usartTxFlag)
     {
-        HAL_UART_Transmit(&huart1, usartTxData, sizeof(usartTxData), 0xffff);
+        //HAL_UART_Transmit(&huart1, usartTxData, sizeof(usartTxData), 0xffff);
+        oppRFMsgSendProc();
         usartTxFlag = 0;
     }
     /*
@@ -280,9 +289,9 @@ void Drv_SERIAL_Proc(void)
         HAL_UART_Transmit(&huart1, usartTxData, sizeof(usartTxData), 0xffff);
         usartTxFlag = 0;
     }*/
-#endif
+    #endif
 
-#if 0
+    #if 0
     /* 1. read the uart buffer... */
     if (HAL_OK == Drv_SERIAL_Read(single_cmd, 0))
     {
@@ -295,7 +304,7 @@ void Drv_SERIAL_Proc(void)
             }
         }
     }
-#endif
+    #endif
     /* 2. read the action buffer... */
     if (HAL_OK == Drv_SERIAL_Read_Act(single_cmd))
     {
@@ -305,6 +314,7 @@ void Drv_SERIAL_Proc(void)
     }
 }
 
+#if(CUBE_MASTER||PROJECTOR_OSRAM)
 /******************************************************************************
  Function    : oppRFMsgRecvCallBack
  Description : RF 消息接收回调
@@ -324,12 +334,12 @@ void oppRFMsgRecvCallBack(uint8_t *data)
     u8 index = pPackageHeader->multiPackageIndex;
     static u16 totalLen = 0;
 
-    //ucLen = oppHalUartRecvData(OPP_RF_UART, data, 20);
-
+    /*
+    ucLen = oppHalUartRecvData(OPP_RF_UART, data, 20);
     isMultiPkg = pPackageHeader->isMultiPackage;
     type = pPackageHeader->multiPackageType;
     index = pPackageHeader->multiPackageIndex;
-
+    */
     if(ucLen > 20 || ucLen < 2)
     {
         return;
@@ -349,8 +359,7 @@ void oppRFMsgRecvCallBack(uint8_t *data)
             return;
         }
         totalLen = pFirstPackage->totalLen;
-        //OPP_SWAP_S(totalLen);
-        totalLen = totalLen&0xff<<8 | totalLen&0xff00>>8;
+        OPP_SWAP_S(totalLen);
         
         if(!isMultiPkg)
         {
@@ -424,6 +433,106 @@ void oppRFMsgRecvCallBack(uint8_t *data)
     }
 }
 
+/******************************************************************************
+ Function    : oppRFMsgSendProc
+ Description : RF 消息发送
+ Note        : (none)
+ Input Para  : (none)
+ Output Para : (none)
+ Return      : (none)
+ Other       : (none)
+******************************************************************************/
+void oppRFMsgSendProc()
+{
+    u8 curSdLen = 0;
+    u8 pkgNum = 0;
+    u8 sendBuf[20];
+    static u8 msgLen = 0;
+    static u8 sdIndex = 0;
+    static u32 lastSendTick = 0;
+    /*
+    if(1 == oppHalUartIsBusy(OPP_RF_UART))
+    {
+        return;
+    }*/
+
+    if((msgLen == 0) && (sdIndex != 0))
+    {
+        sdIndex = 0;
+        gOppRfFlag.isSend = 0;
+        gOppRfFlag.isBusy = 0;
+        return;
+    }
+
+    //if(g_ulOppleSysTick - lastSendTick < 100)
+    if(HAL_GetTick() - lastSendTick < 100)        
+    {
+        return;
+    }
+
+    if(sdIndex == 0)
+    {
+        oppFirstPackage_t *pFisrtPackage = (oppFirstPackage_t *)&sendBuf[0];
+
+        if(gOppBleMsg.msgHeader.pst.ucMsgLen == 0)
+        {
+            gOppRfFlag.isSend = 0;
+            gOppRfFlag.isBusy = 0;
+            return;
+        }
+
+        OPP_SWAP_S(gOppBleMsg.msgHeader.pstApp.uwMsgType);
+        msgLen = gOppBleMsg.msgHeader.pst.ucMsgLen+4;
+        if(msgLen <= 17)
+        {
+            pkgNum = 1;
+        }
+        else
+        {
+            pkgNum = 2+(msgLen-17) / 19;
+            pkgNum = ((msgLen-17)%19 == 0) ? pkgNum-1 : pkgNum;
+        }
+        curSdLen = msgLen > 17 ? 17 : msgLen;   
+        
+        pFisrtPackage->packageHeader.isMultiPackage = msgLen > 17 ? 1 : 0;
+        pFisrtPackage->packageHeader.multiPackageType = 0;
+        pFisrtPackage->packageHeader.multiPackageIndex = 0;
+        pFisrtPackage->totalLen = msgLen+2+pkgNum;
+        OPP_SWAP_S(pFisrtPackage->totalLen);
+        memcpy(&pFisrtPackage->data[0], &gOppBleMsg.msgBuf[0], curSdLen);       
+        msgLen -= curSdLen;
+        sdIndex++;
+        //oppHalUartSend(OPP_RF_UART, &sendBuf[0], curSdLen+3);
+        HAL_UART_Transmit(&huart1, &sendBuf[0], curSdLen+3, 0xffff);
+        lastSendTick = HAL_GetTick();
+    }
+    else
+    {
+        oppMainPackage_t *pMainPackage = (oppMainPackage_t *)&sendBuf[0];
+
+        if(msgLen == 0)
+        {
+            sdIndex = 0;
+            gOppRfFlag.isSend = 0;
+            gOppRfFlag.isBusy = 0;
+            return;
+        }
+
+        curSdLen = msgLen > 19 ? 19 : msgLen;   
+
+        pMainPackage->packageHeader.isMultiPackage = 1;
+        pMainPackage->packageHeader.multiPackageType = msgLen > 19 ? 1 : 2;
+        pMainPackage->packageHeader.multiPackageIndex = sdIndex;
+        memcpy(&pMainPackage->data[0], &gOppBleMsg.msgBuf[17+ (sdIndex-1)*19], curSdLen);       
+        msgLen -= curSdLen;
+        sdIndex++;
+        //oppHalUartSend(OPP_RF_UART, &sendBuf[0], curSdLen+1);
+        HAL_UART_Transmit(&huart1, &sendBuf[0], curSdLen+1, 0xffff);
+        lastSendTick = HAL_GetTick();
+    }
+}
+#endif
+
 int main(void)
 {
 
@@ -445,8 +554,9 @@ int main(void)
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
     MX_USART3_UART_Init();
+#if(PROJECTOR_CUBE)
     MX_TIM1_Init();//for PWM pulse
-
+#endif
     //MX_TIM2_Init();
 
 #if(IR_REMOTE)
@@ -455,8 +565,10 @@ int main(void)
     //Drv_IR_Init();
 #endif
 
-#if(PROJECTOR_OSRAM)
-    Drv_MOTOR_Init();
+    appInit();
+
+#if(PROJECTOR_CUBE)
+    drv_fan_speed(50);
 #endif
 
 #ifdef SUPPORT_FATFS
@@ -466,8 +578,6 @@ int main(void)
     SPI_GPIO_Soft_Init();
 #endif
 #endif
-    appInit();
-    drv_fan_speed(20);
 
     printf("system start.\r\n");
 
@@ -498,7 +608,7 @@ int main(void)
     //SD_ReadFileList("/f2");
     //SD_fileCopy();           //测试函数
 #endif
-#if 0
+#if 1
 #if(PROJECTOR_OSRAM)
     I2C_init();
     SD_ReadPhotoFileList("/OSRAM/Photo");
@@ -534,7 +644,7 @@ int main(void)
 
     while (1)
     {
-#if(PROJECTOR_OSRAM)
+#if(PROJECTOR_CUBE)
         Drv_FAN_Proc();
 #endif
 
@@ -1318,6 +1428,28 @@ void AppControlCubeHandle(uint8_t *data)
             break;
     }
     */
+}
+
+typedef struct {
+    u8 src_sno;
+    u8 dest_sno;
+    u8 data_length;
+    u16 group_number;
+    u16 msg_id;
+    u8 data[128];
+} OPPLE_APP_MSG;
+
+void AppComposeMsg(uint8_t haha)
+{
+
+    uint8_t blePadMsg[16] = {0x60, 0x5f, 0xff,
+                            0xff, 0xfc,
+                            0xff, 0x0c,
+                            0x60, 0x5f, 0x33, 0x33, 0x11, 0x00, 0x00, 0x00, 0x00};
+
+    memcpy(gOppBleMsg.msgBuf, blePadMsg, sizeof(blePadMsg));
+    gOppBleMsg.msgHeader.pst.ucMsgLen = sizeof(blePadMsg);
+
 }
 #endif
 

@@ -13,6 +13,9 @@
 #define PWM_Pin           GPIO_PIN_11
 #define PWM_GPIO_Port     GPIOA
 
+#define FAN_Pin           GPIO_PIN_0
+#define FAN_GPIO_Port     GPIOB
+
 #define IR_IN_Pin         GPIO_PIN_7  //TIM2 CH1
 #define IR_IN_GPIO_Port   GPIOA
 

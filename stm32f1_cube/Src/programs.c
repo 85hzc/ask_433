@@ -151,6 +151,8 @@ void SD_ReadPhotoFileList(char *path)
     int i_name=0, br;
     FRESULT res;
 
+    //printf("SD_ReadPhotoFileList:%s\r\n",path);
+
     /*挂载文件系统*/
     f_mount(0, &fs);
     res =  f_opendir(&dirs, path);
@@ -185,6 +187,8 @@ void SD_ReadFilmFileList(char filmId)
     int i_name=0, br;
     FRESULT res;
     char path[FILE_PATH_LEN];
+
+    //printf("SD_ReadFilmFileList:%s\r\n",path);
 
     memset(path, 0, sizeof(path));
     
@@ -230,6 +234,8 @@ void SD_ReadFilmFolderList(char *path)
     DIR dirs;
     int i_name=0, br;
     FRESULT res;
+
+    //printf("SD_ReadFilmFolderList:%s\r\n",path);
 
     /*挂载文件系统*/
     f_mount(0, &fs);

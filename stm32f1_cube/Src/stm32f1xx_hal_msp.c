@@ -442,6 +442,8 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
     //GPIO_InitStruct.Alternate = GPIO_AF2_TIM1;
     HAL_GPIO_Init(PWM_GPIO_Port, &GPIO_InitStruct);
+    
+    //__HAL_AFIO_REMAP_TIM1_PARTIAL();//PB0 but don't work  PA11OK
 
   /* USER CODE BEGIN TIM1_MspPostInit 1 */
 
@@ -469,7 +471,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE END TIM2_MspPostInit 1 */
   }
 
-}
+  }
 
 void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
 {

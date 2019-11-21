@@ -38,3 +38,4 @@ gescontrol_f103\ws2801.o: ..\Drivers\Fat_spi\SPI_SD_driver.h
 gescontrol_f103\ws2801.o: ..\Drivers\Fat_spi\ff.h
 gescontrol_f103\ws2801.o: ..\Drivers\Fat_spi\diskio.h
 gescontrol_f103\ws2801.o: ../Inc/programs.h
+gescontrol_f103\ws2801.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
