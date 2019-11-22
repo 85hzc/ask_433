@@ -79,7 +79,8 @@
 #if(PROJECTOR_OSRAM)
 #define MATRIX_SIZE         32
 #define MAX_FILE_SIZE       2048
-#define MAX_FILM_FRAME      1024
+#define MAX_FILM_FRAME      512
+#define FILE_NAME_LEN       16
 #elif(PROJECTOR_CUBE)
 #define CUBE_RGB_SIZE       30
 
@@ -92,8 +93,11 @@
 #define CHIP_SIZE_DOWN      (CUBE_ROW_SIZE*CUBE_PILLAR_DOWN_SIZE)
 
 #define MAX_FILE_SIZE       4096//(4096*4)       //256 must be % comfort
-#define MAX_FILM_FRAME      512
+#define MAX_FILM_FRAME      1024
+#define FILE_NAME_LEN       8
 #define PROGRAM_NUM         6
+#define GRAY_STEP           2
+#define LIGHTING_STEP       150
 #elif(PROJECTOR_MBI5124)
 #define MAX_FILE_SIZE       1024       //256 must be % comfort
 #elif(PROJECTOR_CUBEPLT)
@@ -106,14 +110,13 @@
 
 #define MAX_FILM_FOLDER     8
 
-#define FILE_NAME_LEN       8
+
 #define FILE_PATH_LEN       64
 
 #define SW_period_2ms                               1
 #define SW_period_20ms                              10
 #define SW_period_200ms                             100
 #define GRAY                                        10
-#define GRAY_STEP                                   2
 #define UART_RX_LEN         128
 
 

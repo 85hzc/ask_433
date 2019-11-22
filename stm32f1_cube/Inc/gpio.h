@@ -126,14 +126,14 @@
 #define MOTOR_OUT_Pin     GPIO_PIN_9
 #define MOTOR_OUT_Port    GPIOB
 
-#define MOTOR_AIN1_Pin    GPIO_PIN_3
-#define MOTOR_AIN1_Port   GPIOB
-#define MOTOR_AIN2_Pin    GPIO_PIN_4
+#define MOTOR_AIN1_Pin    GPIO_PIN_15
+#define MOTOR_AIN1_Port   GPIOA
+#define MOTOR_AIN2_Pin    GPIO_PIN_3
 #define MOTOR_AIN2_Port   GPIOB
-#define MOTOR_BIN1_Pin    GPIO_PIN_5
+#define MOTOR_BIN1_Pin    GPIO_PIN_4
 #define MOTOR_BIN1_Port   GPIOB
-#define MOTOR_BIN2_Pin    GPIO_PIN_15
-#define MOTOR_BIN2_Port   GPIOA
+#define MOTOR_BIN2_Pin    GPIO_PIN_5
+#define MOTOR_BIN2_Port   GPIOB
 
 //#elif(PROJECTOR_MCUGPIO)
 

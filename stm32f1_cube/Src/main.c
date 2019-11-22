@@ -49,20 +49,26 @@
 /* USER CODE END Includes */
 
 uint8_t                  scenMode = 0;
-uint8_t                  runFlag;
-uint8_t                  powerFlag;
+BOOL                     runFlag;
+BOOL                     powerFlag;
 uint16_t                 fileTotalPhoto;  //静态图片数
-uint16_t                 fileTotalFilm; //每个影片的帧数
+uint16_t                 fileTotalFilm[MAX_FILM_FOLDER]; //每个影片的帧数
 uint8_t                  filmTotalProgram;  //Film目录下的影片个数
 uint8_t                  single_cmd[CMD_LEN_MAX];
 uint16_t                 actType = 1;
 uint16_t                 actTime = 100;
-uint8_t                  usartTxFlag = 0;
+BOOL                     usartTxFlag = false;
 
 #if(PROJECTOR_CUBE)
 uint8_t                  usartTxData[3];
+uint16_t                 brightness = 0;
+BOOL                     lightingStatus;
+
 #elif(CUBEPLT_MASTER)
 uint8_t                  usartTxData[1024];
+#elif(PROJECTOR_OSRAM)
+extern uint8_t           eplosSLPxen;
+extern BOOL              eplosCfgFlag;
 #endif
 
 oppRfFlag_t             gOppRfFlag;
@@ -85,10 +91,6 @@ extern volatile uint16_t I2C_SCL_PIN;
 extern uint8_t           photoProgramIdx;
 extern uint8_t           filmProgramIdx;
 extern uint8_t           filmFrameIdx;
-#if(PROJECTOR_OSRAM)
-extern uint8_t           eplosSLPxen;
-extern uint8_t           eplosCfgFlag;
-#endif
 extern PROGRAMS_TYPE_E   programsType;
 
 /* USER CODE BEGIN PV */
@@ -108,8 +110,8 @@ static void MX_USART3_UART_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
-extern void Drv_FAN_Init(void);
-extern void Drv_FAN_Proc(void);
+extern void Drv_PWM_Init(void);
+extern void Drv_PWM_Proc(void);
 void I2C_init(void);
 void UartDebugControlHandle(uint8_t *key);
 #if PROJECTOR_CUBE
@@ -180,30 +182,31 @@ void MX_SPI2_Init(void)
 void appInit(void)
 {
 
-    runFlag = 1;
-    powerFlag = 1;
+    runFlag = true;
+    powerFlag = true;
 
-    //芯片配置相关参数
-#if(PROJECTOR_OSRAM)
-    eplosCfgFlag = 1;
-    eplosSLPxen = DISABLE;
-#endif
     //显示相关参数
-    programsType = AUTO_ALGORITHM;
     filmProgramIdx = 0;
     filmFrameIdx = 0;
     photoProgramIdx = 0;
-    
-    Drv_SERIAL_Init();
-#if(PROJECTOR_OSRAM || PROJECTOR_CUBE)
-    //for fan or led lighting
-    Drv_FAN_Init();
-#endif
-#if(PROJECTOR_OSRAM)
-    Drv_MOTOR_Init();
-#endif
 
     oppRFTaskInit();
+    Drv_SERIAL_Init();
+
+    //芯片配置相关参数
+#if(PROJECTOR_OSRAM)
+    programsType = PHOTO;
+    eplosCfgFlag = true;
+    eplosSLPxen = DISABLE;
+    Drv_MOTOR_Init();
+#elif(PROJECTOR_CUBE)
+    brightness = 500;
+    programsType = AUTO_ALGORITHM;
+#endif
+
+    //for fan(osram) or led lighting(cube)
+    Drv_PWM_Init();
+
 }
 
 void Drv_SERIAL_Proc(void)
@@ -220,7 +223,7 @@ void Drv_SERIAL_Proc(void)
         memset(data, 0, sizeof(data));
         strncpy(data, ptr, UsartType2.RX_Size);
 
-        #if 1
+        #if 0
         printf("BLE rx len=%d  [",UsartType2.RX_Size);
         for(int i=0; i<UsartType2.RX_Size; i++)
         {
@@ -568,7 +571,7 @@ int main(void)
     appInit();
 
 #if(PROJECTOR_CUBE)
-    drv_fan_speed(50);
+    drv_pwm_speed(brightness);
 #endif
 
 #ifdef SUPPORT_FATFS
@@ -645,7 +648,7 @@ int main(void)
     while (1)
     {
 #if(PROJECTOR_CUBE)
-        Drv_FAN_Proc();
+        Drv_PWM_Proc();
 #endif
 
 #if(PROJECTOR_MBI5153)
@@ -821,8 +824,8 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOD_CLK_ENABLE();
 
-    __HAL_AFIO_REMAP_PD01_ENABLE();
-    __HAL_AFIO_REMAP_TIM1_PARTIAL();
+    //__HAL_AFIO_REMAP_PD01_ENABLE();
+    //__HAL_AFIO_REMAP_TIM1_PARTIAL();
 
     /*Configure GPIO pin Output Level */
     //HAL_GPIO_WritePin(GPIOA, LED_DCLK_Pin|LED_HOLD_Pin, GPIO_PIN_RESET);
@@ -905,10 +908,10 @@ static void MX_TIM1_Init(void)
 #if(PROJECTOR_OSRAM)
   htim1.Init.Prescaler = 640-1;//1KHz
 #else
-  htim1.Init.Prescaler = 64-1;//10KHz
+  htim1.Init.Prescaler = 4-1;//10KHz
 #endif
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 99;
+  htim1.Init.Period = 999;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   //htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -1229,12 +1232,12 @@ void UartDebugControlHandle(uint8_t *key)
     if(!strcmp(key,"stop"))
     {
         //stop
-        runFlag = 0;
+        runFlag = false;
     }
     else if(!strcmp(key,"start"))
     {
         //play
-        runFlag = 1;
+        runFlag = true;
     }
     else if(!strcmp(key,"next"))
     {
@@ -1252,7 +1255,7 @@ void UartDebugControlHandle(uint8_t *key)
     else if(!strcmp(key,"poweron"))
     {
         IR_code = REMOTE_MI_POWER;
-        powerFlag = powerFlag==1?0:1;
+        powerFlag = powerFlag==true?false:true;
     }
     else //flash time and display scens
     {
@@ -1279,7 +1282,7 @@ void UartDebugControlHandle(uint8_t *key)
             actType = ttt;
         }
 
-        drv_fan_speed(ttt);
+        drv_pwm_speed(ttt);
     }
 
     if (IR_code) {
@@ -1306,12 +1309,12 @@ void AppControlEplosHandle(uint8_t *data)
         else if(data[9]==0x11 && data[10]==0x3 && data[11]==0x1)
         {
             IR_code = REMOTE_MI_POWER;
-            powerFlag = 1;
+            powerFlag = true;
         }
         else if(data[9]==0x11 && data[10]==0x3 && data[11]==0x0)
         {
             IR_code = REMOTE_MI_POWER;
-            powerFlag = 0;
+            powerFlag = false;
         }
         else if(data[9]==0xd && data[10]==0x3 && data[11]==0x3)
         {
@@ -1363,12 +1366,12 @@ void AppControlCubeHandle(uint8_t *data)
         else if(data[9]==0x11 && data[10]==0x3 && data[11]==0x1)
         {
             IR_code = REMOTE_MI_POWER;
-            powerFlag = 0;
+            powerFlag = false;
         }
         else if(data[9]==0x11 && data[10]==0x3 && data[11]==0x1)
         {
             IR_code = REMOTE_MI_POWER;
-            powerFlag = 1;
+            powerFlag = true;
         }
         else if(data[9]==0xd && data[10]==0x3 && data[11]==0x3)
         {
@@ -1376,11 +1379,11 @@ void AppControlCubeHandle(uint8_t *data)
         }
         else if(data[9]==0xd && data[10]==0x3 && data[11]==0x2)
         {
-            IR_code = REMOTE_MI_LEFT;
+            IR_code = REMOTE_MI_HOME;
         }
         else if(data[9]==0xd && data[10]==0x3 && data[11]==0x1)
         {
-            IR_code = REMOTE_MI_RIGHT;
+            IR_code = REMOTE_MI_DOWN;
         }
         else if(data[9]==0x13 && data[10]==0x3 && data[11]==0x1)
         {

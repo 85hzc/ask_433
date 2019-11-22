@@ -7,7 +7,7 @@
 #include "programs.h"
 #include "config.h"
 
-extern uint16_t                 fileTotalFilm;
+extern uint16_t                 fileTotalFilm[MAX_FILM_FOLDER];
 extern uint16_t                 fileTotalPhoto;
 extern uint8_t                  filmTotalProgram;
 
@@ -38,7 +38,7 @@ uint8_t                         cube_buff_RGB[IO_SIZE*CHIP_SIZE*3];
 uint8_t                         photoProgramIdx = 0;
 uint8_t                         filmProgramIdx = 0;
 uint8_t                         filmFrameIdx = 0;
-PROGRAMS_TYPE_E                 programsType = AUTO_ALGORITHM;
+PROGRAMS_TYPE_E                 programsType;
 
 FRESULT SD_ReadPhotoData()
 {
@@ -97,18 +97,18 @@ FRESULT SD_ReadFilmData()
     memset(path, 0, sizeof(path));
 
 #if(PROJECTOR_OSRAM)
-    sprintf(path,"/OSRAM/Film/%s/%s",film_foldername[filmProgramIdx%filmTotalProgram],film_filename[filmFrameIdx%fileTotalFilm]);
+    sprintf(path,"/OSRAM/Film/%s/%s",film_foldername[filmProgramIdx%filmTotalProgram],film_filename[filmFrameIdx%fileTotalFilm[filmProgramIdx%filmTotalProgram]]);
 #elif(PROJECTOR_CUBE)
-    sprintf(path,"/WS2801/Film/%s/%s",film_foldername[filmProgramIdx%filmTotalProgram],film_filename[filmFrameIdx%fileTotalFilm]);
+    sprintf(path,"/WS2801/Film/%s/%s",film_foldername[filmProgramIdx%filmTotalProgram],film_filename[filmFrameIdx%fileTotalFilm[filmProgramIdx%filmTotalProgram]]);
 #endif
 
-    printf("path:%s\r\n",path);
+    //printf("path:%s\r\n",path);
     f_mount(0, &fs);
     res = f_open(&fsrc, path, FA_OPEN_EXISTING | FA_READ);
     if(res != 0)
     {
         printf("open [%s/%s] error[%d]!\r\n",
-                film_foldername[filmProgramIdx%filmTotalProgram],film_filename[filmFrameIdx%fileTotalFilm],res);
+                film_foldername[filmProgramIdx%filmTotalProgram],film_filename[filmFrameIdx%fileTotalFilm[filmProgramIdx%filmTotalProgram]],res);
         return res;
     }
     f_read(&fsrc, fileBuffer, MAX_FILE_SIZE, &a);
@@ -158,7 +158,7 @@ void SD_ReadPhotoFileList(char *path)
     res =  f_opendir(&dirs, path);
     if (res == FR_OK)
     {
-        printf("photo files:\r\n");
+        printf("photo files ");
 
         while (f_readdir(&dirs, &finfo) == FR_OK)
         {
@@ -168,11 +168,12 @@ void SD_ReadPhotoFileList(char *path)
                     break;
                 }
                 stringcopy(photo_filename[i_name], (BYTE*)finfo.fname);
-                printf("          [%d]:%s\r\n",i_name,photo_filename[i_name]);
+                //printf("          [%d]:%s\r\n",i_name,photo_filename[i_name]);
                 i_name++;
             }
         }
         fileTotalPhoto = i_name;
+        printf(" %d\r\n",fileTotalPhoto);
     }
     else
     {
@@ -204,7 +205,7 @@ void SD_ReadFilmFileList(char filmId)
     res =  f_opendir(&dirs, path);
     if (res == FR_OK)
     {
-        printf("film[%s] files:\r\n",film_foldername[filmId]);
+        printf("film[%s] files ",film_foldername[filmId]);
     
         while (f_readdir(&dirs, &finfo) == FR_OK)
         {
@@ -216,11 +217,12 @@ void SD_ReadFilmFileList(char filmId)
                     break;
                 }
                 stringcopy(film_filename[i_name], (BYTE*)finfo.fname);
-                printf("          [%d]:%s\r\n",i_name,film_filename[i_name]);
+                //printf("          [%d]:%s\r\n",i_name,film_filename[i_name]);
                 i_name++;
             }
         }
-        fileTotalFilm = i_name;
+        fileTotalFilm[filmId] = i_name;
+        printf(" %d\r\n",i_name);
     }
     else
     {

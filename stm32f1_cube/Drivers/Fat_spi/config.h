@@ -20,6 +20,9 @@
 #include "ff.h"
 #include "diskio.h"
 
+#define     true    1
+#define     false   0
+
 typedef enum
 {
     RGB_B_minus = 1,

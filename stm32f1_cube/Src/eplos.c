@@ -19,7 +19,7 @@
 
 #if(PROJECTOR_OSRAM)
 
-extern uint8_t              runFlag;
+extern BOOL                 runFlag;
 extern char                 fileBuffer[MAX_FILE_SIZE];   // file copy buffer
 extern char                 osram_buff[MATRIX_SIZE][MATRIX_SIZE];
 extern uint8_t              filmFrameIdx;
@@ -27,7 +27,7 @@ extern uint8_t              filmFrameIdx;
 uint64_t                    systime = 0;
 uint64_t                    systime1 = 0;
 uint8_t                     currentAdjustment = 0;//0 ~ 0x1f
-uint8_t                     eplosCfgFlag;
+BOOL                        eplosCfgFlag;
 uint8_t                     eplosSLPxen;
 extern PROGRAMS_TYPE_E      programsType;
 
@@ -601,7 +601,7 @@ void OSRAM_config(void)
     if(eplosCfgFlag)
     {
         printf("OSRAM_config [%s]\r\n",eplosSLPxen==ENABLE?"OFF":"ON");
-        eplosCfgFlag = 0;
+        eplosCfgFlag = false;
     
         EPLOS_config();
         EPLOS_scimon();
@@ -638,6 +638,7 @@ void OSRAM_play(void)
         {
             res = SD_ReadPhotoData();
         }
+        /*
         else
         {
             for( i=0; i<MATRIX_SIZE; i++ )
@@ -647,7 +648,7 @@ void OSRAM_play(void)
                     osram_buff[i][j] = fileBuffer[i*(64+2)+j*2]-'0';
                 }
             }
-        }
+        }*/
         if(res != FR_OK)
         {
             printf("Read [%s] file failed!\r\n",programsType==PHOTO?"photo":"film");

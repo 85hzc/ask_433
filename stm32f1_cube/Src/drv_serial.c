@@ -14,6 +14,7 @@
 #include "drv_ir.h"
 #include "drv_serial.h"
 #include "programs.h"
+#include "config.h"
 
 ACT_CMD act_cmd;
 
@@ -28,14 +29,14 @@ extern uint8_t           runFlag;
 extern uint8_t           eplosCfgFlag;
 extern uint8_t           eplosSLPxen;
 extern uint8_t           currentAdjustment;
+#elif(PROJECTOR_CUBE)
+extern uint8_t           cubeSoftFrameId;
+extern uint8_t           newReqFlag;
+extern BOOL              cubeRGBStatus;
 #endif
+
 extern PROGRAMS_TYPE_E   programsType;
 extern uint8_t           powerFlag;
-
-#if(PROJECTOR_CUBE)
-extern uint8_t           cubeProgramsType;
-extern uint8_t           newReqFlag;
-#endif
 
 static int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key);
 static int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param);
@@ -113,18 +114,26 @@ static void handle_func_MIkeys(uint16_t key)
     switch (key)
     {
         case REMOTE_MI_HOME:
+            #if(PROJECTOR_CUBE)
+            runFlag = true;
+            cubeRGBStatus = !cubeRGBStatus;
+            #endif
             break;
-        
+
         case REMOTE_MI_MENU:
             break;
 
         case REMOTE_MI_POWER:
             #if(PROJECTOR_OSRAM)
-            //eplosSLPxen = !eplosSLPxen; //one power key
             eplosSLPxen = !powerFlag;
-            eplosCfgFlag = 1;
+            eplosCfgFlag = true;
+            #elif(PROJECTOR_CUBE)
+            if(powerFlag)
+                drv_pwm_on();
+            else
+                drv_pwm_off(0);
             #endif
-            runFlag = 1;
+            runFlag = true;
             break;
 
         case REMOTE_MI_UP:
@@ -144,16 +153,16 @@ static void handle_func_MIkeys(uint16_t key)
                 else
                     photoProgramIdx = 0;
 
-                runFlag = 1;
+                runFlag = true;
             }
             #if(CUBE_MASTER)
             else
             {
-                newReqFlag = 1;
-                if(cubeProgramsType<0xff)
-                    cubeProgramsType++;
+                newReqFlag = true;
+                if(cubeSoftFrameId<0xff)
+                    cubeSoftFrameId++;
                 else
-                    cubeProgramsType = 0;
+                    cubeSoftFrameId = 0;
             }
             #endif
             break;
@@ -175,15 +184,15 @@ static void handle_func_MIkeys(uint16_t key)
                 else
                     photoProgramIdx=0xff;
 
-                runFlag = 1;
+                runFlag = true;
             }
             #if(CUBE_MASTER)
             else
             {
-                if(cubeProgramsType>0)
-                    cubeProgramsType--;
+                if(cubeSoftFrameId>0)
+                    cubeSoftFrameId--;
                 else
-                    cubeProgramsType=0xff;
+                    cubeSoftFrameId=0xff;
             }
             #endif
             break;
@@ -201,7 +210,7 @@ static void handle_func_MIkeys(uint16_t key)
             break;
 
         case REMOTE_MI_OK:
-            runFlag = 1;
+            runFlag = true;
             //photoIdx=0;
             filmFrameIdx = 0;
             programsType = (programsType+1)%MAX_PROGRAMS;
@@ -214,8 +223,10 @@ static void handle_func_MIkeys(uint16_t key)
             if(currentAdjustment<0x1f)
             {
                 currentAdjustment++;
-                eplosCfgFlag = 1;
+                eplosCfgFlag = true;
             }
+            #elif(PROJECTOR_CUBE)
+            drv_pwm_speed_stepup(LIGHTING_STEP);
             #endif
             break;
 
@@ -224,8 +235,10 @@ static void handle_func_MIkeys(uint16_t key)
             if(currentAdjustment>0)
             {
                 currentAdjustment--;
-                eplosCfgFlag = 1;
+                eplosCfgFlag = true;
             }
+            #elif(PROJECTOR_CUBE)
+            drv_pwm_speed_stepdown(LIGHTING_STEP);
             #endif
             break;
 

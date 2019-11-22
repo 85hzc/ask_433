@@ -193,18 +193,18 @@ void OSRAM_GPIO_Init(void)
 
     //init for motor
     /*Configure GPIO pin Output Level */
-    HAL_GPIO_WritePin(GPIOB, MOTOR_IN_Pin|MOTOR_BIN1_Pin|MOTOR_AIN2_Pin|MOTOR_AIN1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOB, MOTOR_IN_Pin|MOTOR_BIN1_Pin|MOTOR_AIN2_Pin|MOTOR_BIN2_Pin, GPIO_PIN_RESET);
 
     /*Configure GPIO pin Output Level */
-    HAL_GPIO_WritePin(GPIOA, MOTOR_BIN2_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOA, MOTOR_AIN1_Pin, GPIO_PIN_RESET);
 
-    GPIO_InitStruct.Pin = MOTOR_IN_Pin|MOTOR_BIN1_Pin|MOTOR_AIN2_Pin|MOTOR_AIN1_Pin|FAN_Pin;
+    GPIO_InitStruct.Pin = MOTOR_IN_Pin|MOTOR_BIN1_Pin|MOTOR_AIN2_Pin|MOTOR_BIN2_Pin|FAN_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = MOTOR_BIN2_Pin;
+    GPIO_InitStruct.Pin = MOTOR_AIN1_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

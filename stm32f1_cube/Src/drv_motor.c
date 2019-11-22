@@ -66,8 +66,8 @@ void Drv_MOTOR_Init(void)
 {
     //uint8_t sta;
 
-    HAL_GPIO_WritePin(MOTOR_IN_Port, MOTOR_IN_Pin, GPIO_PIN_SET);
-    MOTOR_MOVE_STOP;  
+    HAL_GPIO_WritePin(MOTOR_IN_Port, MOTOR_IN_Pin, GPIO_PIN_RESET);
+    MOTOR_MOVE_STOP;
     //sta = HAL_GPIO_ReadPin(MOTOR_OUT_Port, MOTOR_OUT_Pin);
     //Drv_SERIAL_Log("MOTOR OUTPUT %d", sta);
 }
@@ -89,8 +89,9 @@ void drv_motor_move_forward(uint8_t steps)
     //for (i=0,step=0;i<steps;i++)
     for (i=0;i<1;i++)
     {
-        drv_motor_move_execute(motor_steps[step]);
         step = (step + 1) % MOVE_CYCLE;
+        //printf("Fstep %d\r\n",motor_steps[step]);
+        drv_motor_move_execute(motor_steps[step]);
         HAL_Delay(5);
     }
     drv_motor_move_execute(MOVE_STEP_S);
@@ -103,8 +104,9 @@ void drv_motor_move_reverse(uint8_t steps)
     //for (i=0,step=0;i<steps;i++)
     for (i=0;i<1;i++)
     {
-        drv_motor_move_execute(motor_steps[step]);
         step = (step + MOVE_CYCLE - 1) % MOVE_CYCLE;
+        //printf("Rstep %d\r\n",motor_steps[step]);
+        drv_motor_move_execute(motor_steps[step]);
         HAL_Delay(5);
     }
     drv_motor_move_execute(MOVE_STEP_S);
@@ -132,6 +134,6 @@ static void drv_motor_move_execute(uint8_t step)
     }
 
     uint8_t sta = HAL_GPIO_ReadPin(MOTOR_OUT_Port, MOTOR_OUT_Pin);
-    //Drv_SERIAL_Log("MOTOR move step %d, OUTPUT %d", step, sta);
+    //printf("MOTOR move step %d, OUTPUT %d\r\n", step, sta);
 }
 

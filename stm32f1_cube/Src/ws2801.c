@@ -7,9 +7,9 @@
 
 #if(PROJECTOR_CUBE)
 extern TIM_HandleTypeDef        htim2;
-extern uint8_t                  runFlag;
+extern BOOL                     runFlag;
 extern uint16_t                 actType;
-extern uint8_t                  usartTxFlag;
+extern BOOL                     usartTxFlag;
 extern char                     fileBuffer[MAX_FILE_SIZE];
 extern uint8_t                  cube_buff_G[CUBE_ROW_SIZE][CUBE_COL_SIZE];
 extern uint8_t                  cube_buff_R[CUBE_ROW_SIZE][CUBE_COL_SIZE];
@@ -19,15 +19,16 @@ extern uint8_t                  cube_buff_B[CUBE_ROW_SIZE][CUBE_COL_SIZE];
 extern PROGRAMS_TYPE_E          programsType;
 extern uint8_t                  filmFrameIdx;
 extern SPI_HandleTypeDef        hspi1;
+extern uint16_t                 brightness;
 
 //static uint8_t                  GData1[CHIP_SIZE], RData1[CHIP_SIZE], BData1[CHIP_SIZE];
 //static uint8_t                  GData2[CHIP_SIZE_DOWN], RData2[CHIP_SIZE_DOWN], BData2[CHIP_SIZE_DOWN];
 //uint8_t                         GData3[CHIP_SIZE], RData3[CHIP_SIZE], BData3[CHIP_SIZE];
 //uint8_t                         GData4[CHIP_SIZE], RData4[CHIP_SIZE], BData4[CHIP_SIZE];
 
-uint8_t                         cubeProgramsType = 2;
-//uint8_t                         cubeSoftFrameId = 0;
-uint8_t                         newReqFlag = 1;
+uint8_t                         cubeSoftFrameId = 0;
+BOOL                            newReqFlag = true;
+BOOL                            cubeRGBStatus = false;
 
 static uint64_t                 systime = 0;
 
@@ -839,7 +840,7 @@ FRESULT WS2801_softScen()
 {
     FRESULT res = FR_TIMEOUT;
 
-    if(cubeProgramsType%PROGRAM_NUM == 0)
+    if(cubeSoftFrameId%PROGRAM_NUM == 0)
     {
         //if(HAL_GetTick()-systime > 1000)
         {
@@ -848,7 +849,7 @@ FRESULT WS2801_softScen()
             res = FR_OK;
         }
     }
-    else if(cubeProgramsType%PROGRAM_NUM == 1)
+    else if(cubeSoftFrameId%PROGRAM_NUM == 1)
     {
         //if(HAL_GetTick()-systime > 1000)
         {
@@ -858,7 +859,7 @@ FRESULT WS2801_softScen()
             res = FR_OK;
         }
     }
-    else if(cubeProgramsType%PROGRAM_NUM == 3)
+    else if(cubeSoftFrameId%PROGRAM_NUM == 3)
     {
         //if(HAL_GetTick()-systime > 1000)
         {
@@ -867,7 +868,7 @@ FRESULT WS2801_softScen()
             //systime = HAL_GetTick();
             res = FR_OK;
         }
-    }    else if(cubeProgramsType%PROGRAM_NUM == 2)
+    }    else if(cubeSoftFrameId%PROGRAM_NUM == 2)
     {
         //if(HAL_GetTick()-systime > 1000)
         {
@@ -876,7 +877,7 @@ FRESULT WS2801_softScen()
             res = FR_OK;
         }
     }
-    else if(cubeProgramsType%PROGRAM_NUM == 4)
+    else if(cubeSoftFrameId%PROGRAM_NUM == 4)
     {
         if(newReqFlag)
         {
@@ -884,7 +885,7 @@ FRESULT WS2801_softScen()
             res = FR_OK;
         }
     }
-    else if(cubeProgramsType%PROGRAM_NUM >= 5)
+    else if(cubeSoftFrameId%PROGRAM_NUM >= 5)
     {
         if(HAL_GetTick()-systime > 2000000 || newReqFlag)
         {
@@ -900,7 +901,8 @@ FRESULT WS2801_softScen()
 void WS2801_play(void)
 {
     FRESULT res = FR_OK;
-    uint8_t flash_flag = 0;
+    BOOL    flash_flag = false;
+    uint8_t row;
 
     if(runFlag || ((programsType!=PHOTO)/* && (HAL_GetTick() - systime>100000)*/))
     {
@@ -914,39 +916,53 @@ void WS2801_play(void)
         Usart1Tx.TX_flag = 1;
 #else
         runFlag = 0;
-        //printf("cubept=%d,pt=%d\r\n",cubeProgramsType,programsType);
-        if(programsType==FILM)
+
+        if(cubeRGBStatus)
         {
-            res = SD_ReadFilmData();
-            if(res==FR_OK)
+            //printf("cubept=%d,pt=%d\r\n",cubeSoftFrameId,programsType);
+            if(programsType==FILM)
             {
-                filmFrameIdx++;
-                flash_flag = 1;
+                res = SD_ReadFilmData();
+                if(res==FR_OK)
+                {
+                    filmFrameIdx++;
+                    flash_flag = true;
+                }
             }
-        }
-        else if(programsType==AUTO_ALGORITHM)
-        {
-            res = WS2801_softScen();
-            if(res==FR_OK)
-                flash_flag = 1;
+            else if(programsType==AUTO_ALGORITHM)
+            {
+                res = WS2801_softScen();
+                if(res==FR_OK)
+                    flash_flag = true;
+                else
+                    return;
+            }
             else
+            {
+                res = SD_ReadPhotoData();
+                if(res==FR_OK)
+                    flash_flag = true;
+            }
+            if(res != FR_OK)
+            {
+                printf("Read [%s] file failed!\r\n",programsType==PHOTO?"photo":"film");
                 return;
+            }
         }
         else
         {
-            res = SD_ReadPhotoData();
-            if(res==FR_OK)
-                flash_flag = 1;
+            for( row=0; row<CUBE_ROW_SIZE; row++ )
+            {
+                memset(cube_buff_G[row], 0xff, CUBE_COL_SIZE);
+                memset(cube_buff_R[row], 0xff, CUBE_COL_SIZE);
+                memset(cube_buff_B[row], 0xff, CUBE_COL_SIZE);
+            }
+            flash_flag = true;
         }
-        if(res != FR_OK)
-        {
-            printf("Read [%s] file failed!\r\n",programsType==PHOTO?"photo":"film");
-            return;
-        }
-
+        
         if(flash_flag)
         {
-            //usartTxFlag = 1;
+            //usartTxFlag = true;
             //WS2801_QuadrantConvert();
             WS2801_framRefresh();
         }

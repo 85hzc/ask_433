@@ -33,3 +33,9 @@ gescontrol_f103\drv_serial.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_
 gescontrol_f103\drv_serial.o: ../Inc/drv_ir.h
 gescontrol_f103\drv_serial.o: ../Inc/drv_serial.h
 gescontrol_f103\drv_serial.o: ../Inc/programs.h
+gescontrol_f103\drv_serial.o: ..\Drivers\Fat_spi\config.h
+gescontrol_f103\drv_serial.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_usart.h
+gescontrol_f103\drv_serial.o: ..\Drivers\Fat_spi\integer.h
+gescontrol_f103\drv_serial.o: ..\Drivers\Fat_spi\SPI_SD_driver.h
+gescontrol_f103\drv_serial.o: ..\Drivers\Fat_spi\ff.h
+gescontrol_f103\drv_serial.o: ..\Drivers\Fat_spi\diskio.h
