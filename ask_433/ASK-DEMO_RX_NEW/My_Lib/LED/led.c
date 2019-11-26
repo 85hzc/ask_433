@@ -50,3 +50,11 @@ void Led_off_all()
   LED_L1=1;
 }
 
+void Led_twinkle()
+{
+    Led_on(0);
+    delay_ms(100);
+    Led_off(0);
+    delay_ms(100);
+}
+

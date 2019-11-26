@@ -48,8 +48,14 @@ void Uart_Init(u8 SYS_Clk, u32 baud)
     
     UART1_BRR2 = (u8)((UART_Temp&0x000F)|((UART_Temp&0xF000)>>8));
     UART1_BRR1 = (u8)((UART_Temp&0x0FF0)>>4);
-    
-    UART1_CR2 = 0x28;//C; // b3 = 1,允许发送
+
+    /*//rx/tx
+    UART1_CR2 = 0x2C; // b3 = 1,允许发送
+                       // b2 = 1,允许接收
+                       // b5 = 1,允许产生接收中断 
+    */
+    //tx
+    UART1_CR2 = 0x08; // b3 = 1,允许发送
                        // b2 = 1,允许接收
                        // b5 = 1,允许产生接收中断 
 }
@@ -111,16 +117,10 @@ int fputc(int ch, FILE *f)
 #pragma vector = UART1_R_RXNE_vector
 __interrupt __root void UART1_Recv_IRQHandler()
 {
-/*
+
   unsigned char ch;
   ch=UART1_DR;
   Uart_Sendbyte(ch);
-  */
 }
-
-
-
-
-
 
 

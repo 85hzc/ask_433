@@ -26,9 +26,11 @@ unsigned char Recv_data[ASK_SEND_LEN];
 
 unsigned char in_bit_n = 0;
 
-unsigned char pwm_duty=0;
+int  pwm_duty=8000, pwm_duty_last=0, lighting_status=1;//total 16000
 unsigned char instNum=0;
-FM24C_Data_S EE_dev_data;
+FM24C_Data_S  EE_dev_data;
+
+void ProcessOut();
 
 ///////////////////ASK初始化函数///////////////////////
 void Ask_Init()
@@ -187,12 +189,36 @@ void ProcessRecv()
       Recv_data[p++]=temp;
     }
 
-    Uart_Senddata(Recv_data,ASK_SEND_LEN);
-    ProcessOut();
+    #ifdef READ_REALTIME
+    FM24C_ReadDevInfo(0);
+    /*
+    Uart_Sendbyte(0xff);
+    Uart_Sendbyte(Recv_data[0]);
+    Uart_Sendbyte(Recv_data[1]);
+    Uart_Sendbyte(Recv_data[2]);
+    Uart_Sendbyte(fm24c_data.assoAddr[0]);
+    Uart_Sendbyte(fm24c_data.assoAddr[1]);
+    Uart_Sendbyte(0xff);
+    */
+    //匹配ID和设备地址
+    if((Recv_data[0]==fm24c_data.assoAddr[0])&&
+       (Recv_data[1]==fm24c_data.assoAddr[1])&&
+       (Recv_data[2]>0xf0))
+    {
+      ProcessOut();
+    }
+    #else
+    //匹配ID和设备地址
+    if((Recv_data[0]==EE_dev_data.assoAddr[0])&&
+       (Recv_data[1]==EE_dev_data.assoAddr[1])&&
+       (Recv_data[2]==EE_dev_data.dev[0].devAddr))
+    {
+      ProcessOut();
+    }
+    #endif
   }
   else 
   {
-
   }
 }
 
@@ -260,15 +286,15 @@ void ReadSelfAddr()
   EE_dev_data.assoAddr[0]= EEPROM_Byte_Read(EE_ADDR0);
   EE_dev_data.assoAddr[1]= EEPROM_Byte_Read(EE_ADDR1);
   EE_dev_data.instNum = EEPROM_Byte_Read(EE_ADDR_InsNum);
-  pwm_duty = EEPROM_Byte_Read(EE_Duty);
+  //pwm_duty = EEPROM_Byte_Read(EE_Duty)<<8|EEPROM_Byte_Read(EE_Duty+2);
 
-  EE_dev_data.dev[0].devType = EEPROM_Byte_Read(EE_ADDR_DevType);
-  EE_dev_data.dev[0].devAddr = EEPROM_Byte_Read(EE_ADDR_DevAddr);
+  EE_dev_data.dev.devType = EEPROM_Byte_Read(EE_ADDR_DevType);
+  EE_dev_data.dev.devAddr = EEPROM_Byte_Read(EE_ADDR_DevAddr);
 
   for(i=0;i<8;i++)
   {
-    EE_dev_data.dev[0].key[i].keyType = EEPROM_Byte_Read(EE_ADDR_KeyVal+i*4);
-    EE_dev_data.dev[0].key[i].scene = EEPROM_Byte_Read(EE_ADDR_KeyVal+i*4+2);
+    EE_dev_data.dev.key[i].keyType = EEPROM_Byte_Read(EE_ADDR_KeyVal+i*4);
+    EE_dev_data.dev.key[i].scene = EEPROM_Byte_Read(EE_ADDR_KeyVal+i*4+2);
   }
 }
 
@@ -292,78 +318,111 @@ void Dele_Sender()
 ///////////////////输出处理函数///////////////////////
 void ProcessOut()
 {
-  uint8_t i;
-
-  #ifdef READ_REALTIME
-  FM24C_ReadDevInfo(0);
-  //匹配ID和设备地址
-  if((Recv_data[0]==fm24c_data.assoAddr[0])&&
-     (Recv_data[1]==fm24c_data.assoAddr[1])/*&&
-     (Recv_data[2]==fm24c_data.dev[0].devAddr)*/)
-  {
+    uint8_t i;
+    float scene;
+    
+    #ifdef READ_REALTIME
     for(i=0;i<8;i++)
     {
-      if(Recv_data[3]==fm24c_data.dev[0].key[i].keyType)
+      /*
+      Uart_Sendbyte(i);
+      Uart_Sendbyte(fm24c_data.dev.key[i].keyType);
+      Uart_Sendbyte(Recv_data[2]&0x0f);
+      */
+      if((Recv_data[2]&0x0f) == fm24c_data.dev.key[i].keyType)
       {
-        switch(Recv_data[3])//KEY Action
+        Uart_Sendbyte(Recv_data[2]);
+        switch(Recv_data[2]&0x0f)//KEY Action
         {
             case LIGHT_OFF:
-                Set_Pwm(0);//0-256
-                Led_on(1);
-                delay_ms(100);
-                Led_off(1);
-                delay_ms(100);
+                Led_twinkle();
+                if(lighting_status)
+                {
+                    CH3_PWM_SET(0);//0-256
+                    pwm_duty = 0;
+                    lighting_status = 0;
+                }
                 break;
             case LIGHT_ON:
-                Set_Pwm(pwm_duty);//0-256
-                Led_on(2);
-                delay_ms(100);
-                Led_off(2);
-                delay_ms(100);
+                Led_twinkle();
+                if(!lighting_status)
+                {
+                    Uart_Sendbyte(pwm_duty_last>>8&0xff);
+                    Uart_Sendbyte(pwm_duty_last&0xff);
+                    On_Pwm();
+                    pwm_duty = pwm_duty_last;
+                    lighting_status = 1;
+                }
                 break;
             case LIGHT_UP:
-                pwm_duty = pwm_duty>=255?255:pwm_duty++;
-                Set_Pwm(pwm_duty);//0-256
-                Led_on(3);
-                delay_ms(100);
-                Led_off(3);
-                delay_ms(100);
+                Led_twinkle();
+                if(lighting_status)
+                {
+                    pwm_duty = (pwm_duty+4000>16000) ? 16000 : pwm_duty+4000;
+                    
+                    if(pwm_duty_last != pwm_duty)
+                    {
+                      Uart_Sendbyte(pwm_duty>>8&0xff);
+                      Uart_Sendbyte(pwm_duty&0xff);
+                      CH3_PWM_SET(pwm_duty);//0-256
+                      pwm_duty_last = pwm_duty;
+                    }
+                }
                 break;
             case LIGHT_DOWN:
-                pwm_duty = pwm_duty<=10?10:pwm_duty--;
-                Set_Pwm(pwm_duty);//0-256
-                Led_on(4);
-                delay_ms(100);
-                Led_off(4);
-                delay_ms(100);
+                Led_twinkle();
+                if(lighting_status)
+                {
+                    pwm_duty = (pwm_duty-4000>4000) ? pwm_duty-4000 : 4000;
+
+                    if(pwm_duty_last != pwm_duty)
+                    {
+                      Uart_Sendbyte(pwm_duty>>8&0xff);
+                      Uart_Sendbyte(pwm_duty&0xff);
+                      CH3_PWM_SET(pwm_duty);//0-256
+                      pwm_duty_last = pwm_duty;
+                    }
+                }
                 break;
             case SCENE_1:
-                Set_Pwm(fm24c_data.dev[0].key[i].scene);
+                Led_twinkle();
+                Uart_Sendbyte(fm24c_data.dev.key[i].scene);
+                scene = fm24c_data.dev.key[i].scene;
+                pwm_duty = (scene/100.0)*PWM_SET;
+                CH3_PWM_SET(pwm_duty);
+                pwm_duty_last = pwm_duty;
                 break;
             case SCENE_2:
-                Set_Pwm(fm24c_data.dev[0].key[i].scene);
+                Led_twinkle();
+                Uart_Sendbyte(fm24c_data.dev.key[i].scene);
+                scene = fm24c_data.dev.key[i].scene;
+                pwm_duty = (scene/100.0)*PWM_SET;
+                CH3_PWM_SET(pwm_duty);
+                pwm_duty_last = pwm_duty;
                 break;
             case SCENE_3:
-                Set_Pwm(fm24c_data.dev[0].key[i].scene);
+                Led_twinkle();
+                Uart_Sendbyte(fm24c_data.dev.key[i].scene);
+                scene = fm24c_data.dev.key[i].scene;
+                pwm_duty = (scene/100.0)*PWM_SET;
+                CH3_PWM_SET(pwm_duty);
+                pwm_duty_last = pwm_duty;
                 break;
             case SCENE_4:
-                Set_Pwm(fm24c_data.dev[0].key[i].scene);
+                Led_twinkle();
+                Uart_Sendbyte(fm24c_data.dev.key[i].scene);
+                scene = fm24c_data.dev.key[i].scene;
+                pwm_duty = (scene/100.0)*PWM_SET;
+                CH3_PWM_SET(pwm_duty);
+                pwm_duty_last = pwm_duty;
                 break;
             default:
                 break;
         }
       }
     }
-  }
-  #else
-  //匹配ID和设备地址
-  if((Recv_data[0]==EE_dev_data.assoAddr[0])&&
-     (Recv_data[1]==EE_dev_data.assoAddr[1])&&
-     (Recv_data[2]==EE_dev_data.dev[0].devAddr))
-  {
-
+    #else
     //key = (Recv_data[3]>>4)&0x0f; //KEY Type
-
     for(i=0;i<8;i++)
     {
       if(Recv_data[3]==EE_dev_data.dev[0].key[i].keyType)
@@ -417,8 +476,7 @@ void ProcessOut()
         }
       }
     }
-  }
-  #endif
+    #endif
 }
 ///////////////////清除对码函数///////////////////////
 void Write_Coder()
@@ -434,16 +492,16 @@ void Write_Coder()
   delay_ms(1);
   EEPROM_Byte_Write(EE_ADDR_InsNum, fm24c_data.instNum);
 
-  for(j=0;j<MAX_DEV_NUM;j++)
+  //for(j=0;j<MAX_DEV_NUM;j++)
   {
     delay_ms(1);
-    EEPROM_Byte_Write(EE_ADDR_DevAddr+j*0x10, fm24c_data.dev[j].devAddr);
+    EEPROM_Byte_Write(EE_ADDR_DevAddr+j*0x10, fm24c_data.dev.devAddr);
   
     for(i=0;i<8;i++)
     {
       delay_ms(1);
-      EEPROM_Byte_Write(EE_ADDR_KeyVal+j*0x10+i*4, fm24c_data.dev[j].key[i].keyType);
-      EEPROM_Byte_Write(EE_ADDR_KeyVal+j*0x10+i*4+2, fm24c_data.dev[j].key[i].scene);
+      EEPROM_Byte_Write(EE_ADDR_KeyVal+j*0x10+i*4, fm24c_data.dev.key[i].keyType);
+      EEPROM_Byte_Write(EE_ADDR_KeyVal+j*0x10+i*4+2, fm24c_data.dev.key[i].scene);
     }
   }
 }

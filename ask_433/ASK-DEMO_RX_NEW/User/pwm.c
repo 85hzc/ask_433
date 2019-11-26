@@ -12,6 +12,20 @@
 *  说    明：通道1输出pwm波
 *  范    例：无
 ****************************************************************************************/
+extern int  pwm_duty, pwm_duty_last, lighting_status;
+
+void CH3_PWM_SET(int Duty_CH3);
+
+void delay(unsigned int z) 
+{
+  unsigned int i,j;
+  while (z--)
+  {
+    for(i=0;i<20;i++)
+      for(j=0;j<5;j++);
+  }
+}
+
 void Tim1_Init(void)
 {
     //对于stm8l，默认时钟源是关闭的，需要先打开，才能配置寄存器
@@ -41,17 +55,104 @@ void Tim1_Init(void)
 
    TIM1_CR1_CEN=1;//开启计数器
 }
-
+//pc   3:pwm3   4:pwm2    5: pwm1
 void Pwm_Init()
 {
    //PD2引脚输出PWM波
-    PD_DDR_DDR2 =1;//设置为输出
-    PD_CR1_C12 =1;//推挽输出
+    //PD_DDR_DDR2 =1;//设置为输出
+    //PD_CR1_C12 =1;//推挽输出
+    PC_DDR_DDR3 =1;//设置为输出
+    PC_CR1_C13 =1;//推挽输出
 }
 
-void Set_Pwm(unsigned char dutyCycle)
+void On_Pwm()
 {
-    TIM1_CCR1H = 0;
-    TIM1_CCR1L = dutyCycle;
+  unsigned int i,tmp;
+  
+  for(i=1; i<=pwm_duty_last; i++)
+  {
+      tmp = i;
+      TIM1_CCR3H=((unsigned int)(tmp))/256;
+      TIM1_CCR3L=((unsigned int)(tmp))%256;
+      delay(1);
+  }
+}
+
+void CH1_PWM_SET(unsigned int SET_CH1,float Duty_CH1)//改变占空比
+{
+  float a;
+  a=Duty_CH1*SET_CH1;
+  TIM1_CCR1H=((unsigned int)(a))/256;
+  TIM1_CCR1L=((unsigned int)(a))%256;
+  TIM1_CCMR1|=0x60;
+  TIM1_CCER1&=0xfd;
+  TIM1_CCER1|=0x01;
+  TIM1_OISR|=0x01;
+}
+
+void CH2_PWM_SET(unsigned int SET_CH2,float Duty_CH2)//改变占空比
+{
+  float a;
+  a=Duty_CH2*SET_CH2;
+  TIM1_CCR2H=((unsigned int)(a))/256;
+  TIM1_CCR2L=((unsigned int)(a))%256;
+  TIM1_CCMR2|=0x60;
+  TIM1_CCER1&=0xdf;
+  TIM1_CCER1|=0x10;
+  TIM1_OISR|=0x04;
+}
+
+void CH3_PWM_SET(int a)//改变占空比
+{
+  int i,tmp;
+  
+  if(pwm_duty_last > a)//-
+  {
+    for(i=1; i<=pwm_duty_last-a; i++)
+    {
+        tmp = pwm_duty_last-i;
+        TIM1_CCR3H=((unsigned int)(tmp))/256;
+        TIM1_CCR3L=((unsigned int)(tmp))%256;
+        delay(1);
+    }
+  }
+  else if(pwm_duty_last < a)//+
+  {
+    for(i=1; i<=a-pwm_duty_last; i++)
+    {
+        tmp = pwm_duty_last+i;
+        TIM1_CCR3H=((unsigned int)(tmp))/256;
+        TIM1_CCR3L=((unsigned int)(tmp))%256;
+        delay(1);
+    }
+  }
+
+  /*
+  TIM1_CCMR3|=0x60;
+  TIM1_CCER2&=0x3d;
+  TIM1_CCER2|=0x01;
+  TIM1_OISR|=0x10;*/
+}
+
+void TIM1_PWM_SET()//改变周期
+{
+  //PWM_SET=(PWM_SET/2); //改变和边沿对齐一样的频率
+  TIM1_ARRH=PWM_SET/256;
+  TIM1_ARRL=PWM_SET%256;
+  TIM1_CR1|=0x60;
+  //CH1_PWM_SET(PWM_SET,0.2);
+  //CH2_PWM_SET(PWM_SET,0.4);
+  CH3_PWM_SET(pwm_duty);
+  pwm_duty_last = pwm_duty;
+  lighting_status = 1;
+  
+  //ch3 config
+  TIM1_CCMR3|=0x60;
+  TIM1_CCER2&=0x3d;
+  TIM1_CCER2|=0x01;
+  TIM1_OISR|=0x10;
+
+  TIM1_CR1|=0x01;
+  TIM1_BKR|=0x80;
 }
 

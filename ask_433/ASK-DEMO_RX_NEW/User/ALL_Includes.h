@@ -15,5 +15,8 @@
 
 ///////user////////////
 #include "Ask.h"
+
+#define PWM_SET     16000
+
 #endif
 

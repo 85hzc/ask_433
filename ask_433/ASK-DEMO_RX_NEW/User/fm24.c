@@ -329,69 +329,106 @@ uint8_t FM24C_WriteData(uint8_t *pbuf)
 
 void FM24C_SetDevInfo(uint8_t devId)
 {
+  uint8_t page[FM24C_PAGE_SIZE];
+  
   memset(&fm24c_data, 0, sizeof(FM24C_Data_S));
+  
   delay_ms(20);
   fm24c_data.cardType = 0x11;
   fm24c_data.instNum = 1;
   fm24c_data.assoAddr[0] = 0xA;
   fm24c_data.assoAddr[1] = 0xB;
   fm24c_store_addr=0;
-  FM24C_WriteData((uint8_t *)&fm24c_data);
+  memset(&page, 0, sizeof(page));
+  page[0] = fm24c_data.cardType;
+  page[1] = fm24c_data.instNum;
+  page[2] = fm24c_data.assoAddr[0];
+  page[3] = fm24c_data.assoAddr[1];
+  FM24C_WriteData(page);
 
   delay_ms(20);
-  fm24c_data.dev[devId].devType = 0x01;
-  fm24c_data.dev[devId].devAddr = 0x28;
+  fm24c_data.dev.devType = 0x01;
+  fm24c_data.dev.devAddr = 0x28;
   fm24c_store_addr=0x10;
-  FM24C_WriteData((uint8_t *)&fm24c_data.dev[0]);
-
+  memset(&page, 0, sizeof(page));
+  page[0] = fm24c_data.dev.devType;
+  page[1] = fm24c_data.dev.devAddr;
+  FM24C_WriteData(page);
   delay_ms(20);
-  fm24c_data.dev[devId].key[0].keyType = LIGHT_ON;
-  fm24c_data.dev[devId].key[1].keyType = LIGHT_OFF;
-  fm24c_data.dev[devId].key[2].keyType = LIGHT_UP;
-  fm24c_data.dev[devId].key[3].keyType = LIGHT_DOWN;
-  fm24c_data.dev[devId].key[4].keyType = SCENE_1;
-  fm24c_data.dev[devId].key[5].keyType = SCENE_2;
-  fm24c_data.dev[devId].key[6].keyType = SCENE_3;
-  fm24c_data.dev[devId].key[7].keyType = SCENE_4;
   
-  fm24c_data.dev[devId].key[0].scene = SCENE_4;
-  fm24c_data.dev[devId].key[1].scene = SCENE_4;
-  fm24c_data.dev[devId].key[2].scene = SCENE_4;
-  fm24c_data.dev[devId].key[3].scene = SCENE_4;
-  fm24c_data.dev[devId].key[4].scene = SCENE_4;
-  fm24c_data.dev[devId].key[5].scene = SCENE_4;
-  fm24c_data.dev[devId].key[6].scene = SCENE_4;
-  fm24c_data.dev[devId].key[7].scene = SCENE_4;
+  fm24c_data.dev.key[0].keyType = LIGHT_ON;
+  fm24c_data.dev.key[1].keyType = LIGHT_OFF;
+  fm24c_data.dev.key[2].keyType = LIGHT_UP;
+  fm24c_data.dev.key[3].keyType = LIGHT_DOWN;
+  fm24c_data.dev.key[4].keyType = SCENE_1;
+  fm24c_data.dev.key[5].keyType = SCENE_2;
+  fm24c_data.dev.key[6].keyType = SCENE_3;
+  fm24c_data.dev.key[7].keyType = SCENE_4;
+  
+  fm24c_data.dev.key[0].scene = 0;
+  fm24c_data.dev.key[1].scene = 0;
+  fm24c_data.dev.key[2].scene = 0;
+  fm24c_data.dev.key[3].scene = 0;
+  fm24c_data.dev.key[4].scene = 30;
+  fm24c_data.dev.key[5].scene = 50;
+  fm24c_data.dev.key[6].scene = 70;
+  fm24c_data.dev.key[7].scene = 90;
   
   fm24c_store_addr=0x20;
-  FM24C_WriteData((uint8_t *)&fm24c_data.dev[devId].key[0]);
-  delay_ms(10);
+  memset(&page, 0, sizeof(page));
+  page[0] = fm24c_data.dev.key[0].keyType;
+  page[1] = fm24c_data.dev.key[0].scene;
+  FM24C_WriteData(page);
+  delay_ms(20);
 
   fm24c_store_addr=0x28;
-  FM24C_WriteData((uint8_t *)&fm24c_data.dev[devId].key[1]);
-  delay_ms(10);
+  memset(&page, 0, sizeof(page));
+  page[0] = fm24c_data.dev.key[1].keyType;
+  page[1] = fm24c_data.dev.key[1].scene;
+  FM24C_WriteData(page);
+  delay_ms(20);
   
   fm24c_store_addr=0x30;
-  FM24C_WriteData((uint8_t *)&fm24c_data.dev[devId].key[2]);
-  delay_ms(10);
+  memset(&page, 0, sizeof(page));
+  page[0] = fm24c_data.dev.key[2].keyType;
+  page[1] = fm24c_data.dev.key[2].scene;
+  FM24C_WriteData(page);
+  delay_ms(20);
   
   fm24c_store_addr=0x38;
-  FM24C_WriteData((uint8_t *)&fm24c_data.dev[devId].key[3]);
+  memset(&page, 0, sizeof(page));
+  page[0] = fm24c_data.dev.key[3].keyType;
+  page[1] = fm24c_data.dev.key[3].scene;
+  FM24C_WriteData(page);
+  delay_ms(20);
   
   fm24c_store_addr=0x40;
-  FM24C_WriteData((uint8_t *)&fm24c_data.dev[devId].key[4]);
-  delay_ms(10);
+  memset(&page, 0, sizeof(page));
+  page[0] = fm24c_data.dev.key[4].keyType;
+  page[1] = fm24c_data.dev.key[4].scene;
+  FM24C_WriteData(page);
+  delay_ms(20);
   
   fm24c_store_addr=0x48;
-  FM24C_WriteData((uint8_t *)&fm24c_data.dev[devId].key[5]);
-  delay_ms(10);
+  memset(&page, 0, sizeof(page));
+  page[0] = fm24c_data.dev.key[5].keyType;
+  page[1] = fm24c_data.dev.key[5].scene;
+  FM24C_WriteData(page);
+  delay_ms(20);
   
   fm24c_store_addr=0x50;
-  FM24C_WriteData((uint8_t *)&fm24c_data.dev[devId].key[6]);
-  delay_ms(10);
+  memset(&page, 0, sizeof(page));
+  page[0] = fm24c_data.dev.key[6].keyType;
+  page[1] = fm24c_data.dev.key[6].scene;
+  FM24C_WriteData(page);
+  delay_ms(20);
   
   fm24c_store_addr=0x58;
-  FM24C_WriteData((uint8_t *)&fm24c_data.dev[devId].key[7]);
+  memset(&page, 0, sizeof(page));
+  page[0] = fm24c_data.dev.key[7].keyType;
+  page[1] = fm24c_data.dev.key[7].scene;
+  FM24C_WriteData(page);
+  delay_ms(20);
 }
 
 void FM24C_ReadDevInfo(uint8_t devId)
@@ -399,9 +436,10 @@ void FM24C_ReadDevInfo(uint8_t devId)
   uint8_t page[FM24C_PAGE_SIZE];
 
   memset(&fm24c_data, 0, sizeof(FM24C_Data_S));
+  
   delay_ms(10);
-
   fm24c_store_addr=0;
+  memset(page,0,sizeof(page));
   FM24C_ReadData(page);
   fm24c_data.cardType = page[0];
   fm24c_data.instNum = page[1];
@@ -410,49 +448,71 @@ void FM24C_ReadDevInfo(uint8_t devId)
   
   delay_ms(20);
   fm24c_store_addr=0x10;
+  memset(page,0,sizeof(page));
   FM24C_ReadData(page);
-  fm24c_data.dev[devId].devType = page[0];
-  fm24c_data.dev[devId].devAddr = page[1];
+  fm24c_data.dev.devType = page[0];
+  fm24c_data.dev.devAddr = page[1];
 
   delay_ms(20);
   fm24c_store_addr=0x20;
+  memset(page,0,sizeof(page));
   FM24C_ReadData(page);
-  fm24c_data.dev[devId].key[0].keyType = page[0];
-  fm24c_data.dev[devId].key[0].scene = page[1];
-  delay_ms(10);
+  fm24c_data.dev.key[0].keyType = page[0];
+  fm24c_data.dev.key[0].scene = page[1];
+  delay_ms(20);
 
+  fm24c_store_addr=0x28;
+  memset(page,0,sizeof(page));
   FM24C_ReadData(page);
-  fm24c_data.dev[devId].key[1].keyType = page[0];
-  fm24c_data.dev[devId].key[1].scene = page[1];
-  delay_ms(10);
+  fm24c_data.dev.key[1].keyType = page[0];
+  fm24c_data.dev.key[1].scene = page[1];
+  delay_ms(20);
 
+  fm24c_store_addr=0x30;
+  memset(page,0,sizeof(page));
   FM24C_ReadData(page);
-  fm24c_data.dev[devId].key[2].keyType = page[0];
-  fm24c_data.dev[devId].key[2].scene = page[1];
-  delay_ms(10);
-  FM24C_ReadData(page);
+  fm24c_data.dev.key[2].keyType = page[0];
+  fm24c_data.dev.key[2].scene = page[1];
+  delay_ms(20);
 
-  fm24c_data.dev[devId].key[3].keyType = page[0];
-  fm24c_data.dev[devId].key[3].scene = page[1];
-  delay_ms(10);
-
+  fm24c_store_addr=0x38;
+  memset(page,0,sizeof(page));
   FM24C_ReadData(page);
-  fm24c_data.dev[devId].key[4].keyType = page[0];
-  fm24c_data.dev[devId].key[4].scene = page[1];
-  delay_ms(10);
+  fm24c_data.dev.key[3].keyType = page[0];
+  fm24c_data.dev.key[3].scene = page[1];
+  delay_ms(20);
 
+  fm24c_store_addr=0x40;
+  memset(page,0,sizeof(page));
   FM24C_ReadData(page);
-  fm24c_data.dev[devId].key[5].keyType = page[0];
-  fm24c_data.dev[devId].key[5].scene = page[1];
-  delay_ms(10);
+  fm24c_data.dev.key[4].keyType = page[0];
+  fm24c_data.dev.key[4].scene = page[1];
+  delay_ms(20);
 
+  fm24c_store_addr=0x48;
+  memset(page,0,sizeof(page));
   FM24C_ReadData(page);
-  fm24c_data.dev[devId].key[6].keyType = page[0];
-  fm24c_data.dev[devId].key[6].scene = page[1];
-  delay_ms(10);
+  fm24c_data.dev.key[5].keyType = page[0];
+  fm24c_data.dev.key[5].scene = page[1];
+  delay_ms(20);
 
+  fm24c_store_addr=0x50;
+  memset(page,0,sizeof(page));
   FM24C_ReadData(page);
-  fm24c_data.dev[devId].key[7].keyType = page[0];
-  fm24c_data.dev[devId].key[7].scene = page[1];
+  fm24c_data.dev.key[6].keyType = page[0];
+  fm24c_data.dev.key[6].scene = page[1];
+  delay_ms(20);
+
+  fm24c_store_addr=0x58;
+  memset(page,0,sizeof(page));
+  FM24C_ReadData(page);
+  fm24c_data.dev.key[7].keyType = page[0];
+  fm24c_data.dev.key[7].scene = page[1];
+  /*
+  for(int i=0;i<8;i++)
+  {
+    Uart_Sendbyte(fm24c_data.dev.key[i].keyType);
+    Uart_Sendbyte(fm24c_data.dev.key[i].scene);
+  }*/
 }
 

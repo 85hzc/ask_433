@@ -12,12 +12,14 @@
 #define  SYS_CLOCK    16
 
 extern uint8_t fm24c_store_addr;
-extern unsigned char pwm_duty;
 extern FM24C_Data_S EE_dev_data;
 
 void CLOCK_Config(u8 SYS_CLK);
 void All_Congfig(void);
 void Pwrup_Indicate();
+void Ask_process();
+void FM24C_SetDevInfo(uint8_t devId);
+void FM24C_ReadDevInfo(uint8_t devId);
 
 FM24C_Data_S fm24c_data;
 
@@ -28,7 +30,7 @@ int main(void)
   All_Congfig();        //所有的基本配置，除了ASK的
   __enable_interrupt(); //开总中断
   Pwrup_Indicate();     //开机指示
-  Uart_Sendbyte(1);
+  //Uart_Sendbyte(1);
 
   I2C_Init();
 #if 1
@@ -39,7 +41,6 @@ int main(void)
   FM24C_ReadDevInfo(0);
 
   ReadSelfAddr();
-  Set_Pwm(pwm_duty);
 
   if(!((fm24c_data.assoAddr[0]==EE_dev_data.assoAddr[0]) &&
      (fm24c_data.assoAddr[1]==EE_dev_data.assoAddr[1]))&&fm24c_data.assoAddr[0]&&fm24c_data.assoAddr[1])
@@ -73,7 +74,8 @@ void All_Congfig(void)
     Pwm_Init();
     Uart_Init(16, 9600);
     Tim4_Init();
-    Tim1_Init();
+    //Tim1_Init();
+    TIM1_PWM_SET();
 }
 
 

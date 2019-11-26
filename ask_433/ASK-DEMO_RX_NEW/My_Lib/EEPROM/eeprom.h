@@ -39,7 +39,7 @@ typedef struct {
 typedef struct {
   unsigned char devType;
   unsigned char devAddr;
-  unsigned char Reserved[6];
+  //unsigned char Reserved[6];
   FM24C_Key_S   key[8];
 } FM24C_DevData_S;
 
@@ -47,8 +47,8 @@ typedef struct {
   unsigned char cardType;
   unsigned char instNum;
   unsigned char assoAddr[2];
-  unsigned char Reserved[4];
-  FM24C_DevData_S dev[3];
+  //unsigned char Reserved[4];
+  FM24C_DevData_S dev;
 } FM24C_Data_S;
 
 #endif

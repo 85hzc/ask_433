@@ -118,9 +118,9 @@ void Ask_process()
           //if(fm24c_data.dev[i].key[j].keyType==key_value)
           {
             //Ask_send_buf[2] = fm24c_data.dev[i].devAddr;
-            Ask_send_buf[3] = key_value;//fm24c_data.dev[i].key[j].keyType;
+            Ask_send_buf[2] = 0xf0 | key_value;//fm24c_data.dev[i].key[j].keyType;
             //Ask_send_buf[4] = fm24c_data.dev[i].key[j].scene;
-
+            Uart_Sendbyte(Ask_send_buf[2]);
             ask_send(Ask_send_buf, ASK_SEND_LEN);
             ask_send(Ask_send_buf, ASK_SEND_LEN);
             ask_send(Ask_send_buf, ASK_SEND_LEN);

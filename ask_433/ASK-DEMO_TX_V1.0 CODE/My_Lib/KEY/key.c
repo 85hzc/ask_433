@@ -84,7 +84,7 @@ unsigned char key_scan()
   if(SW_SENSOR==1 && !sensor_status)
   {
     delay_off_times = 0;
-    delay_ms(10);
+    delay_ms(KEY_DELAY);
     if(SW_SENSOR==1)
     {
       key_value=LIGHT_ON;
@@ -94,7 +94,7 @@ unsigned char key_scan()
   }
   else if(SW_SENSOR==0 && sensor_status)
   {
-    delay_ms(10);
+    delay_ms(KEY_DELAY);
     if(SW_SENSOR==0)
     {
       delay_off_times++;
@@ -109,7 +109,7 @@ unsigned char key_scan()
   #else
   if(SW_K1==1)
   {
-    delay_ms(10);
+    delay_ms(KEY_DELAY);
     if(SW_K1==1)
     {
       key_value=LIGHT_ON;
@@ -118,64 +118,64 @@ unsigned char key_scan()
   }
   else if(SW_K2==1)
   {
-    delay_ms(10);
+    delay_ms(KEY_DELAY);
     if(SW_K2==1)
     {
-      key_value=LIGHT_OFF;
+      key_value=SCENE_1;
       Led_on(2);
     }
   }
   else if(SW_K3==1)
   {
-    delay_ms(10);
+    delay_ms(KEY_DELAY);
     if(SW_K3==1)
     {
-      key_value=LIGHT_UP;
+      key_value=SCENE_4;
       Led_on(3);
     }
   }
   else if(SW_K4==1)
   {
-    delay_ms(10);
+    delay_ms(KEY_DELAY);
     if(SW_K4==1)
     {
-      key_value=LIGHT_DOWN;
+      key_value=SCENE_3;
       Led_on(4);
     }
   }
   else if(SW_K5==1)
   {
-    delay_ms(10);
+    delay_ms(KEY_DELAY);
     if(SW_K5==1)
     {
-      key_value=SCENE_1;
+      key_value=LIGHT_OFF;
       Led_on(5);
     }
   }
   else if(SW_K6==1)
   {
-    delay_ms(10);
+    delay_ms(KEY_DELAY);
     if(SW_K6==1)
     {
-      key_value=SCENE_2;
+      key_value=LIGHT_DOWN;
       Led_on(6);
     }
   }
   else if(SW_K7==1)
   {
-    delay_ms(10);
+    delay_ms(KEY_DELAY);
     if(SW_K7==1)
     {
-      key_value=SCENE_3;
+      key_value=LIGHT_UP;
       Led_on(7);
     }
   }
   else if(SW_K8==1)
   {
-    delay_ms(10);
+    delay_ms(KEY_DELAY);
     if(SW_K8==1)
     {
-      key_value=SCENE_4;
+      key_value=SCENE_2;
       Led_on(8);
     }
   }

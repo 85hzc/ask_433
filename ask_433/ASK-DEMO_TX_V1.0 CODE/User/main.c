@@ -29,7 +29,7 @@ int main(void)
 
   I2C_Init();
 
-  FM24C_ReadDevInfo();
+  FM24C_ReadDevInfo(0);
 
   ReadSelfAddr();
 
