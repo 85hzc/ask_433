@@ -30,16 +30,14 @@ int main(void)
   All_Congfig();        //所有的基本配置，除了ASK的
   __enable_interrupt(); //开总中断
   Pwrup_Indicate();     //开机指示
-  //Uart_Sendbyte(1);
 
   I2C_Init();
-#if 1
+#if 0
   //FM24C_Reset();
   FM24C_SetDevInfo(0);
 #endif
 
   FM24C_ReadDevInfo(0);
-
   ReadSelfAddr();
 
   if(!((fm24c_data.assoAddr[0]==EE_dev_data.assoAddr[0]) &&
