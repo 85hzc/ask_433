@@ -90,7 +90,7 @@ void drv_motor_move_forward(uint8_t steps)
     for (i=0;i<1;i++)
     {
         step = (step + 1) % MOVE_CYCLE;
-        //printf("Fstep %d\r\n",motor_steps[step]);
+        printf("Fstep %d\r\n",motor_steps[step]);
         drv_motor_move_execute(motor_steps[step]);
         HAL_Delay(5);
     }
@@ -105,7 +105,7 @@ void drv_motor_move_reverse(uint8_t steps)
     for (i=0;i<1;i++)
     {
         step = (step + MOVE_CYCLE - 1) % MOVE_CYCLE;
-        //printf("Rstep %d\r\n",motor_steps[step]);
+        printf("Rstep %d\r\n",motor_steps[step]);
         drv_motor_move_execute(motor_steps[step]);
         HAL_Delay(5);
     }
@@ -134,6 +134,6 @@ static void drv_motor_move_execute(uint8_t step)
     }
 
     uint8_t sta = HAL_GPIO_ReadPin(MOTOR_OUT_Port, MOTOR_OUT_Pin);
-    //printf("MOTOR move step %d, OUTPUT %d\r\n", step, sta);
+    printf("MOTOR move step %d, OUTPUT %d\r\n", step, sta);
 }
 

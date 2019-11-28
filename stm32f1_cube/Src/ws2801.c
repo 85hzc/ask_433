@@ -868,7 +868,8 @@ FRESULT WS2801_softScen()
             //systime = HAL_GetTick();
             res = FR_OK;
         }
-    }    else if(cubeSoftFrameId%PROGRAM_NUM == 2)
+    }
+    else if(cubeSoftFrameId%PROGRAM_NUM == 2)
     {
         //if(HAL_GetTick()-systime > 1000)
         {

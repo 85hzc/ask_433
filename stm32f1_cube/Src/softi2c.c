@@ -170,8 +170,8 @@ BYTE IIC_Wait_Ack(void)
   */
 void IIC_Ack(void)
 {
-    SDA_OUT();
     IIC_SCL_0();
+    SDA_OUT();
     IIC_SDA_0();
     delayus(4);
     IIC_SCL_1();
@@ -185,9 +185,8 @@ void IIC_Ack(void)
   */
 void IIC_NAck(void)
 {
-    SDA_OUT();
-    
     IIC_SCL_0();
+    SDA_OUT();
     IIC_SDA_1();
     delayus(4);
     IIC_SCL_1();
@@ -202,7 +201,7 @@ void IIC_NAck(void)
   * @retval None
   */
 void IIC_Send_Byte(BYTE txd)
-{                        
+{
     BYTE i;   
     SDA_OUT();        
     IIC_SCL_0();//push down scl  to start transmit data
