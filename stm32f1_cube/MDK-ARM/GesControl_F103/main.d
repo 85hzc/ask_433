@@ -43,3 +43,4 @@ gescontrol_f103\main.o: ..\Drivers\Fat_spi\SPI_SD_driver.h
 gescontrol_f103\main.o: ..\Drivers\Fat_spi\ff.h
 gescontrol_f103\main.o: ..\Drivers\Fat_spi\diskio.h
 gescontrol_f103\main.o: ../Src/oppRFTask.h
+gescontrol_f103\main.o: ../Inc/oppLocalAppMsg.h

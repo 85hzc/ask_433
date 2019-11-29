@@ -17,7 +17,7 @@ extern uint8_t                  cube_buff_B[CUBE_ROW_SIZE][CUBE_COL_SIZE];
 
 //extern USART_TransmiteTYPE      Usart1Tx;
 extern PROGRAMS_TYPE_E          programsType;
-extern uint8_t                  filmFrameIdx;
+extern uint16_t                 filmFrameIdx;
 extern SPI_HandleTypeDef        hspi1;
 extern uint16_t                 brightness;
 

@@ -20,10 +20,11 @@
 #if(PROJECTOR_OSRAM)
 
 extern BOOL                 runFlag;
+extern BOOL                 powerFlag;
 extern char                 fileBuffer[MAX_FILE_SIZE];   // file copy buffer
 extern char                 osram_buff[MATRIX_SIZE][MATRIX_SIZE];
-extern uint8_t              filmFrameIdx;
-
+extern uint16_t             filmFrameIdx;
+extern uint8_t              msgBuf[128];
 uint64_t                    systime = 0;
 uint64_t                    systime1 = 0;
 uint8_t                     currentAdjustment = 0;//0 ~ 0x1f
@@ -620,13 +621,8 @@ void OSRAM_play(void)
     FRESULT res = FR_OK;
     static uint8_t j=0;
 
-    //if((HAL_GetTick() - systime>1000000) && runFlag)//100ms
-    if(runFlag || ((programsType==FILM)/* && (HAL_GetTick() - systime>100000)*/))
+    if((runFlag || ((programsType==FILM))) && powerFlag)
     {
-#if 0
-        memcpy(displayMatrix,cartoonBuffer[32*(j%20)],1024);
-        j++;
-#else
         runFlag = 0;
 
         if(programsType==FILM)
@@ -637,18 +633,19 @@ void OSRAM_play(void)
         else if(programsType==PHOTO)
         {
             res = SD_ReadPhotoData();
-        }
-        /*
-        else
+        } 
+        else if(programsType==APP)
         {
             for( i=0; i<MATRIX_SIZE; i++ )
             {
                 for( j=0; j<MATRIX_SIZE; j++ )
                 {
-                    osram_buff[i][j] = fileBuffer[i*(64+2)+j*2]-'0';
+
+                    //printf("msgbuf:%d\r\n",i*4+j/8);
+                    osram_buff[i][j] = msgBuf[i*4+j/8] & (0x80>>j%8);
                 }
             }
-        }*/
+        }
         if(res != FR_OK)
         {
             printf("Read [%s] file failed!\r\n",programsType==PHOTO?"photo":"film");
@@ -665,8 +662,7 @@ void OSRAM_play(void)
 
         OSRAM_QuadrantConvert();
         //OSRAM_QuadrantShow();
-#endif
-        systime = HAL_GetTick();
+        //systime = HAL_GetTick();
 
         OSRAM_framRefresh();
         OSRAM_framRefresh();

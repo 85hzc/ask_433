@@ -23,7 +23,7 @@ static uint32_t          tickstart;
 extern uint8_t           single_cmd[CMD_LEN_MAX];
 extern uint8_t           photoProgramIdx;
 extern uint8_t           filmProgramIdx;
-extern uint8_t           filmFrameIdx;
+extern uint16_t          filmFrameIdx;
 extern uint8_t           runFlag;
 #if(PROJECTOR_OSRAM)
 extern uint8_t           eplosCfgFlag;
@@ -37,6 +37,10 @@ extern BOOL              cubeRGBStatus;
 
 extern PROGRAMS_TYPE_E   programsType;
 extern uint8_t           powerFlag;
+
+extern BYTE              film_filename[MAX_FILM_FRAME][FILE_NAME_LEN];
+extern BYTE              film_foldername[MAX_FILM_FOLDER][FILE_NAME_LEN];
+extern uint16_t          filmTotalProgram;
 
 static int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key);
 static int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param);
@@ -117,6 +121,9 @@ static void handle_func_MIkeys(uint16_t key)
             #if(PROJECTOR_CUBE)
             runFlag = true;
             cubeRGBStatus = !cubeRGBStatus;
+            #elif(PROJECTOR_OSRAM)
+            runFlag = true;
+            programsType = APP;
             #endif
             break;
 
@@ -145,6 +152,11 @@ static void handle_func_MIkeys(uint16_t key)
                     filmProgramIdx = 0;
 
                 filmFrameIdx = 0;//切换影片频道，从片头开始
+                printf("film [%s]\r\n", film_foldername[filmProgramIdx%filmTotalProgram]);
+
+                #ifdef LARGE_FILE
+                SD_OpenFilmData();
+                #endif
             }
             else if(programsType==PHOTO)
             {
@@ -176,6 +188,11 @@ static void handle_func_MIkeys(uint16_t key)
                     filmProgramIdx=0xff;
 
                 filmFrameIdx = 0;//切换影片频道，从片头开始
+                printf("film [%s]\r\n", film_foldername[filmProgramIdx%filmTotalProgram]);
+
+                #ifdef LARGE_FILE
+                SD_OpenFilmData();
+                #endif
             }
             else if(programsType==PHOTO)
             {
@@ -212,8 +229,17 @@ static void handle_func_MIkeys(uint16_t key)
         case REMOTE_MI_OK:
             runFlag = true;
             //photoIdx=0;
-            filmFrameIdx = 0;
             programsType = (programsType+1)%MAX_PROGRAMS;
+
+            if(programsType==FILM)
+            {
+                filmFrameIdx = 0;//切换影片频道，从片头开始
+                printf("film [%s]\r\n", film_foldername[filmProgramIdx%filmTotalProgram]);
+
+                #ifdef LARGE_FILE
+                SD_OpenFilmData();
+                #endif
+            }
             break;
 
         case REMOTE_MI_BACK:
@@ -298,7 +324,9 @@ static int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key)
             if(repeatflag) */
             {
                 //repeatflag = 0;
-                handle_func_MIkeys(key);
+
+                if(powerFlag || (!powerFlag&&key==REMOTE_MI_POWER))
+                    handle_func_MIkeys(key);
             }
         }
         else

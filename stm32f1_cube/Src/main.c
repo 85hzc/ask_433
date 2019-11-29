@@ -43,6 +43,7 @@
 #include "programs.h"
 #include "config.h"
 #include "oppRFTask.h"
+#include "oppLocalAppMsg.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -53,7 +54,7 @@ BOOL                     runFlag;
 BOOL                     powerFlag;
 uint16_t                 fileTotalPhoto;  //静态图片数
 uint16_t                 fileTotalFilm[MAX_FILM_FOLDER]; //每个影片的帧数
-uint8_t                  filmTotalProgram;  //Film目录下的影片个数
+uint16_t                 filmTotalProgram;  //Film目录下的影片个数
 uint8_t                  single_cmd[CMD_LEN_MAX];
 uint16_t                 actType = 1;
 uint16_t                 actTime = 100;
@@ -90,7 +91,7 @@ extern volatile uint16_t I2C_SCL_PIN;
 
 extern uint8_t           photoProgramIdx;
 extern uint8_t           filmProgramIdx;
-extern uint8_t           filmFrameIdx;
+extern uint16_t          filmFrameIdx;
 extern PROGRAMS_TYPE_E   programsType;
 
 /* USER CODE BEGIN PV */
@@ -115,17 +116,17 @@ extern void Drv_PWM_Proc(void);
 void I2C_init(void);
 void UartDebugControlHandle(uint8_t *key);
 #if PROJECTOR_CUBE
-void AppControlCubeHandle(uint8_t *key);
+void AppControlCubeHandle();
 void oppRFMsgSendProc();
 void oppRFMsgRecvCallBack(uint8_t *data);
 #endif
 #if PROJECTOR_OSRAM
-void AppControlEplosHandle(uint8_t *key);
+void AppControlEplosHandle();
 void oppRFMsgSendProc();
 void oppRFMsgRecvCallBack(uint8_t *data);
 #endif
 #if CUBEPLT_SLAVE
-void AppControlCubePltHandle(uint8_t *key,uint16_t len);
+void AppControlCubePltHandle();
 #endif
 
 /* USER CODE BEGIN PFP */
@@ -211,17 +212,12 @@ void appInit(void)
 
 void Drv_SERIAL_Proc(void)
 {
-    uint8_t *ptr;
-    uint8_t data[128];
+    uint8_t *ptr,data[128];
 
     //BLE mesh 8258/8269
     if(UsartType2.RX_flag)
     {
         UsartType2.RX_flag = 0;
-        ptr = UsartType2.RX_pData;
-
-        memset(data, 0, sizeof(data));
-        strncpy(data, ptr, UsartType2.RX_Size);
 
         #if 0
         printf("BLE rx len=%d  [",UsartType2.RX_Size);
@@ -233,11 +229,11 @@ void Drv_SERIAL_Proc(void)
         #endif
 
         #if PROJECTOR_CUBE
-        AppControlCubeHandle(data);
+        AppControlCubeHandle();
         #elif(CUBEPLT_SLAVE)
-        AppControlCubePltHandle(data, UsartType1.RX_Size);
+        AppControlCubePltHandle();
         #elif PROJECTOR_OSRAM
-        AppControlEplosHandle(data);
+        AppControlEplosHandle();
         #endif
         //HAL_UART_Transmit(&DEBUG_UART, UsartType1.RX_pData, UsartType1.RX_Size, 0xffff);
     }
@@ -329,109 +325,145 @@ void Drv_SERIAL_Proc(void)
 ******************************************************************************/
 void oppRFMsgRecvCallBack(uint8_t *data)
 {
+    uint16_t IR_code = 0;
+    uint16_t msgType;
     uint8_t ucLen = 0;
-    //uint8_t data[20];
+    static u16 totalLen = 0;
+
     oppPackageCtrlHeader_t *pPackageHeader = (oppPackageCtrlHeader_t *)&data[0];
     u8 isMultiPkg = pPackageHeader->isMultiPackage;
     u8 type = pPackageHeader->multiPackageType;
     u8 index = pPackageHeader->multiPackageIndex;
-    static u16 totalLen = 0;
 
-    /*
-    ucLen = oppHalUartRecvData(OPP_RF_UART, data, 20);
-    isMultiPkg = pPackageHeader->isMultiPackage;
-    type = pPackageHeader->multiPackageType;
-    index = pPackageHeader->multiPackageIndex;
-    */
-    if(ucLen > 20 || ucLen < 2)
+/*
+    printf("msg rx len=%d  [",UsartType2.RX_Size-1);
+    for(int i=0; i<UsartType2.RX_Size-1; i++)
     {
-        return;
+        printf("0x%02x ",data[i]);
     }
-    /*
-    if(gOppRfFlag.isBusy)
-    {
-        return;
-    }*/
+    printf("]\r\n");
 
-    if(index == 0)
+    printf("oppRFMsgRecvCallBack %d,%d,%d\r\n",isMultiPkg,type,index);
+*/
+    if(isMultiPkg==0)//control msg must be single Pkg
     {
-        oppFirstPackage_t *pFirstPackage = (oppFirstPackage_t*)&data[0];
+        msgType = data[12]<<8|data[13];
+        if(msgType==CTRL_SWITCH_MODE_MSG)
+        {
+            //runFlag = !runFlag;
+            IR_code = REMOTE_MI_OK;
+        }
+        else if(msgType==CTRL_SWITCH_ON_MSG)
+        {
+            //escape repetitive action
+            if(!powerFlag)
+            {
+                IR_code = REMOTE_MI_POWER;
+                powerFlag = true;
+            }
+        }
+        else if(msgType==CTRL_SWITCH_OFF_MSG)
+        {
+            //escape repetitive action
+            if(powerFlag)
+            {
+                IR_code = REMOTE_MI_POWER;
+                powerFlag = false;
+            }
+        }
+        else if(msgType==CALL_SCENE_PLUS_MSG)
+        {
+            IR_code = REMOTE_MI_UP;
+        }
+        else if(msgType==CTRL_MOTOR_L_MSG)
+        {
+            IR_code = REMOTE_MI_LEFT;
+        }
+        else if(msgType==CTRL_MOTOR_R_MSG)
+        {
+            IR_code = REMOTE_MI_RIGHT;
+        }
+        else if(msgType==CTRL_BRIGHT_PLUS_MSG)
+        {
+            IR_code = REMOTE_MI_PLUS;
+        }
+        else if(msgType==CTRL_BRIGHT_MINUS_MSG)
+        {
+            IR_code = REMOTE_MI_MINUS;
+        }
 
-        if(ucLen < 4)
-        {
-            return;
-        }
-        totalLen = pFirstPackage->totalLen;
-        OPP_SWAP_S(totalLen);
-        
-        if(!isMultiPkg)
-        {
-            if(totalLen > 20)
-            {
-                return;
-            }
-            //if(totalLen != ucLen)
-            //{
-            //    return;
-            //}
-            memcpy(&msgBuf[0], &pFirstPackage->data[0], totalLen);
-            gOppRfFlag.isRecv = 1;
-            gOppRfFlag.isBusy = 1;
-        }
-        else
-        {
-            if(ucLen != 20)
-            {
-                return;
-            }
-            if(type != 0)
-            {
-                return;
-            }
-            if(totalLen > 256)
-            {
-                return;
-            }
-            memcpy(&msgBuf[0], &pFirstPackage->data[0], 17);
-            gOppRfFlag.isRecvHeader = 1;
+        if (IR_code) {
+            Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
         }
     }
     else
     {
-        oppMainPackage_t *pMainPackage = (oppMainPackage_t*)&data[0];
-        
-        if(!gOppRfFlag.isRecvHeader)
+        if(index == 0)
         {
-            return;
-        }
+            oppFirstPackage_t *pFirstPackage = (oppFirstPackage_t*)&data[0];
 
-        if(!isMultiPkg)
-        {
-            gOppRfFlag.isRecvHeader = 0;
-            return;
-        }
+            msgType = data[12]<<8|data[13];
 
-        if(type == 2)
-        {
-            u8 len = ucLen - 1;
+            if(msgType!=CTRL_MATRIX_MSG)
+            {
+                printf("Not CTRL_MATRIX_MSG\r\n");
+                return;
+            }
+            totalLen = pFirstPackage->totalLen;
+            OPP_SWAP_S(totalLen);
+            
+            if(type != 0)
+            {
+                printf("Not type 0\r\n");
+                return;
+            }
 
-            memcpy(&msgBuf[17 + (index-1) * 19], &pMainPackage->data[0], len);
-            gOppRfFlag.isBusy = 1;
-            gOppRfFlag.isRecv = 1;
-            gOppRfFlag.isRecvHeader = 0;
+            memcpy(&msgBuf[0], &pFirstPackage->data[11], 6);
+            gOppRfFlag.isRecvHeader = 1;
         }
-        else if(type == 1)
+        else
         {
-            if(ucLen != 20)
+            oppMainPackage_t *pMainPackage = (oppMainPackage_t*)&data[0];
+            
+            if(!gOppRfFlag.isRecvHeader)
+            {
+                return;
+            }
+
+            if(!isMultiPkg)
             {
                 gOppRfFlag.isRecvHeader = 0;
                 return;
             }
-            memcpy(&msgBuf[17 + (index-1) * 19], &pMainPackage->data[0], 19);
+
+            if(type == 2)
+            {
+                u8 len = UsartType2.RX_Size - 2;
+
+                memcpy(&msgBuf[6 + (index-1) * 19], &pMainPackage->data[0], len);
+                gOppRfFlag.isBusy = 1;
+                gOppRfFlag.isRecv = 1;
+                gOppRfFlag.isRecvHeader = 0;
+                IR_code = REMOTE_MI_HOME;
+            }
+            else if(type == 1)
+            {
+                if(UsartType2.RX_Size != 21)
+                {
+                    gOppRfFlag.isRecvHeader = 0;
+                    printf("RX_Size not 21.\r\n");
+                    return;
+                }
+                memcpy(&msgBuf[6 + (index-1) * 19], &pMainPackage->data[0], 19);
+            }
+            else
+            {
+                gOppRfFlag.isRecvHeader = 0;
+            }
         }
-        else
-        {
-            gOppRfFlag.isRecvHeader = 0;
+
+        if (IR_code) {
+            Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
         }
     }
 }
@@ -824,7 +856,8 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOD_CLK_ENABLE();
 
-    //__HAL_AFIO_REMAP_PD01_ENABLE();
+    //eplos UPD gpio PD0
+    __HAL_AFIO_REMAP_PD01_ENABLE();
     //__HAL_AFIO_REMAP_TIM1_PARTIAL();
 
     /*Configure GPIO pin Output Level */
@@ -1292,14 +1325,15 @@ void UartDebugControlHandle(uint8_t *key)
 }
 
 #if PROJECTOR_OSRAM
-void AppControlEplosHandle(uint8_t *data)
+void AppControlEplosHandle()
 {
-    uint16_t ttt;
+    uint8_t  data[20];
     uint16_t IR_code = 0;
 
-    //printf("AppControlEplosHandle data:%s\r\n",data);
+    memset(data,0,sizeof(data));
+    memcpy(data, &UsartType2.RX_pData[1], 20);
 
-    if(UsartType2.RX_Size<20)
+    if(UsartType2.RX_pData[0]==0x00)//ble mesh msg
     {
         if(data[9]==0xd && data[10]==0x3 && data[11]==0x0)
         {
@@ -1308,13 +1342,21 @@ void AppControlEplosHandle(uint8_t *data)
         }
         else if(data[9]==0x11 && data[10]==0x3 && data[11]==0x1)
         {
-            IR_code = REMOTE_MI_POWER;
-            powerFlag = true;
+            //escape repetitive action
+            if(!powerFlag)
+            {
+                IR_code = REMOTE_MI_POWER;
+                powerFlag = true;
+            }
         }
         else if(data[9]==0x11 && data[10]==0x3 && data[11]==0x0)
         {
-            IR_code = REMOTE_MI_POWER;
-            powerFlag = false;
+            //escape repetitive action
+            if(powerFlag)
+            {
+                IR_code = REMOTE_MI_POWER;
+                powerFlag = false;
+            }
         }
         else if(data[9]==0xd && data[10]==0x3 && data[11]==0x3)
         {
@@ -1341,7 +1383,7 @@ void AppControlEplosHandle(uint8_t *data)
             Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
         }
     }
-    else
+    else //ble gatt msg
     {
         oppRFMsgRecvCallBack(data);
     }
@@ -1350,13 +1392,17 @@ void AppControlEplosHandle(uint8_t *data)
 #endif
 
 #if PROJECTOR_CUBE
-void AppControlCubeHandle(uint8_t *data)
+void AppControlCubeHandle()
 {
     uint16_t IR_code = 0;
     uint8_t pId,fId,keyval;
     PROGRAMS_TYPE_E ptype;
+    uint8_t  data[20];
 
-    if(UsartType2.RX_Size<20)
+    memset(data,0,sizeof(data));
+    memcpy(data, &UsartType2.RX_pData[1], 20);
+
+    if(UsartType2.RX_pData[0]==0x00)//ble mesh msg
     {
         if(data[9]==0xd && data[10]==0x3 && data[11]==0x0)
         {
@@ -1365,13 +1411,21 @@ void AppControlCubeHandle(uint8_t *data)
         }
         else if(data[9]==0x11 && data[10]==0x3 && data[11]==0x1)
         {
-            IR_code = REMOTE_MI_POWER;
-            powerFlag = false;
+            //escape repetitive action
+            if(powerFlag)
+            {
+                IR_code = REMOTE_MI_POWER;
+                powerFlag = false;
+            }
         }
         else if(data[9]==0x11 && data[10]==0x3 && data[11]==0x1)
         {
-            IR_code = REMOTE_MI_POWER;
-            powerFlag = true;
+            //escape repetitive action
+            if(!powerFlag)
+            {
+                IR_code = REMOTE_MI_POWER;
+                powerFlag = true;
+            }
         }
         else if(data[9]==0xd && data[10]==0x3 && data[11]==0x3)
         {

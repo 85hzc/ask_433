@@ -11,8 +11,10 @@ typedef enum
 #endif
     PHOTO,
     FILM,
-
     MAX_PROGRAMS,
+
+    APP,
+
 } PROGRAMS_TYPE_E;
 
 #endif
