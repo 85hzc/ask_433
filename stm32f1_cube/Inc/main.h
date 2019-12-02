@@ -73,13 +73,14 @@
 #define IR_REMOTE           0
 #define SUPPORT_FATFS
 #define SPI_HARD
+#define LARGE_FILE
 
 #define MAX_FILE_NUM        32
 
 #if(PROJECTOR_OSRAM)
 #define MATRIX_SIZE         32
-#define MAX_FILE_SIZE       2048
-#define MAX_FILM_FRAME      512
+#define MAX_FILE_SIZE       2080
+//#define MAX_FILM_FRAME      512
 #define FILE_NAME_LEN       16
 #elif(PROJECTOR_CUBE)
 #define CUBE_RGB_SIZE       30

@@ -15,8 +15,9 @@ static FATFS                    fs;            // Work area (file system object)
 static FIL                      fsrc, fdst;      // file objects
 static uint32_t                 fileOffset = 0;
 BYTE                            photo_filename[MAX_FILE_NUM][FILE_NAME_LEN];
-BYTE                            film_filename[MAX_FILM_FRAME][FILE_NAME_LEN];
-BYTE                            film_foldername[MAX_FILM_FOLDER][FILE_NAME_LEN];
+//BYTE                            film_filename[MAX_FILM_FRAME][FILE_NAME_LEN];
+//BYTE                            film_foldername[MAX_FILM_FOLDER][FILE_NAME_LEN];
+FILE_INFO_S                     film_file[MAX_FILM_FOLDER];
 
 char                            fileBuffer[MAX_FILE_SIZE];
 
@@ -62,18 +63,29 @@ FRESULT SD_ReadPhotoData()
         printf("open [%s] error[%d]!\r\n",photo_filename[photoProgramIdx%fileTotalPhoto],res);
         return res;
     }
+    memset(fileBuffer, 0, MAX_FILE_SIZE);
     f_read(&fsrc, fileBuffer, MAX_FILE_SIZE, &a);
     f_close(&fsrc);
-    printf("[%s] return %d bytes\r\n",photo_filename[photoProgramIdx%fileTotalPhoto],a);
+    printf("\r\n[%s] return %d bytes\r\n",photo_filename[photoProgramIdx%fileTotalPhoto],a);
 
 #if(PROJECTOR_OSRAM)
     for( i=0; i<MATRIX_SIZE; i++ )
     {
         for( j=0; j<MATRIX_SIZE; j++ )
         {
-            osram_buff[i][j] = fileBuffer[i*(64+2)+j*2]-'0';
+            osram_buff[i][j] = fileBuffer[i*(64+1)+j*2]-'0';
         }
     }
+    /*
+    for( i=0; i<MATRIX_SIZE; i++ )
+    {
+        for( j=0; j<MATRIX_SIZE; j++ )
+        {
+            printf("%d ",osram_buff[i][j]);
+        }
+        printf("\r\n");
+    }*/
+    
 #elif(PROJECTOR_CUBE)
     for( i=0; i<CUBE_ROW_SIZE; i++ )
     {
@@ -99,9 +111,9 @@ FRESULT SD_OpenFilmData()
     memset(path, 0, sizeof(path));
 
 #if(PROJECTOR_OSRAM)
-    sprintf(path,"/OSRAM/Film/%s/o-%d.dat",film_foldername[filmProgramIdx%filmTotalProgram],filmFrameIdx%fileTotalFilm[filmProgramIdx%filmTotalProgram]);
+    sprintf(path,"/OSRAM/Film/%s/%s",film_file[filmProgramIdx%filmTotalProgram].foldername,film_file[filmProgramIdx%filmTotalProgram].filename);
 #elif(PROJECTOR_CUBE)
-    sprintf(path,"/WS2801/Film/%s/%s",film_foldername[filmProgramIdx%filmTotalProgram],film_filename[filmFrameIdx%fileTotalFilm[filmProgramIdx%filmTotalProgram]]);
+    sprintf(path,"/WS2801/Film/%s/%s",film_file[filmProgramIdx%filmTotalProgram].foldername,film_file[filmProgramIdx%filmTotalProgram].filename);
 #endif
 
     printf("%s\r\n",path);
@@ -122,13 +134,14 @@ FRESULT SD_ReadFilmData()
     FRESULT res;
     UINT a = 1,i,j;
 
-    printf("fileOffset:%d\r\n",fileOffset);
+    printf("\r\nfileOffset:%d\r\n",fileOffset);
     res = f_lseek(&fsrc, fileOffset);           //偏移到文件尾部（问题：file_size不为0 导致后续写入变慢）
     if(res != 0)
     {
         printf("f_lseek error[%d]!\r\n", res);
         return res;
     }
+    memset(fileBuffer, 0, MAX_FILE_SIZE);
     res = f_read(&fsrc, fileBuffer, MAX_FILE_SIZE, &a);
     if(res != 0)
     {
@@ -136,13 +149,17 @@ FRESULT SD_ReadFilmData()
         return res;
     }
     fileOffset += MAX_FILE_SIZE;
+    if(fileOffset >= film_file[filmProgramIdx%filmTotalProgram].filesize)
+    {
+        fileOffset = 0;
+    }
 
 #if(PROJECTOR_OSRAM)
     for( i=0; i<MATRIX_SIZE; i++ )
     {
         for( j=0; j<MATRIX_SIZE; j++ )
         {
-            osram_buff[i][j] = fileBuffer[i*(64+2)+j*2]-'0';
+            osram_buff[i][j] = fileBuffer[i*(64+1)+j*2]-'0';
         }
     }
 #elif(PROJECTOR_CUBE)
@@ -170,9 +187,9 @@ FRESULT SD_ReadFilmData()
 
 #if(PROJECTOR_OSRAM)
     //sprintf(path,"/OSRAM/Film/%s/%s",film_foldername[filmProgramIdx%filmTotalProgram],film_filename[filmFrameIdx%fileTotalFilm[filmProgramIdx%filmTotalProgram]]);
-    sprintf(path,"/OSRAM/Film/%s/o-%d.dat",film_foldername[filmProgramIdx%filmTotalProgram],filmFrameIdx%fileTotalFilm[filmProgramIdx%filmTotalProgram]);
+    sprintf(path,"/OSRAM/Film/%s/%s",film_file[filmProgramIdx%filmTotalProgram].foldername,film_file[filmProgramIdx%filmTotalProgram].filename);
 #elif(PROJECTOR_CUBE)
-    sprintf(path,"/WS2801/Film/%s/%s",film_foldername[filmProgramIdx%filmTotalProgram],film_filename[filmFrameIdx%fileTotalFilm[filmProgramIdx%filmTotalProgram]]);
+    sprintf(path,"/WS2801/Film/%s/%s",film_file[filmProgramIdx%filmTotalProgram].foldername,film_file[filmProgramIdx%filmTotalProgram].filename);
 #endif
 
     printf("%s\r\n",path);
@@ -183,6 +200,7 @@ FRESULT SD_ReadFilmData()
         printf("open [%s] error[%d]!\r\n", path, res);
         return res;
     }
+    memset(fileBuffer, 0, MAX_FILE_SIZE);
     f_read(&fsrc, fileBuffer, MAX_FILE_SIZE, &a);
     f_close(&fsrc);
 
@@ -191,7 +209,7 @@ FRESULT SD_ReadFilmData()
     {
         for( j=0; j<MATRIX_SIZE; j++ )
         {
-            osram_buff[i][j] = fileBuffer[i*(64+2)+j*2]-'0';
+            osram_buff[i][j] = fileBuffer[i*(64+1)+j*2]-'0';
         }
     }
 #elif(PROJECTOR_CUBE)
@@ -258,7 +276,7 @@ void SD_ReadFilmFileList(char filmId)
 {
     FILINFO finfo;
     DIR dirs;
-    int i_name=0, br;
+    int br;
     FRESULT res;
     char path[FILE_PATH_LEN];
 
@@ -267,18 +285,18 @@ void SD_ReadFilmFileList(char filmId)
     memset(path, 0, sizeof(path));
     
 #if(PROJECTOR_OSRAM)
-    sprintf(path,"/OSRAM/Film/%s",film_foldername[filmId]);
+    sprintf(path,"/OSRAM/Film/%s",film_file[filmId].foldername);
 #elif(PROJECTOR_CUBE)
-    sprintf(path,"/WS2801/Film/%s",film_foldername[filmId]);
+    sprintf(path,"/WS2801/Film/%s",film_file[filmId].foldername);
 #elif(CUBEPLT_MASTER)
-    sprintf(path,"/CUBE/Film/%s",film_foldername[filmId]);
+    sprintf(path,"/CUBE/Film/%s",film_file[filmId].foldername);
 #endif
     /*挂载文件系统*/
     f_mount(0, &fs);
     res =  f_opendir(&dirs, path);
     if (res == FR_OK)
     {
-        printf("film[%s] files ",film_foldername[filmId]);
+        printf("film[%s] files ",film_file[filmId].foldername);
     
         while (f_readdir(&dirs, &finfo) == FR_OK)
         {
@@ -289,13 +307,14 @@ void SD_ReadFilmFileList(char filmId)
                 {
                     break;
                 }
-                stringcopy(film_filename[i_name], (BYTE*)finfo.fname);
-                //printf("          [%d]:%s\r\n",i_name,film_filename[i_name]);
-                i_name++;
+                stringcopy(film_file[filmId].filename, (BYTE*)finfo.fname);
+                film_file[filmId].filesize = finfo.fsize;
+                //printf("          [%s]size:%lld\r\n",film_file[filmId].filename,film_file[filmId].filesize);
+                //i_name++;
             }
         }
-        fileTotalFilm[filmId] = i_name;
-        printf(" %d\r\n",i_name);
+        film_file[filmId].framNum = film_file[filmId].filesize/MAX_FILE_SIZE;
+        printf("          [%s]size:%ld fnum:%d\r\n",film_file[filmId].filename,film_file[filmId].filesize,film_file[filmId].framNum);
     }
     else
     {
@@ -328,8 +347,8 @@ void SD_ReadFilmFolderList(char *path)
                 {
                     break;
                 }
-                stringcopy(film_foldername[i_name], (BYTE*)finfo.fname);
-                printf("          [%d]:%s\r\n",i_name,film_foldername[i_name]);
+                stringcopy(film_file[i_name].foldername, (BYTE*)finfo.fname);
+                printf("          [%d]:%s\r\n",i_name,film_file[i_name].foldername);
                 i_name++;
             }
         }

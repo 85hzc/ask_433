@@ -633,17 +633,30 @@ void OSRAM_play(void)
         else if(programsType==PHOTO)
         {
             res = SD_ReadPhotoData();
-        } 
+        }
         else if(programsType==APP)
         {
+            //printf("msgbuf id[bit]:\r\n");
             for( i=0; i<MATRIX_SIZE; i++ )
             {
                 for( j=0; j<MATRIX_SIZE; j++ )
                 {
+                    //if(j%8==0)
+                    //    printf("\r\n");
 
-                    //printf("msgbuf:%d\r\n",i*4+j/8);
-                    osram_buff[i][j] = msgBuf[i*4+j/8] & (0x80>>j%8);
+                    osram_buff[i][j] = (msgBuf[i*4+j/8] & (0x80>>(j%8))) ? 1 : 0;
+                    //printf("%2x[%d:%d]  ",msgBuf[i*4+j/8], j%8,osram_buff[i][j]);
                 }
+            }
+            
+            printf("\r\n");
+            for( i=0; i<MATRIX_SIZE; i++ )
+            {
+                for( j=0; j<MATRIX_SIZE; j++ )
+                {
+                    printf("%d ",osram_buff[i][j]);
+                }
+                printf("\r\n");
             }
         }
         if(res != FR_OK)

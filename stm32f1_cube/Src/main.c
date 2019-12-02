@@ -53,7 +53,7 @@ uint8_t                  scenMode = 0;
 BOOL                     runFlag;
 BOOL                     powerFlag;
 uint16_t                 fileTotalPhoto;  //静态图片数
-uint16_t                 fileTotalFilm[MAX_FILM_FOLDER]; //每个影片的帧数
+//uint16_t                 fileTotalFilm[MAX_FILM_FOLDER]; //每个影片的帧数
 uint16_t                 filmTotalProgram;  //Film目录下的影片个数
 uint8_t                  single_cmd[CMD_LEN_MAX];
 uint16_t                 actType = 1;
@@ -417,7 +417,7 @@ void oppRFMsgRecvCallBack(uint8_t *data)
                 printf("Not type 0\r\n");
                 return;
             }
-
+            memset(msgBuf,0,sizeof(msgBuf));
             memcpy(&msgBuf[0], &pFirstPackage->data[11], 6);
             gOppRfFlag.isRecvHeader = 1;
         }
@@ -1260,7 +1260,12 @@ void UartDebugControlHandle(uint8_t *key)
     uint16_t ttt;
     uint16_t IR_code = 0;
 
-    printf("UartDebugControlHandle key:%s,len=%d\r\n",key,UsartType3.RX_Size);
+    printf("Debug rx len=%d  [",UsartType3.RX_Size);
+    for(int i=0; i<UsartType3.RX_Size; i++)
+    {
+        printf("0x%02x ",UsartType3.RX_pData[i]);
+    }
+    printf("]\r\n");
 
     if(!strcmp(key,"stop"))
     {
@@ -1290,7 +1295,7 @@ void UartDebugControlHandle(uint8_t *key)
         IR_code = REMOTE_MI_POWER;
         powerFlag = powerFlag==true?false:true;
     }
-    else //flash time and display scens
+    else if(key != NULL)//flash time and display scens
     {
         ttt = atoi(key);
         if(ttt>15)

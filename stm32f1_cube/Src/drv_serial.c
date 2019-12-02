@@ -25,6 +25,7 @@ extern uint8_t           photoProgramIdx;
 extern uint8_t           filmProgramIdx;
 extern uint16_t          filmFrameIdx;
 extern uint8_t           runFlag;
+extern FILE_INFO_S       film_file[MAX_FILM_FOLDER];
 #if(PROJECTOR_OSRAM)
 extern uint8_t           eplosCfgFlag;
 extern uint8_t           eplosSLPxen;
@@ -38,8 +39,8 @@ extern BOOL              cubeRGBStatus;
 extern PROGRAMS_TYPE_E   programsType;
 extern uint8_t           powerFlag;
 
-extern BYTE              film_filename[MAX_FILM_FRAME][FILE_NAME_LEN];
-extern BYTE              film_foldername[MAX_FILM_FOLDER][FILE_NAME_LEN];
+//extern BYTE              film_filename[MAX_FILM_FRAME][FILE_NAME_LEN];
+//extern BYTE              film_foldername[MAX_FILM_FOLDER][FILE_NAME_LEN];
 extern uint16_t          filmTotalProgram;
 
 static int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key);
@@ -59,7 +60,6 @@ void Drv_SERIAL_Init(void)
     act_cmd.wr_id = 0;
 
     memset(single_cmd, 0, sizeof(single_cmd));
-
 }
 
 int8_t Drv_CMD_Handler(uint8_t *cmd)
@@ -152,7 +152,7 @@ static void handle_func_MIkeys(uint16_t key)
                     filmProgramIdx = 0;
 
                 filmFrameIdx = 0;//切换影片频道，从片头开始
-                printf("film [%s]\r\n", film_foldername[filmProgramIdx%filmTotalProgram]);
+                printf("film [%s]\r\n", film_file[filmProgramIdx%filmTotalProgram].foldername);
 
                 #ifdef LARGE_FILE
                 SD_OpenFilmData();
@@ -188,7 +188,7 @@ static void handle_func_MIkeys(uint16_t key)
                     filmProgramIdx=0xff;
 
                 filmFrameIdx = 0;//切换影片频道，从片头开始
-                printf("film [%s]\r\n", film_foldername[filmProgramIdx%filmTotalProgram]);
+                printf("film [%s]\r\n", film_file[filmProgramIdx%filmTotalProgram].foldername);
 
                 #ifdef LARGE_FILE
                 SD_OpenFilmData();
@@ -234,7 +234,7 @@ static void handle_func_MIkeys(uint16_t key)
             if(programsType==FILM)
             {
                 filmFrameIdx = 0;//切换影片频道，从片头开始
-                printf("film [%s]\r\n", film_foldername[filmProgramIdx%filmTotalProgram]);
+                printf("film [%s]\r\n", film_file[filmProgramIdx%filmTotalProgram].foldername);
 
                 #ifdef LARGE_FILE
                 SD_OpenFilmData();

@@ -15,7 +15,7 @@ extern uint8_t                  cube_buff_B[IO_SIZE][CHIP_SIZE];
 
 //extern USART_TransmiteTYPE      Usart1Tx;
 extern PROGRAMS_TYPE_E          programsType;
-extern uint8_t                  filmFrameIdx;
+extern uint16_t                 filmFrameIdx;
 extern UART_HandleTypeDef       huart1;
 
 #if(CUBEPLT_MASTER)

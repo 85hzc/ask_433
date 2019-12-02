@@ -49,5 +49,13 @@ typedef enum
     RGB = G|R|B,
 }RGB_Type_E;
 
+typedef struct
+{
+    DWORD    filesize;
+    uint16_t framNum;
+    uint8_t  filename[FILE_NAME_LEN];
+    uint8_t  foldername[FILE_NAME_LEN];
+}FILE_INFO_S;
+
 #endif
 
