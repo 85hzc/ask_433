@@ -675,6 +675,8 @@ int main(void)
 
 #if(PROJECTOR_MBI5124)
     //reg_config();
+#elif(PROJECTOR_OSRAM)
+    OSRAM_Start();
 #endif
 
     while (1)

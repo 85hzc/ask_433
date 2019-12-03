@@ -25,6 +25,9 @@ extern char                 fileBuffer[MAX_FILE_SIZE];   // file copy buffer
 extern char                 osram_buff[MATRIX_SIZE][MATRIX_SIZE];
 extern uint16_t             filmFrameIdx;
 extern uint8_t              msgBuf[128];
+extern BYTE                 photo_filename[MAX_FILE_NUM][FILE_NAME_LEN];
+extern uint8_t              photoProgramIdx;
+extern uint16_t             fileTotalPhoto;  //¾²Ì¬Í¼Æ¬Êý
 uint64_t                    systime = 0;
 uint64_t                    systime1 = 0;
 uint8_t                     currentAdjustment = 0;//0 ~ 0x1f
@@ -320,6 +323,14 @@ void OSRAM_QuadrantConvert(void)
 {
     uint8_t row, col, tmp, tmpR[16];
 
+    for(uint8_t i = 0; i < 16; i++ )
+    {
+        memcpy(displayMatrix0Q[i], &osram_buff[16+i][0], 16);
+        memcpy(displayMatrix1Q[i], &osram_buff[i][0], 16);
+        memcpy(displayMatrix2Q[i], &osram_buff[i][16], 16);
+        memcpy(displayMatrix3Q[i], &osram_buff[16+i][16], 16);
+    }
+
     //Column Convert
     for(row = 0; row < 16; row++)
     {
@@ -596,6 +607,17 @@ void OSRAM_framRefreshNull(void)
     QT_UPD_L
 }
 
+void OSRAM_DriverEplos()
+{
+
+    OSRAM_QuadrantConvert();
+    //OSRAM_QuadrantShow();
+
+    OSRAM_framRefresh();
+    OSRAM_framRefresh();
+   // OSRAM_framRefreshNull();
+}
+
 void OSRAM_config(void)
 {
 
@@ -632,7 +654,12 @@ void OSRAM_play(void)
         }
         else if(programsType==PHOTO)
         {
-            res = SD_ReadPhotoData();
+            uint8_t path[FILE_PATH_LEN];
+
+            memset(path, 0, FILE_PATH_LEN);
+            sprintf(path,"/OSRAM/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
+
+            res = SD_ReadPhotoData(path);
         }
         else if(programsType==APP)
         {
@@ -664,23 +691,52 @@ void OSRAM_play(void)
             printf("Read [%s] file failed!\r\n",programsType==PHOTO?"photo":"film");
             return;
         }
-        
+        /*
         for( i = 0; i < 16; i++ )
         {
             memcpy(displayMatrix0Q[i], &osram_buff[16+i][0], 16);
             memcpy(displayMatrix1Q[i], &osram_buff[i][0], 16);
             memcpy(displayMatrix2Q[i], &osram_buff[i][16], 16);
             memcpy(displayMatrix3Q[i], &osram_buff[16+i][16], 16);
-        }
+        }*/
 
-        OSRAM_QuadrantConvert();
-        //OSRAM_QuadrantShow();
-        //systime = HAL_GetTick();
-
-        OSRAM_framRefresh();
-        OSRAM_framRefresh();
-       // OSRAM_framRefreshNull();
+        OSRAM_DriverEplos();
     }
+}
+
+void OSRAM_Start()
+{
+    uint8_t path[FILE_PATH_LEN];
+
+    OSRAM_config();
+
+    memset(path, 0, sizeof(path));
+    sprintf(path,"/OSRAM/Start/start1.dat");
+    printf("%s\r\n",path);
+    SD_ReadPhotoData(path);
+    OSRAM_DriverEplos();
+    Delay_ms(3000);
+
+    memset(path, 0, sizeof(path));
+    sprintf(path,"/OSRAM/Start/start2.dat");
+    printf("%s\r\n",path);
+    SD_ReadPhotoData(path);
+    OSRAM_DriverEplos();
+    Delay_ms(3000);
+
+    memset(path, 0, sizeof(path));
+    sprintf(path,"/OSRAM/Start/start3.dat");
+    printf("%s\r\n",path);
+    SD_ReadPhotoData(path);
+    OSRAM_DriverEplos();
+    Delay_ms(3000);
+
+    memset(path, 0, sizeof(path));
+    sprintf(path,"/OSRAM/Start/start4.dat");
+    printf("%s\r\n",path);
+    SD_ReadPhotoData(path);
+    OSRAM_DriverEplos();
+    Delay_ms(3000);
 }
 
 #endif

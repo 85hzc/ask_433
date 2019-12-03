@@ -940,6 +940,10 @@ void WS2801_play(void)
             }
             else
             {
+                uint8_t path[FILE_PATH_LEN];
+
+                memset(path, 0, sizeof(path));
+                sprintf(path,"/WS2801/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
                 res = SD_ReadPhotoData();
                 if(res==FR_OK)
                     flash_flag = true;

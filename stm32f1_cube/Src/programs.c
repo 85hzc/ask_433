@@ -42,31 +42,22 @@ uint8_t                         filmProgramIdx = 0;
 uint16_t                        filmFrameIdx = 0;
 PROGRAMS_TYPE_E                 programsType;
 
-FRESULT SD_ReadPhotoData()
+FRESULT SD_ReadPhotoData(uint8_t *path)
 {
     FRESULT res;
     UINT a = 1,i,j;
-    uint8_t path[FILE_PATH_LEN];
-
-    memset(path, 0, sizeof(path));
-
-#if(PROJECTOR_OSRAM)
-    sprintf(path,"/OSRAM/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
-#elif(PROJECTOR_CUBE)
-    sprintf(path,"/WS2801/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
-#endif
 
     f_mount(0, &fs);
     res = f_open(&fsrc, path, FA_OPEN_EXISTING | FA_READ);
     if(res != 0)
     {
-        printf("open [%s] error[%d]!\r\n",photo_filename[photoProgramIdx%fileTotalPhoto],res);
+        printf("open [%s] error[%d]!\r\n",path,res);
         return res;
     }
     memset(fileBuffer, 0, MAX_FILE_SIZE);
     f_read(&fsrc, fileBuffer, MAX_FILE_SIZE, &a);
     f_close(&fsrc);
-    printf("\r\n[%s] return %d bytes\r\n",photo_filename[photoProgramIdx%fileTotalPhoto],a);
+    printf("\r\n[%s] return %d bytes\r\n",path,a);
 
 #if(PROJECTOR_OSRAM)
     for( i=0; i<MATRIX_SIZE; i++ )

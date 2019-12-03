@@ -86,14 +86,13 @@ void drv_motor_move_forward(uint8_t steps)
 {
     uint8_t i;
 
-    for (i=0,step=0;i<steps;i++)
-    //for (i=0;i<1;i++)
-    //for (i=0;i<10;i++)
+    //for (i=0,step=0;i<steps;i++)
+    for (i=0;i<1;i++)
     {
         step = (step + 1) % MOVE_CYCLE;
         printf("Fstep %d\r\n",motor_steps[step]);
         drv_motor_move_execute(motor_steps[step]);
-        HAL_Delay(10);
+        HAL_Delay(3);
     }
     drv_motor_move_execute(MOVE_STEP_S);
 }
@@ -102,13 +101,13 @@ void drv_motor_move_reverse(uint8_t steps)
 {  
     uint8_t i;
 
-    for (i=0,step=0;i<steps;i++)
-    //for (i=0;i<1;i++)
+    //for (i=0,step=0;i<steps;i++)
+    for (i=0;i<1;i++)
     {
         step = (step + MOVE_CYCLE - 1) % MOVE_CYCLE;
         printf("Rstep %d\r\n",motor_steps[step]);
         drv_motor_move_execute(motor_steps[step]);
-        HAL_Delay(10);
+        HAL_Delay(3);
     }
     drv_motor_move_execute(MOVE_STEP_S);
 }
