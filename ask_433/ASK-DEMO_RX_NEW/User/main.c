@@ -74,6 +74,9 @@ void All_Congfig(void)
     Tim4_Init();
     //Tim1_Init();
     TIM1_PWM_SET();
+    #ifdef PROJECT_SPOTLIGHT
+    Drv_MOTOR_Init();
+    #endif
 }
 
 

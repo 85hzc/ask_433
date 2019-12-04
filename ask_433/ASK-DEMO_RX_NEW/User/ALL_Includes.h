@@ -15,6 +15,9 @@
 
 ///////user////////////
 #include "Ask.h"
+#ifdef PROJECT_SPOTLIGHT
+#include "motor.h"
+#endif
 
 #define PWM_SET     16000
 

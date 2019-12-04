@@ -387,19 +387,29 @@ void ProcessOut()
                 break;
             case SCENE_1:
                 Led_twinkle();
+
+                #ifdef PROJECTOR_SPOTLIGHT
+                Drv_MOTOR_CMD_Handler(CMD_OP_MOTOR_SET_FORWARD, 4);
+                #else
                 Uart_Sendbyte(fm24c_data.dev.key[i].scene);
                 scene = fm24c_data.dev.key[i].scene;
                 pwm_duty = (scene/100.0)*PWM_SET;
                 CH3_PWM_SET(pwm_duty);
                 pwm_duty_last = pwm_duty;
+                #endif
                 break;
             case SCENE_2:
                 Led_twinkle();
+                
+                #ifdef PROJECTOR_SPOTLIGHT
+                Drv_MOTOR_CMD_Handler(CMD_OP_MOTOR_SET_FORWARD, 4);
+                #else
                 Uart_Sendbyte(fm24c_data.dev.key[i].scene);
                 scene = fm24c_data.dev.key[i].scene;
                 pwm_duty = (scene/100.0)*PWM_SET;
                 CH3_PWM_SET(pwm_duty);
                 pwm_duty_last = pwm_duty;
+                #endif
                 break;
             case SCENE_3:
                 Led_twinkle();

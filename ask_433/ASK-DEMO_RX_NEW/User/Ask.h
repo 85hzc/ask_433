@@ -13,7 +13,7 @@
 //#define max_time_l       15      //窄脉冲最大允许时间
 //#define min_time_l       6      //窄脉冲最小允许时间
 
-#if 1 //欧顶灯透传
+#if 0 //欧顶灯透传
 #define ASK_SEND_LEN        4
 #else
 #define ASK_SEND_LEN        3
