@@ -6,11 +6,23 @@
 #include "math.h"
 
 #if(PROJECTOR_CUBE)
+#define CU_P1_PIN_H       GPIOB->BSRR = CU_P1_PIN;                        // 输出高电平
+#define CU_P1_PIN_L       GPIOB->BSRR = (uint32_t)CU_P1_PIN << 16;        // 输出低电平 
+#define CU_P2_PIN_H       GPIOB->BSRR = CU_P2_PIN;                        // 输出高电平
+#define CU_P2_PIN_L       GPIOB->BSRR = (uint32_t)CU_P2_PIN << 16;        // 输出低电平 
+#define CU_P3_PIN_H       GPIOB->BSRR = CU_P3_PIN;                        // 输出高电平
+#define CU_P3_PIN_L       GPIOB->BSRR = (uint32_t)CU_P3_PIN << 16;        // 输出低电平 
+#define CU_P4_PIN_H       GPIOB->BSRR = CU_P4_PIN;                        // 输出高电平
+#define CU_P4_PIN_L       GPIOB->BSRR = (uint32_t)CU_P4_PIN << 16;        // 输出低电平 
+
 extern TIM_HandleTypeDef        htim2;
 extern BOOL                     runFlag;
 extern uint16_t                 actType;
 extern BOOL                     usartTxFlag;
 extern char                     fileBuffer[MAX_FILE_SIZE];
+extern uint8_t                  photoProgramIdx;
+extern uint16_t                 fileTotalPhoto;  //静态图片数
+extern BYTE                     photo_filename[MAX_FILE_NUM][FILE_NAME_LEN];
 extern uint8_t                  cube_buff_G[CUBE_ROW_SIZE][CUBE_COL_SIZE];
 extern uint8_t                  cube_buff_R[CUBE_ROW_SIZE][CUBE_COL_SIZE];
 extern uint8_t                  cube_buff_B[CUBE_ROW_SIZE][CUBE_COL_SIZE];
@@ -216,7 +228,7 @@ void Send_8bits2(uint8_t dat)
 {
     uint8_t i;
 
-    CU_P1_PIN_L;
+    CU_P2_PIN_L;
     delayns_100();
     for(i=0;i<8;i++)
     {
@@ -242,7 +254,7 @@ void Send_8bits3(uint8_t dat)
 {
     uint8_t i;
 
-    CU_P1_PIN_L;
+    CU_P3_PIN_L;
     delayns_100();
     for(i=0;i<8;i++)
     {
@@ -268,7 +280,7 @@ void Send_8bits4(uint8_t dat)
 {
     uint8_t i;
 
-    CU_P1_PIN_L;
+    CU_P4_PIN_L;
     delayns_100();
     for(i=0;i<8;i++)
     {
@@ -387,7 +399,7 @@ void calc_RGB_COL(uint8_t *buff_G,uint8_t *buff_R,uint8_t *buff_B)
             sRGB[1] = (GRB[col+base]>>16)&0xff;
             sRGB[2] = (GRB[col+base])    &0xff;
             #if CUBE_LED_ALG
-            oppColorRGBtoRGBPWM(uwPWM,  sRGB, 255);
+            oppColorRGBtoRGBPWM(uwPWM, sRGB, 255);
             #endif
         }
         else
@@ -396,7 +408,7 @@ void calc_RGB_COL(uint8_t *buff_G,uint8_t *buff_R,uint8_t *buff_B)
             sRGB[1] = (GRB[(col+base)-(CUBE_COL_SIZE)]>>16)&0xff;
             sRGB[2] = (GRB[(col+base)-(CUBE_COL_SIZE)])    &0xff;
             #if CUBE_LED_ALG
-            oppColorRGBtoRGBPWM(uwPWM,  sRGB, 255);
+            oppColorRGBtoRGBPWM(uwPWM, sRGB, 255);
             #endif
         }
         
@@ -836,6 +848,31 @@ void WS2801_framRefresh(void)
     Send_2811_totalPixels2();
 }
 
+void WS2801_framShow(void)
+{
+    uint16_t row,col;
+    
+    for( row=0; row<CUBE_ROW_SIZE; row++ )
+    {
+        printf("--------------------------------------up:%d--------------------------------------\r\n",row);
+        for( col=0; col<CUBE_PILLAR_SIZE; col++ )
+        {
+            printf("%2x%2x%2x ",cube_buff_G[row][col], cube_buff_R[row][col], cube_buff_B[row][col]);
+        }
+        printf("\r\n");
+    }
+
+    for( row=0; row<CUBE_ROW_SIZE; row++ )
+    {
+        printf("--------------------------------------down:%d--------------------------------------\r\n",row);
+        for( col=0; col<CUBE_PILLAR_DOWN_SIZE; col++ )
+        {
+            printf("%2x%2x%2x ",cube_buff_G[row][CUBE_PILLAR_SIZE+col], cube_buff_R[row][CUBE_PILLAR_SIZE+col], cube_buff_B[row][CUBE_PILLAR_SIZE+col]);
+        }
+        printf("\r\n");
+    }
+}
+
 FRESULT WS2801_softScen()
 {
     FRESULT res = FR_TIMEOUT;
@@ -903,6 +940,7 @@ void WS2801_play(void)
 {
     FRESULT res = FR_OK;
     BOOL    flash_flag = false;
+    static BOOL RGB_white_firsttime_flag = true;
     uint8_t row;
 
     if(runFlag || ((programsType!=PHOTO)/* && (HAL_GetTick() - systime>100000)*/))
@@ -920,6 +958,7 @@ void WS2801_play(void)
 
         if(cubeRGBStatus)
         {
+            RGB_white_firsttime_flag = true;
             //printf("cubept=%d,pt=%d\r\n",cubeSoftFrameId,programsType);
             if(programsType==FILM)
             {
@@ -942,9 +981,10 @@ void WS2801_play(void)
             {
                 uint8_t path[FILE_PATH_LEN];
 
-                memset(path, 0, sizeof(path));
+                memset(path, 0, FILE_PATH_LEN);
                 sprintf(path,"/WS2801/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
-                res = SD_ReadPhotoData();
+
+                res = SD_ReadPhotoData(path);
                 if(res==FR_OK)
                     flash_flag = true;
             }
@@ -958,17 +998,26 @@ void WS2801_play(void)
         {
             for( row=0; row<CUBE_ROW_SIZE; row++ )
             {
+            
                 memset(cube_buff_G[row], 0xff, CUBE_COL_SIZE);
                 memset(cube_buff_R[row], 0xff, CUBE_COL_SIZE);
                 memset(cube_buff_B[row], 0xff, CUBE_COL_SIZE);
+                /*
+                memset(cube_buff_G[row], 0, CUBE_COL_SIZE);
+                memset(cube_buff_R[row], 0, CUBE_COL_SIZE);
+                memset(cube_buff_B[row], 0, CUBE_COL_SIZE);*/
             }
-            flash_flag = true;
+            if(RGB_white_firsttime_flag)
+            {
+                flash_flag = true;
+                RGB_white_firsttime_flag = false;
+            }
         }
         
         if(flash_flag)
         {
             //usartTxFlag = true;
-            //WS2801_QuadrantConvert();
+            //WS2801_framShow();
             WS2801_framRefresh();
         }
 #endif

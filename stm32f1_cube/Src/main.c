@@ -62,7 +62,7 @@ BOOL                     usartTxFlag = false;
 
 #if(PROJECTOR_CUBE)
 uint8_t                  usartTxData[3];
-uint16_t                 brightness = 0;
+uint32_t                 brightness;//init in appinit
 BOOL                     lightingStatus;
 
 #elif(CUBEPLT_MASTER)
@@ -96,8 +96,11 @@ extern PROGRAMS_TYPE_E   programsType;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+#if PROJECTOR_CUBE
+#define DEBUG_UART       huart1
+#else
 #define DEBUG_UART       huart3
-
+#endif
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -239,24 +242,25 @@ void Drv_SERIAL_Proc(void)
     }
 
     //uart sub-control interface
-    /*
+    #if(PROJECTOR_CUBE)    //debug port
     if(UsartType1.RX_flag)
     {
         UsartType1.RX_flag = 0;
+
         ptr = UsartType1.RX_pData;
 
-        memset(key, 0, sizeof(key));
-        strncpy(key,ptr,UsartType1.RX_Size);
-        //HAL_UART_Transmit(&DEBUG_UART, UsartType1.RX_pData, UsartType1.RX_Size, 0xffff);
-    }*/
+        memset(data, 0, sizeof(data));
+        strncpy(data, ptr, UsartType1.RX_Size);
+        UartDebugControlHandle(data);
+    }
+    #endif
     
-    //debug
-    if(UsartType3.RX_flag)
+    #if(PROJECTOR_CUBE==0)
+    if(UsartType3.RX_flag)    //debug
     {
         UsartType3.RX_flag = 0;
 
         ptr = UsartType3.RX_pData;
-
         memset(data, 0, sizeof(data));
         strncpy(data, ptr, UsartType3.RX_Size);
         UartDebugControlHandle(data);
@@ -272,6 +276,7 @@ void Drv_SERIAL_Proc(void)
         */
         //HAL_UART_Transmit(&DEBUG_UART, UsartType3.RX_pData, UsartType3.RX_Size, 0xffff);
     }
+    #endif
 
     #if(CUBE_MASTER)
     if(usartTxFlag)
@@ -588,9 +593,12 @@ int main(void)
     MX_DMA_Init();
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
+    #if(PROJECTOR_CUBE==0)
     MX_USART3_UART_Init();
+    #endif
 #if(PROJECTOR_CUBE)
-    MX_TIM1_Init();//for PWM pulse
+    //MX_TIM1_Init();//for PWM pulse
+    MX_TIM3_Init();//for PWM pulse
 #endif
     //MX_TIM2_Init();
 
@@ -623,8 +631,10 @@ int main(void)
     HAL_UART_Receive_DMA(&huart2, UsartType2.RX_pData, UART_RX_LEN);
     __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
 
+    #if(PROJECTOR_CUBE==0)
     HAL_UART_Receive_DMA(&huart3, UsartType3.RX_pData, UART_RX_LEN);
     __HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);
+    #endif
 #else
     HAL_UART_Receive_IT(&huart1, rxData, 5);
 #endif
@@ -643,7 +653,7 @@ int main(void)
     //SD_ReadFileList("/f2");
     //SD_fileCopy();           //²âÊÔº¯Êý
 #endif
-#if 1
+
 #if(PROJECTOR_OSRAM)
     I2C_init();
     SD_ReadPhotoFileList("/OSRAM/Photo");
@@ -670,7 +680,7 @@ int main(void)
         SD_ReadFilmFileList(i);
     }
 #endif
-#endif
+
     printf("Files Ready!\r\n");
 
 #if(PROJECTOR_MBI5124)
@@ -730,6 +740,53 @@ int main(void)
 
 /** System Clock Configuration
 */
+#if (PROJECTOR_CUBE)
+void SystemClock_Config(void)
+{
+   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+    /**Initializes the CPU, AHB and APB busses clocks 
+    */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    /**Initializes the CPU, AHB and APB busses clocks 
+    */
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    /**Configure the Systick interrupt time 
+    */
+    HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/(1000*500));
+
+    /**Configure the Systick 
+    */
+    HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
+    /* SysTick_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+}
+
+#else
 void SystemClock_Config(void)
 {
 
@@ -774,6 +831,7 @@ void SystemClock_Config(void)
     /* SysTick_IRQn interrupt configuration */
     HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
+#endif
 
 /* USART1 init function */
 static void MX_USART1_UART_Init(void)
@@ -931,6 +989,7 @@ static void MX_DMA_Init(void)
 
 
 /* TIM1 init function */
+//PWM mode
 static void MX_TIM1_Init(void)
 {
 
@@ -1101,6 +1160,77 @@ static void MX_TIM2_Init(void)
 #endif
 
 /* TIM3 init function */
+//For IR controller
+#if PROJECTOR_CUBE
+/* TIM3 init function */
+//For white leds
+static void MX_TIM3_Init(void)
+{
+
+  TIM_ClockConfigTypeDef sClockSourceConfig;
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
+
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 4-1;//10KHz
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 999;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.RepetitionCounter = 0;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim3, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  HAL_TIM_MspPostInit(&htim3);
+}
+#else
 static void MX_TIM3_Init(void)
 {
 
@@ -1135,6 +1265,7 @@ static void MX_TIM3_Init(void)
     Error_Handler();
   }
 }
+#endif
 
 
 /*****************************************************************************
@@ -1262,12 +1393,21 @@ void UartDebugControlHandle(uint8_t *key)
     uint16_t ttt;
     uint16_t IR_code = 0;
 
+    #if(PROJECTOR_CUBE)
+    printf("Debug rx len=%d  [",UsartType1.RX_Size);
+    for(int i=0; i<UsartType1.RX_Size; i++)
+    {
+        printf("0x%02x ",UsartType1.RX_pData[i]);
+    }
+    printf("]\r\n");
+    #else
     printf("Debug rx len=%d  [",UsartType3.RX_Size);
     for(int i=0; i<UsartType3.RX_Size; i++)
     {
         printf("0x%02x ",UsartType3.RX_pData[i]);
     }
     printf("]\r\n");
+    #endif
 
     if(!strcmp(key,"stop"))
     {

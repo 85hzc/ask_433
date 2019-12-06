@@ -13,7 +13,7 @@
 #include "config.h"
 
 /* Private variables ---------------------------------------------------------*/
-extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim1,htim3;
 
 static uint32_t tickstart = 0;
 static uint32_t tickexpire = 0;
@@ -31,7 +31,12 @@ extern uint16_t          brightness;
 void Drv_PWM_Init(void)
 {
     #if (PROJECTOR_CUBE)
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);  
+    #if 0
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
+    #else
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+    #endif
     tickstart = HAL_GetTick();
     #elif (PROJECTOR_OSRAM)
     HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_SET);
@@ -40,8 +45,8 @@ void Drv_PWM_Init(void)
 
 void Drv_PWM_Proc(void)
 {
-		uint16_t i;
-	
+    uint16_t i;
+
     if (turn_off)
     {
         if((HAL_GetTick() - tickstart) > tickexpire)
@@ -52,17 +57,28 @@ void Drv_PWM_Proc(void)
             for( i=brightness; i>0; i-- )
             {
                 HAL_Delay(10);
+                #if 0
                 __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4, i-1);
+                #else
+                __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, i-1);
+                __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_2, i-1);
+                #endif
             }
             #endif
         }
     }
 }
 
-void drv_pwm_speed(uint16_t param)
+void drv_pwm_speed(uint32_t param)
 {
     param=param>1000?1000:param;
+
+    #if 0
     __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4, (uint32_t)param);
+    #else
+    __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, (uint32_t)param);
+    __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_2, (uint32_t)param);
+    #endif
 
     #if (PROJECTOR_CUBE)
     if(param)
@@ -72,9 +88,9 @@ void drv_pwm_speed(uint16_t param)
     #endif
 }
 
-void drv_pwm_speed_stepup(uint16_t param)
+void drv_pwm_speed_stepup(uint32_t param)
 {
-    uint16_t i;
+    uint32_t i;
 
     #if (PROJECTOR_CUBE)
     param=param+brightness>1000?1000:param+brightness;
@@ -82,17 +98,22 @@ void drv_pwm_speed_stepup(uint16_t param)
     for( i=brightness; i<param; i++ )
     {
         HAL_Delay(10);
+        #if 0
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4, i+1);
+        #else
+        __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, i+1);
+        __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_2, i+1);
+        #endif
     }
 
     brightness = param;
     #endif
 }
 
-void drv_pwm_speed_stepdown(uint16_t param)
+void drv_pwm_speed_stepdown(uint32_t param)
 {
     #if (PROJECTOR_CUBE)
-    uint16_t i=brightness;
+    uint32_t i=brightness;
 
     if(brightness>param)
     {
@@ -103,7 +124,12 @@ void drv_pwm_speed_stepdown(uint16_t param)
     while(i>param)
     {
         HAL_Delay(10);
+        #if 0
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4, --i);
+        #else
+        __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, --i);
+        __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_2, --i);
+        #endif
     }
     #endif
 }
@@ -121,7 +147,12 @@ void drv_pwm_on(void)
     for( i=0; i<brightness; i++ )
     {
         HAL_Delay(10);
+        #if 0
         __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4, i+1);
+        #else
+        __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, i+1);
+        __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_2, i+1);
+        #endif
     }
     #endif
 }

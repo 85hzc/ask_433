@@ -21,12 +21,16 @@ void LED_GPIO_Init(void)
 
     /*Configure GPIO pins : LED_LEFT_Pin LED_DOWN_Pin LED_UP_Pin LED_RIGHT_Pin 
                            LED1_Pin */
+    #if(PROJECTOR_CUBE)
+    GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11;
+    #else
     GPIO_InitStruct.Pin = LED_Pin;
+    #endif
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
-    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10|GPIO_PIN_11, GPIO_PIN_RESET);
 }
 
 //spi init
@@ -132,7 +136,7 @@ void MBI_GPIO_Init(void)
     HAL_GPIO_WritePin(AG_PORT, AG_CLK_PIN|AG_DIN_PIN|AG_OE_PIN, GPIO_PIN_RESET);
 }
 
-#if PROJECTOR_CUBE
+#if(PROJECTOR_CUBE)
 // 函数：IO初始化
 void WS2801_GPIO_Init(void)
 {
@@ -140,13 +144,12 @@ void WS2801_GPIO_Init(void)
 
     //初始化引脚
     /*Configure GPIO pins :  */
-    GPIO_InitStruct.Pin = CU_P1_PIN|CU_P2_PIN|CU_P3_PIN|CU_P4_PIN;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(WS_PORT, &GPIO_InitStruct);
-
-    HAL_GPIO_WritePin(WS_PORT, CU_P1_PIN|CU_P2_PIN|CU_P3_PIN|CU_P4_PIN, GPIO_PIN_RESET);
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3|GPIO_PIN_4, GPIO_PIN_RESET);
 }
 #endif
 

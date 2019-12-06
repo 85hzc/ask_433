@@ -182,20 +182,11 @@
 
 //#if(PROJECTOR_CUBE)
 
-#define CU_P1_PIN         GPIO_PIN_7
-#define CU_P2_PIN         GPIO_PIN_0
-#define CU_P3_PIN         GPIO_PIN_6
-#define CU_P4_PIN         GPIO_PIN_5
-#define WS_PORT           GPIOA
-
-#define CU_P1_PIN_H       WS_PORT->BSRR = CU_P1_PIN;                        // 输出高电平
-#define CU_P1_PIN_L       WS_PORT->BSRR = (uint32_t)CU_P1_PIN << 16;        // 输出低电平 
-#define CU_P2_PIN_H       WS_PORT->BSRR = CU_P2_PIN;                        // 输出高电平
-#define CU_P2_PIN_L       WS_PORT->BSRR = (uint32_t)CU_P2_PIN << 16;        // 输出低电平 
-#define CU_P3_PIN_H       WS_PORT->BSRR = CU_P3_PIN;                        // 输出高电平
-#define CU_P3_PIN_L       WS_PORT->BSRR = (uint32_t)CU_P3_PIN << 16;        // 输出低电平 
-#define CU_P4_PIN_H       WS_PORT->BSRR = CU_P4_PIN;                        // 输出高电平
-#define CU_P4_PIN_L       WS_PORT->BSRR = (uint32_t)CU_P4_PIN << 16;        // 输出低电平 
+#define CU_P1_PIN         GPIO_PIN_3
+#define CU_P2_PIN         GPIO_PIN_4
+#define CU_P3_PIN         GPIO_PIN_8
+#define CU_P4_PIN         GPIO_PIN_9
+#define WS_PORT           GPIOB
 
 //#elif(CUBEPLT_SLAVE)
 

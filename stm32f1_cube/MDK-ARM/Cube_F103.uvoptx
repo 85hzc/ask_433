@@ -161,7 +161,7 @@
       <DebugFlag>
         <trace>0</trace>
         <periodic>0</periodic>
-        <aLwin>1</aLwin>
+        <aLwin>0</aLwin>
         <aCover>0</aCover>
         <aSer1>0</aSer1>
         <aSer2>0</aSer2>
@@ -199,28 +199,16 @@
       <pMultCmdsp></pMultCmdsp>
       <SystemViewers>
         <Entry>
-          <Name>System Viewer\TIM1</Name>
-          <WinId>35903</WinId>
+          <Name>System Viewer\GPIOB</Name>
+          <WinId>35898</WinId>
         </Entry>
         <Entry>
-          <Name>System Viewer\TIM2</Name>
-          <WinId>35904</WinId>
+          <Name>System Viewer\RCC</Name>
+          <WinId>35901</WinId>
         </Entry>
         <Entry>
           <Name>System Viewer\TIM3</Name>
           <WinId>35905</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\USART1</Name>
-          <WinId>35902</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\USART2</Name>
-          <WinId>35896</WinId>
-        </Entry>
-        <Entry>
-          <Name>System Viewer\USART3</Name>
-          <WinId>35900</WinId>
         </Entry>
       </SystemViewers>
       <DebugDescription>

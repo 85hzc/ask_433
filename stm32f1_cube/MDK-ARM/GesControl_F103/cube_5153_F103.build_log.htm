@@ -27,7 +27,141 @@ Project File Date:  10/31/2019
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'GesControl_F103'
-"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 0 Warning(s).
+compiling ws2801.c...
+../Inc/gpio.h(199): warning:  #47-D: incompatible redefinition of macro "WS_PORT"  (declared at line 189)
+  #define WS_PORT           GPIOA
+..\Src\ws2801.c(43): warning:  #188-D: enumerated type mixed with another type
+  BOOL                            newReqFlag = 
+rue;
+..\Src\ws2801.c(44): warning:  #188-D: enumerated type mixed with another type
+  BOOL                            cubeRGBStatus = 
+rue;//false;
+..\Src\ws2801.c(114): warning:  #223-D: function "delayus" declared implicitly
+      delayus(1);
+..\Src\ws2801.c(205): warning:  #223-D: function "delayns_100" declared implicitly
+      delayns_100();
+..\Src\ws2801.c(211): warning:  #223-D: function "delayns_900" declared implicitly
+              delayns_900();
+..\Src\ws2801.c(218): warning:  #223-D: function "delayns_300" declared implicitly
+              delayns_300();
+..\Src\ws2801.c(220): warning:  #223-D: function "delayns_600" declared implicitly
+              delayns_600();
+..\Src\ws2801.c(233): warning:  #223-D: function "delayns_100" declared implicitly
+      delayns_100();
+..\Src\ws2801.c(239): warning:  #223-D: function "delayns_900" declared implicitly
+              delayns_900();
+..\Src\ws2801.c(246): warning:  #223-D: function "delayns_300" declared implicitly
+              delayns_300();
+..\Src\ws2801.c(248): warning:  #223-D: function "delayns_600" declared implicitly
+              delayns_600();
+..\Src\ws2801.c(259): warning:  #223-D: function "delayns_100" declared implicitly
+      delayns_100();
+..\Src\ws2801.c(265): warning:  #223-D: function "delayns_900" declared implicitly
+              delayns_900();
+..\Src\ws2801.c(272): warning:  #223-D: function "delayns_300" declared implicitly
+              delayns_300();
+..\Src\ws2801.c(274): warning:  #223-D: function "delayns_600" declared implicitly
+              delayns_600();
+..\Src\ws2801.c(285): warning:  #223-D: function "delayns_100" declared implicitly
+      delayns_100();
+..\Src\ws2801.c(291): warning:  #223-D: function "delayns_900" declared implicitly
+              delayns_900();
+..\Src\ws2801.c(298): warning:  #223-D: function "delayns_300" declared implicitly
+              delayns_300();
+..\Src\ws2801.c(300): warning:  #223-D: function "delayns_600" declared implicitly
+              delayns_600();
+..\Src\ws2801.c(325): warning:  #177-D: variable "fixel"  was declared but never referenced
+      unsigned short fixel;
+..\Src\ws2801.c(343): warning:  #177-D: variable "fixel"  was declared but never referenced
+      unsigned short fixel;
+..\Src\ws2801.c(390): warning:  #177-D: variable "row"  was declared but never referenced
+      uint8_t         row=0,col=0,base;
+..\Src\ws2801.c(424): warning:  #177-D: variable "col"  was declared but never referenced
+      uint8_t         row=0,col=0,base;
+..\Src\ws2801.c(424): warning:  #177-D: variable "base"  was declared but never referenced
+      uint8_t         row=0,col=0,base;
+..\Src\ws2801.c(494): warning:  #188-D: enumerated type mixed with another type
+          newReqFlag = 0;
+..\Src\ws2801.c(595): warning:  #223-D: function "memset" declared implicitly
+          memset(cube_buff_G[row], gcolor, CUBE_COL_SIZE);
+..\Src\ws2801.c(485): warning:  #550-D: variable "GRB"  was set but never used
+      uint32_t GRB;
+..\Src\ws2801.c(486): warning:  #177-D: variable "col"  was declared but never referenced
+      uint8_t row,col;
+..\Src\ws2801.c(610): warning:  #188-D: enumerated type mixed with another type
+          newReqFlag = 0;
+..\Src\ws2801.c(614): warning:  #223-D: function "memset" declared implicitly
+              memset(cube_buff_G[row], (GRB[row]>>16)&0xff, CUBE_COL_SIZE);
+..\Src\ws2801.c(621): warning:  #223-D: function "memcpy" declared implicitly
+          memcpy(g, cube_buff_G[0],CUBE_COL_SIZE);
+..\Src\ws2801.c(603): warning:  #177-D: variable "col"  was declared but never referenced
+      uint8_t     row=0,col=0;
+..\Src\ws2801.c(661): warning:  #188-D: enumerated type mixed with another type
+          newReqFlag = 0;
+..\Src\ws2801.c(656): warning:  #177-D: variable "uwPWM"  was declared but never referenced
+      uint16_t        uwPWM [4];
+..\Src\ws2801.c(716): warning:  #188-D: enumerated type mixed with another type
+          newReqFlag = 0;
+..\Src\ws2801.c(753): warning:  #188-D: enumerated type mixed with another type
+          newReqFlag = 0;
+..\Src\ws2801.c(762): warning:  #223-D: function "memset" declared implicitly
+          memset(cube_buff_G[row], buff_G[row], CUBE_COL_SIZE);
+..\Src\ws2801.c(746): warning:  #177-D: variable "uwPWM"  was declared but never referenced
+      uint16_t    uwPWM [ 4 ];
+..\Src\ws2801.c(747): warning:  #177-D: variable "sRGB"  was declared but never referenced
+      uint8_t     sRGB [ 3 ];
+..\Src\ws2801.c(749): warning:  #177-D: variable "col"  was declared but never referenced
+      uint8_t     col,row,r,g,b;
+..\Src\ws2801.c(749): warning:  #177-D: variable "r"  was declared but never referenced
+      uint8_t     col,row,r,g,b;
+..\Src\ws2801.c(749): warning:  #177-D: variable "g"  was declared but never referenced
+      uint8_t     col,row,r,g,b;
+..\Src\ws2801.c(749): warning:  #177-D: variable "b"  was declared but never referenced
+      uint8_t     col,row,r,g,b;
+..\Src\ws2801.c(943): warning:  #188-D: enumerated type mixed with another type
+      BOOL    flash_flag = 
+alse;
+..\Src\ws2801.c(944): warning:  #188-D: enumerated type mixed with another type
+      static BOOL RGB_white_firsttime_flag = 
+rue;
+..\Src\ws2801.c(958): warning:  #188-D: enumerated type mixed with another type
+          runFlag = 0;
+..\Src\ws2801.c(962): warning:  #188-D: enumerated type mixed with another type
+              RGB_white_firsttime_flag = 
+rue;
+..\Src\ws2801.c(966): warning:  #223-D: function "SD_ReadFilmData" declared implicitly
+                  res = SD_ReadFilmData();
+..\Src\ws2801.c(966): warning:  #188-D: enumerated type mixed with another type
+                  res = SD_ReadFilmData();
+..\Src\ws2801.c(970): warning:  #188-D: enumerated type mixed with another type
+                      flash_flag = 
+rue;
+..\Src\ws2801.c(977): warning:  #188-D: enumerated type mixed with another type
+                      flash_flag = 
+rue;
+..\Src\ws2801.c(985): warning:  #223-D: function "memset" declared implicitly
+                  memset(path, 0, FILE_PATH_LEN);
+..\Src\ws2801.c(986): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+                  sprintf(path,"/WS2801/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
+..\Src\ws2801.c(988): warning:  #223-D: function "SD_ReadPhotoData" declared implicitly
+                  res = SD_ReadPhotoData(path);
+..\Src\ws2801.c(988): warning:  #188-D: enumerated type mixed with another type
+                  res = SD_ReadPhotoData(path);
+..\Src\ws2801.c(990): warning:  #188-D: enumerated type mixed with another type
+                      flash_flag = 
+rue;
+..\Src\ws2801.c(1003): warning:  #223-D: function "memset" declared implicitly
+                  memset(cube_buff_G[row], 0xff, CUBE_COL_SIZE);
+..\Src\ws2801.c(1013): warning:  #188-D: enumerated type mixed with another type
+                  flash_flag = 
+rue;
+..\Src\ws2801.c(1014): warning:  #188-D: enumerated type mixed with another type
+                  RGB_white_firsttime_flag = 
+alse;
+..\Src\ws2801.c: 60 warnings, 0 errors
+linking...
+Program Size: Code=38422 RO-data=730 RW-data=292 ZI-data=11100  
+"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 60 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -50,7 +184,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.1
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>

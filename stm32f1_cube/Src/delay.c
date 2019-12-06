@@ -37,9 +37,12 @@ void delayns_100()
 }
 void delayns_300()
 {
-    __ASM("nop");    __ASM("nop");
-    __ASM("nop");    __ASM("nop");
-    __ASM("nop");    __ASM("nop");
+    __ASM("nop");
+    __ASM("nop");
+    __ASM("nop");
+    __ASM("nop");
+    //__ASM("nop");
+    //__ASM("nop");
 }
 
 void delayns_600()
@@ -56,12 +59,12 @@ void delayns_600()
     __ASM("nop");    __ASM("nop");
     __ASM("nop");    __ASM("nop");
     __ASM("nop");    __ASM("nop");
+    /*__ASM("nop");    __ASM("nop");
     __ASM("nop");    __ASM("nop");
     __ASM("nop");    __ASM("nop");
     __ASM("nop");    __ASM("nop");
     __ASM("nop");    __ASM("nop");
-    __ASM("nop");    __ASM("nop");
-    __ASM("nop");    __ASM("nop");
+    __ASM("nop");    __ASM("nop");*/
 }
 
 
