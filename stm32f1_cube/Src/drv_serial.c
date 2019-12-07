@@ -26,6 +26,8 @@ extern uint8_t           filmProgramIdx;
 extern uint16_t          filmFrameIdx;
 extern uint8_t           runFlag;
 extern FILE_INFO_S       film_file[MAX_FILM_FOLDER];
+extern BYTE              photo_filename[MAX_FILE_NUM][FILE_NAME_LEN];
+extern uint16_t          fileTotalPhoto;  //静态图片数
 #if(PROJECTOR_OSRAM)
 extern uint8_t           eplosCfgFlag;
 extern uint8_t           eplosSLPxen;
@@ -121,6 +123,7 @@ static void handle_func_MIkeys(uint16_t key)
             #if(PROJECTOR_CUBE)
             runFlag = true;
             cubeRGBStatus = !cubeRGBStatus;
+            printf("cubeRGBStatus [%d]\r\n", cubeRGBStatus);
             #elif(PROJECTOR_OSRAM)
             runFlag = true;
             programsType = APP;
@@ -134,47 +137,65 @@ static void handle_func_MIkeys(uint16_t key)
             #if(PROJECTOR_OSRAM)
             eplosSLPxen = !powerFlag;
             eplosCfgFlag = true;
+            runFlag = true;
             #elif(PROJECTOR_CUBE)
+            printf("Power:%d\r\n",powerFlag);
             if(powerFlag)
                 drv_pwm_on();
             else
                 drv_pwm_off(0);
             #endif
-            runFlag = true;
             break;
 
         case REMOTE_MI_UP:
             if(programsType==FILM)
             {
-                if(filmProgramIdx<0xff)
-                    filmProgramIdx++;
-                else
-                    filmProgramIdx = 0;
-
-                filmFrameIdx = 0;//切换影片频道，从片头开始
-                printf("film [%s]\r\n", film_file[filmProgramIdx%filmTotalProgram].foldername);
-
-                #ifdef LARGE_FILE
-                SD_OpenFilmData();
+                #if(PROJECTOR_CUBE)
+                if(cubeRGBStatus)
                 #endif
+                {
+                    if(filmProgramIdx<0xff)
+                        filmProgramIdx++;
+                    else
+                        filmProgramIdx = 0;
+
+                    filmFrameIdx = 0;//切换影片频道，从片头开始
+
+                    #ifdef LARGE_FILE
+                    SD_OpenFilmData();
+                    #endif
+                }
+                printf("film [%s]\r\n", film_file[filmProgramIdx%filmTotalProgram].foldername);
             }
             else if(programsType==PHOTO)
             {
-                if(photoProgramIdx<0xff)
-                    photoProgramIdx++;
-                else
-                    photoProgramIdx = 0;
+                #if(PROJECTOR_CUBE)
+                if(cubeRGBStatus)
+                #endif
+                {
+                    if(photoProgramIdx<0xff)
+                        photoProgramIdx++;
+                    else
+                        photoProgramIdx = 0;
 
-                runFlag = true;
+                    runFlag = true;
+                }
+                printf("photo [%s]\r\n", photo_filename[photoProgramIdx%fileTotalPhoto]);
             }
             #if(CUBE_MASTER)
             else
             {
-                newReqFlag = true;
-                if(cubeSoftFrameId<0xff)
-                    cubeSoftFrameId++;
-                else
-                    cubeSoftFrameId = 0;
+                #if(PROJECTOR_CUBE)
+                if(cubeRGBStatus)
+                #endif
+                {
+                    newReqFlag = true;
+                    if(cubeSoftFrameId<0xff)
+                        cubeSoftFrameId++;
+                    else
+                        cubeSoftFrameId = 0;
+                }
+                printf("soft [%d]\r\n", cubeSoftFrameId%PROGRAM_NUM);
             }
             #endif
             break;
@@ -182,34 +203,52 @@ static void handle_func_MIkeys(uint16_t key)
         case REMOTE_MI_DOWN:
             if(programsType==FILM)
             {
-                if(filmProgramIdx>0)
-                    filmProgramIdx--;
-                else
-                    filmProgramIdx=0xff;
-
-                filmFrameIdx = 0;//切换影片频道，从片头开始
-                printf("film [%s]\r\n", film_file[filmProgramIdx%filmTotalProgram].foldername);
-
-                #ifdef LARGE_FILE
-                SD_OpenFilmData();
+                #if(PROJECTOR_CUBE)
+                if(cubeRGBStatus)
                 #endif
+                {
+                    if(filmProgramIdx>0)
+                        filmProgramIdx--;
+                    else
+                        filmProgramIdx=0xff;
+
+                    filmFrameIdx = 0;//切换影片频道，从片头开始
+
+                    #ifdef LARGE_FILE
+                    SD_OpenFilmData();
+                    #endif
+                }
+                printf("film [%s]\r\n", film_file[filmProgramIdx%filmTotalProgram].foldername);
             }
             else if(programsType==PHOTO)
             {
-                if(photoProgramIdx>0)
-                    photoProgramIdx--;
-                else
-                    photoProgramIdx=0xff;
+                #if(PROJECTOR_CUBE)
+                if(cubeRGBStatus)
+                #endif
+                {
+                    if(photoProgramIdx>0)
+                        photoProgramIdx--;
+                    else
+                        photoProgramIdx=0xff;
 
-                runFlag = true;
+                    runFlag = true;
+                }
+                printf("photo [%s]\r\n", photo_filename[photoProgramIdx%fileTotalPhoto]);
             }
             #if(CUBE_MASTER)
             else
             {
-                if(cubeSoftFrameId>0)
-                    cubeSoftFrameId--;
-                else
-                    cubeSoftFrameId=0xff;
+                #if(PROJECTOR_CUBE)
+                if(cubeRGBStatus)
+                #endif
+                {
+                    newReqFlag = true;
+                    if(cubeSoftFrameId>0)
+                        cubeSoftFrameId--;
+                    else
+                        cubeSoftFrameId=0xff;
+                }
+                printf("soft [%d]\r\n", cubeSoftFrameId%PROGRAM_NUM);
             }
             #endif
             break;
@@ -227,17 +266,31 @@ static void handle_func_MIkeys(uint16_t key)
             break;
 
         case REMOTE_MI_OK:
-            runFlag = true;
-            //photoIdx=0;
-            programsType = (programsType+1)%MAX_PROGRAMS;
-
-            if(programsType==FILM)
+            #if(PROJECTOR_CUBE)
+            if(cubeRGBStatus)
+            #endif
             {
-                filmFrameIdx = 0;//切换影片频道，从片头开始
-                printf("film [%s]\r\n", film_file[filmProgramIdx%filmTotalProgram].foldername);
+                runFlag = true;
+                programsType = (programsType+1)%MAX_PROGRAMS;
 
-                #ifdef LARGE_FILE
-                SD_OpenFilmData();
+                if(programsType==FILM)
+                {
+                    filmFrameIdx = 0;//切换影片频道，从片头开始
+                    printf("film [%s]\r\n", film_file[filmProgramIdx%filmTotalProgram].foldername);
+
+                    #ifdef LARGE_FILE
+                    SD_OpenFilmData();
+                    #endif
+                }
+                else if(programsType==PHOTO)
+                {
+                    printf("photo [%s]\r\n", photo_filename[photoProgramIdx%fileTotalPhoto]);
+                }
+                #if(PROJECTOR_CUBE)
+                else if(programsType==AUTO_ALGORITHM)
+                {
+                    printf("soft [%d]\r\n", cubeSoftFrameId%PROGRAM_NUM);
+                }
                 #endif
             }
             break;

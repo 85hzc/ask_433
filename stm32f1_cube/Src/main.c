@@ -729,12 +729,6 @@ int main(void)
 
         //Delay_ms(5);
         Drv_SERIAL_Proc();
-/*
-        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
-        Delay_ms(100);
-        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
-        Delay_ms(100);
-*/
     }
 }
 
@@ -1559,19 +1553,21 @@ void AppControlCubeHandle()
         else if(data[9]==0x11 && data[10]==0x3 && data[11]==0x1)
         {
             //escape repetitive action
-            if(powerFlag)
-            {
-                IR_code = REMOTE_MI_POWER;
-                powerFlag = false;
-            }
-        }
-        else if(data[9]==0x11 && data[10]==0x3 && data[11]==0x1)
-        {
-            //escape repetitive action
             if(!powerFlag)
             {
                 IR_code = REMOTE_MI_POWER;
                 powerFlag = true;
+                //RGB_white_firsttime_flag = true;
+            }
+        }
+        else if(data[9]==0x11 && data[10]==0x3 && data[11]==0x0)
+        {
+            //escape repetitive action
+            if(powerFlag)
+            {
+                IR_code = REMOTE_MI_POWER;
+                powerFlag = false;
+                //RGB_white_firsttime_flag = true;
             }
         }
         else if(data[9]==0xd && data[10]==0x3 && data[11]==0x3)
@@ -1590,7 +1586,7 @@ void AppControlCubeHandle()
         {
             IR_code = REMOTE_MI_PLUS;
         }
-        else if(data[9]==0x13 && data[10]==0x3 && data[11]==0x1)
+        else if(data[9]==0x13 && data[10]==0x3 && data[11]==0x0)
         {
             IR_code = REMOTE_MI_MINUS;
         }

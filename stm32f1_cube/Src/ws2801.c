@@ -38,6 +38,7 @@ extern uint16_t                 brightness;
 //uint8_t                         GData3[CHIP_SIZE], RData3[CHIP_SIZE], BData3[CHIP_SIZE];
 //uint8_t                         GData4[CHIP_SIZE], RData4[CHIP_SIZE], BData4[CHIP_SIZE];
 
+BOOL                            RGB_white_firsttime_flag = true;
 uint8_t                         cubeSoftFrameId = 0;
 BOOL                            newReqFlag = true;
 BOOL                            cubeRGBStatus = false;
@@ -896,21 +897,21 @@ FRESULT WS2801_softScen()
             res = FR_OK;
         }
     }
+    else if(cubeSoftFrameId%PROGRAM_NUM == 2)
+    {
+        //if(HAL_GetTick()-systime > 1000)
+        {
+            ScenceCycle();
+            //systime = HAL_GetTick();
+            res = FR_OK;
+        }
+    }
     else if(cubeSoftFrameId%PROGRAM_NUM == 3)
     {
         //if(HAL_GetTick()-systime > 1000)
         {
             //printf("Layering\r\n");
             ScenceWaving();
-            //systime = HAL_GetTick();
-            res = FR_OK;
-        }
-    }
-    else if(cubeSoftFrameId%PROGRAM_NUM == 2)
-    {
-        //if(HAL_GetTick()-systime > 1000)
-        {
-            ScenceCycle();
             //systime = HAL_GetTick();
             res = FR_OK;
         }
@@ -940,7 +941,6 @@ void WS2801_play(void)
 {
     FRESULT res = FR_OK;
     BOOL    flash_flag = false;
-    static BOOL RGB_white_firsttime_flag = true;
     uint8_t row;
 
     if(runFlag || ((programsType!=PHOTO)/* && (HAL_GetTick() - systime>100000)*/))
@@ -998,14 +998,18 @@ void WS2801_play(void)
         {
             for( row=0; row<CUBE_ROW_SIZE; row++ )
             {
-            
-                memset(cube_buff_G[row], 0xff, CUBE_COL_SIZE);
-                memset(cube_buff_R[row], 0xff, CUBE_COL_SIZE);
-                memset(cube_buff_B[row], 0xff, CUBE_COL_SIZE);
-                /*
-                memset(cube_buff_G[row], 0, CUBE_COL_SIZE);
-                memset(cube_buff_R[row], 0, CUBE_COL_SIZE);
-                memset(cube_buff_B[row], 0, CUBE_COL_SIZE);*/
+                /*if(powerFlag)
+                {
+                    memset(cube_buff_G[row], 0xff, CUBE_COL_SIZE);
+                    memset(cube_buff_R[row], 0xff, CUBE_COL_SIZE);
+                    memset(cube_buff_B[row], 0xff, CUBE_COL_SIZE);
+                }
+                else*/
+                {
+                    memset(cube_buff_G[row], 0, CUBE_COL_SIZE);
+                    memset(cube_buff_R[row], 0, CUBE_COL_SIZE);
+                    memset(cube_buff_B[row], 0, CUBE_COL_SIZE);
+                }
             }
             if(RGB_white_firsttime_flag)
             {
