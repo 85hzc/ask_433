@@ -54,14 +54,14 @@
 #define PROJECTOR_MBI5124   0
 
 //OSRAM eplos芯片投射灯方案
-#define PROJECTOR_OSRAM     0
+#define PROJECTOR_OSRAM     1
 
 //gpio控制16*16方案
 #define PROJECTOR_MCUGPIO   0
 
 //分体系列立体吊灯方案
-#define PROJECTOR_CUBE      1
-#define CUBE_MASTER         1
+#define PROJECTOR_CUBE      0
+#define CUBE_MASTER         0
 #define CUBE_SLAVE          0
 #define CUBE_LED_ALG        1
 
@@ -69,6 +69,8 @@
 #define CUBEPLT_MASTER      0
 #define CUBEPLT_SLAVE       0
 
+//调焦射灯
+#define PROJECTOR_FOCUS     0
 
 #define IR_REMOTE           0
 #define SUPPORT_FATFS
@@ -76,16 +78,14 @@
 #define LARGE_FILE
 
 #define MAX_FILE_NUM        32
+#define FILE_NAME_LEN_SHORT 13  //short file name fixed 13
 
 #if(PROJECTOR_OSRAM)
 #define MATRIX_SIZE         32
 #define MAX_FILE_SIZE       2080
-//#define MAX_FILM_FRAME      512
-#define FILE_NAME_LEN       16
 #elif(PROJECTOR_CUBE)
 #define CUBE_RGB_SIZE       30
-
-#define CUBE_ROW_SIZE       30
+#define CUBE_ROW_SIZE       24
 #define CUBE_PILLAR_SIZE    22
 #define CUBE_PILLAR_DOWN_SIZE  10
 #define CUBE_COL_SIZE       (CUBE_PILLAR_SIZE+CUBE_PILLAR_DOWN_SIZE)
@@ -93,8 +93,7 @@
 #define CHIP_SIZE           (CUBE_ROW_SIZE*CUBE_PILLAR_SIZE)
 #define CHIP_SIZE_DOWN      (CUBE_ROW_SIZE*CUBE_PILLAR_DOWN_SIZE)
 
-#define MAX_FILE_SIZE       2880//(4096*4)       //256 must be % comfort
-#define FILE_NAME_LEN       16
+#define MAX_FILE_SIZE       2304//(4096*4)       //256 must be % comfort
 #define PROGRAM_NUM         6
 #define GRAY_STEP           2
 #define LIGHTING_STEP       150

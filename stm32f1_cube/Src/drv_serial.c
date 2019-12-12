@@ -22,16 +22,25 @@ static uint32_t          tickstart;
 
 extern uint8_t           single_cmd[CMD_LEN_MAX];
 extern uint8_t           photoProgramIdx;
+extern uint8_t           lightProgramIdx;
 extern uint8_t           filmProgramIdx;
 extern uint16_t          filmFrameIdx;
 extern uint8_t           runFlag;
+
+#if(PROJECTOR_OSRAM || PROJECTOR_CUBE)
 extern FILE_INFO_S       film_file[MAX_FILM_FOLDER];
-extern BYTE              photo_filename[MAX_FILE_NUM][FILE_NAME_LEN];
-extern uint16_t          fileTotalPhoto;  //静态图片数
+extern BYTE              photo_filename[MAX_FILE_NUM][FILE_NAME_LEN_SHORT];
+extern BYTE              light_filename[MAX_FILE_NUM][FILE_NAME_LEN_SHORT];
+extern uint16_t          fileTotalPhoto;
+extern uint16_t          fileTotallight;
+#endif
+
 #if(PROJECTOR_OSRAM)
 extern uint8_t           eplosCfgFlag;
 extern uint8_t           eplosSLPxen;
 extern uint8_t           currentAdjustment;
+extern uint8_t           currentAdjustId;//0 ~ 0x1f
+extern uint8_t           currentAdjustList[4];
 #elif(PROJECTOR_CUBE)
 extern uint8_t           cubeSoftFrameId;
 extern uint8_t           newReqFlag;
@@ -123,6 +132,7 @@ static void handle_func_MIkeys(uint16_t key)
             #if(PROJECTOR_CUBE)
             runFlag = true;
             cubeRGBStatus = !cubeRGBStatus;
+            newReqFlag = true;
             printf("cubeRGBStatus [%d]\r\n", cubeRGBStatus);
             #elif(PROJECTOR_OSRAM)
             runFlag = true;
@@ -138,7 +148,7 @@ static void handle_func_MIkeys(uint16_t key)
             eplosSLPxen = !powerFlag;
             eplosCfgFlag = true;
             runFlag = true;
-            #elif(PROJECTOR_CUBE)
+            #elif(PROJECTOR_CUBE || PROJECTOR_FOCUS)
             printf("Power:%d\r\n",powerFlag);
             if(powerFlag)
                 drv_pwm_on();
@@ -160,12 +170,15 @@ static void handle_func_MIkeys(uint16_t key)
                         filmProgramIdx = 0;
 
                     filmFrameIdx = 0;//切换影片频道，从片头开始
-
+                    #if(PROJECTOR_CUBE||PROJECTOR_OSRAM)
                     #ifdef LARGE_FILE
                     SD_OpenFilmData();
                     #endif
+                    #endif
                 }
+                #if(PROJECTOR_CUBE||PROJECTOR_OSRAM)
                 printf("film [%s]\r\n", film_file[filmProgramIdx%filmTotalProgram].foldername);
+                #endif
             }
             else if(programsType==PHOTO)
             {
@@ -180,8 +193,22 @@ static void handle_func_MIkeys(uint16_t key)
 
                     runFlag = true;
                 }
+                #if(PROJECTOR_CUBE||PROJECTOR_OSRAM)
                 printf("photo [%s]\r\n", photo_filename[photoProgramIdx%fileTotalPhoto]);
+                #endif
             }
+            #if(PROJECTOR_OSRAM)
+            else if(programsType==LIGHT)
+            {
+                if(lightProgramIdx<0xff)
+                    lightProgramIdx++;
+                else
+                    lightProgramIdx = 0;
+
+                runFlag = true;
+                printf("photo [%s]\r\n", light_filename[lightProgramIdx%fileTotallight]);
+            }
+            #endif
             #if(CUBE_MASTER)
             else
             {
@@ -213,12 +240,15 @@ static void handle_func_MIkeys(uint16_t key)
                         filmProgramIdx=0xff;
 
                     filmFrameIdx = 0;//切换影片频道，从片头开始
-
+                    #if(PROJECTOR_CUBE||PROJECTOR_OSRAM)
                     #ifdef LARGE_FILE
                     SD_OpenFilmData();
                     #endif
+                    #endif
                 }
+                #if(PROJECTOR_CUBE||PROJECTOR_OSRAM)
                 printf("film [%s]\r\n", film_file[filmProgramIdx%filmTotalProgram].foldername);
+                #endif
             }
             else if(programsType==PHOTO)
             {
@@ -233,7 +263,9 @@ static void handle_func_MIkeys(uint16_t key)
 
                     runFlag = true;
                 }
+                #if(PROJECTOR_CUBE||PROJECTOR_OSRAM)
                 printf("photo [%s]\r\n", photo_filename[photoProgramIdx%fileTotalPhoto]);
+                #endif
             }
             #if(CUBE_MASTER)
             else
@@ -272,7 +304,7 @@ static void handle_func_MIkeys(uint16_t key)
             {
                 runFlag = true;
                 programsType = (programsType+1)%MAX_PROGRAMS;
-
+                #if(PROJECTOR_CUBE||PROJECTOR_OSRAM)
                 if(programsType==FILM)
                 {
                     filmFrameIdx = 0;//切换影片频道，从片头开始
@@ -292,6 +324,7 @@ static void handle_func_MIkeys(uint16_t key)
                     printf("soft [%d]\r\n", cubeSoftFrameId%PROGRAM_NUM);
                 }
                 #endif
+                #endif
             }
             break;
 
@@ -299,25 +332,36 @@ static void handle_func_MIkeys(uint16_t key)
             break;
         case REMOTE_MI_PLUS:
             #if(PROJECTOR_OSRAM)
-            if(currentAdjustment<0x1f)
+            //if(currentAdjustment<0x1f)
             {
-                currentAdjustment++;
+                //currentAdjustment++;
+                currentAdjustment = currentAdjustList[currentAdjustId++%4];
+                printf("currentAdjust %d\r\n",currentAdjustment);
                 eplosCfgFlag = true;
             }
             #elif(PROJECTOR_CUBE)
-            drv_pwm_speed_stepup(LIGHTING_STEP);
+            if(powerFlag)
+            {
+                drv_pwm_speed_stepup(LIGHTING_STEP);
+            }
             #endif
             break;
 
         case REMOTE_MI_MINUS:
             #if(PROJECTOR_OSRAM)
+            runFlag = true;
+            programsType = FIXED;
+            /*
             if(currentAdjustment>0)
             {
                 currentAdjustment--;
                 eplosCfgFlag = true;
-            }
+            }*/
             #elif(PROJECTOR_CUBE)
-            drv_pwm_speed_stepdown(LIGHTING_STEP);
+            if(powerFlag)
+            {
+                drv_pwm_speed_stepdown(LIGHTING_STEP);
+            }
             #endif
             break;
 
@@ -326,6 +370,7 @@ static void handle_func_MIkeys(uint16_t key)
     }
 }
 
+#if(PROJECTOR_OSRAM)
 static int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param)
 {
     int8_t rc = HAL_OK;
@@ -342,6 +387,7 @@ static int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param)
 
     return rc;
 }
+#endif
 
 static int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key)
 {
@@ -378,7 +424,9 @@ static int8_t Drv_IR_CMD_Handler(uint8_t code, uint16_t key)
             {
                 //repeatflag = 0;
 
+                #if(!PROJECTOR_CUBE)
                 if(powerFlag || (!powerFlag&&key==REMOTE_MI_POWER))
+                #endif
                     handle_func_MIkeys(key);
             }
         }

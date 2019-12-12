@@ -53,6 +53,8 @@ uint8_t                  scenMode = 0;
 BOOL                     runFlag;
 BOOL                     powerFlag;
 uint16_t                 fileTotalPhoto;  //静态图片数
+uint16_t                 fileTotallight;  //静态图片数
+
 //uint16_t                 fileTotalFilm[MAX_FILM_FOLDER]; //每个影片的帧数
 uint16_t                 filmTotalProgram;  //Film目录下的影片个数
 uint8_t                  single_cmd[CMD_LEN_MAX];
@@ -64,7 +66,10 @@ BOOL                     usartTxFlag = false;
 uint8_t                  usartTxData[3];
 uint32_t                 brightness;//init in appinit
 BOOL                     lightingStatus;
-
+#elif(PROJECTOR_FOCUS)
+BOOL                     lightingStatus;
+BOOL                     motorFlag = 0;
+uint8_t                  motor_status = 0xff;//stop
 #elif(CUBEPLT_MASTER)
 uint8_t                  usartTxData[1024];
 #elif(PROJECTOR_OSRAM)
@@ -82,14 +87,14 @@ DMA_HandleTypeDef        hdma_usart1_rx, hdma_usart2_rx, hdma_usart3_rx;
 DMA_HandleTypeDef        hdma_usart1_tx, hdma_usart2_tx, hdma_usart3_tx;
 USART_RECEIVETYPE        UsartType1, UsartType2, UsartType3;
 
-TIM_HandleTypeDef        htim1,htim2;
-TIM_HandleTypeDef        htim3;
+TIM_HandleTypeDef        htim1,htim2,htim3;;
 SPI_HandleTypeDef        hspi1,hspi2;
 
 extern volatile uint16_t I2C_SDA_PIN;
 extern volatile uint16_t I2C_SCL_PIN;
 
 extern uint8_t           photoProgramIdx;
+extern uint8_t           lightProgramIdx;
 extern uint8_t           filmProgramIdx;
 extern uint16_t          filmFrameIdx;
 extern PROGRAMS_TYPE_E   programsType;
@@ -193,6 +198,7 @@ void appInit(void)
     filmProgramIdx = 0;
     filmFrameIdx = 0;
     photoProgramIdx = 0;
+    lightProgramIdx = 0;
 
     oppRFTaskInit();
     Drv_SERIAL_Init();
@@ -231,18 +237,18 @@ void Drv_SERIAL_Proc(void)
         printf("]\r\n");
         #endif
 
-        #if PROJECTOR_CUBE
+        #if(PROJECTOR_CUBE)
         AppControlCubeHandle();
         #elif(CUBEPLT_SLAVE)
         AppControlCubePltHandle();
-        #elif PROJECTOR_OSRAM
+        #elif(PROJECTOR_OSRAM)
         AppControlEplosHandle();
         #endif
         //HAL_UART_Transmit(&DEBUG_UART, UsartType1.RX_pData, UsartType1.RX_Size, 0xffff);
     }
 
     //uart sub-control interface
-    #if(PROJECTOR_CUBE)    //debug port
+    #if(PROJECTOR_CUBE || PROJECTOR_FOCUS)    //debug port
     if(UsartType1.RX_flag)
     {
         UsartType1.RX_flag = 0;
@@ -317,6 +323,27 @@ void Drv_SERIAL_Proc(void)
         (void)Drv_CMD_Handler(single_cmd);
     }
 }
+
+#if(PROJECTOR_FOCUS)
+void Drv_MOTOR_Proc()
+{
+    if(motor_status==1)
+    {
+        motorFlag = 1;
+        motor_loop_forward();
+    }
+    else if(motor_status==2)
+    {
+        motorFlag = 1;
+        motor_loop_reverse();
+    }
+    else if(motorFlag)
+    {
+        motorFlag = 0;
+        motor_loop_stop();
+    }
+}
+#endif
 
 #if(CUBE_MASTER||PROJECTOR_OSRAM)
 /******************************************************************************
@@ -599,8 +626,8 @@ int main(void)
 #if(PROJECTOR_CUBE)
     //MX_TIM1_Init();//for PWM pulse
     MX_TIM3_Init();//for PWM pulse
-#endif
     //MX_TIM2_Init();
+#endif
 
 #if(IR_REMOTE)
     //MX_TIM3_Init();//for IR INT
@@ -657,6 +684,7 @@ int main(void)
 #if(PROJECTOR_OSRAM)
     I2C_init();
     SD_ReadPhotoFileList("/OSRAM/Photo");
+    SD_ReadLightFileList("/OSRAM/Light");
     SD_ReadFilmFolderList("/OSRAM/Film");
     
     for(int i=0;i < filmTotalProgram; i++)
@@ -693,6 +721,10 @@ int main(void)
     {
 #if(PROJECTOR_CUBE)
         Drv_PWM_Proc();
+#endif
+
+#if(PROJECTOR_FOCUS)
+        Drv_MOTOR_Proc();
 #endif
 
 #if(PROJECTOR_MBI5153)
@@ -832,7 +864,11 @@ static void MX_USART1_UART_Init(void)
 {
 
     huart1.Instance = USART1;
+    #if (PROJECTOR_FOCUS)
+    huart1.Init.BaudRate = 9600;
+    #else
     huart1.Init.BaudRate = 115200;
+    #endif
     huart1.Init.WordLength = UART_WORDLENGTH_8B;
     huart1.Init.StopBits = UART_STOPBITS_1;
     huart1.Init.Parity = UART_PARITY_NONE;
@@ -945,6 +981,8 @@ static void MX_GPIO_Init(void)
     WS2801_GPIO_Init();
 #elif(CUBEPLT_SLAVE)
     CUBE_GPIO_Init();
+#elif(PROJECTOR_FOCUS)
+    FOCUS_GPIO_Init();
 #endif
 
     /* EXTI interrupt init*/
@@ -1057,7 +1095,6 @@ static void MX_TIM1_Init(void)
 static void MX_TIM2_Init(void)
 #if 1
 {
-
   /* USER CODE BEGIN TIM2_Init 0 */
 
   /* USER CODE END TIM2_Init 0 */
@@ -1073,7 +1110,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 0;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 81;
+  htim2.Init.Period = 1000;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   //htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -1387,7 +1424,7 @@ void UartDebugControlHandle(uint8_t *key)
     uint16_t ttt;
     uint16_t IR_code = 0;
 
-    #if(PROJECTOR_CUBE)
+    #if(PROJECTOR_CUBE || PROJECTOR_FOCUS)
     printf("Debug rx len=%d  [",UsartType1.RX_Size);
     for(int i=0; i<UsartType1.RX_Size; i++)
     {
@@ -1403,6 +1440,46 @@ void UartDebugControlHandle(uint8_t *key)
     printf("]\r\n");
     #endif
 
+    #if(PROJECTOR_FOCUS)    //433 rx port
+    if(UsartType1.RX_pData[0]==0xBB) // 433 focus lighting ID
+    {
+        if(UsartType1.RX_pData[2]==0x1)
+        {
+            if(!powerFlag)
+            {
+                IR_code = REMOTE_MI_POWER;
+                powerFlag = true;
+            }
+        }
+        else if(UsartType1.RX_pData[2]==0x2)
+        {
+            //escape repetitive action
+            if(powerFlag)
+            {
+                IR_code = REMOTE_MI_POWER;
+                powerFlag = false;
+            }
+        }
+        else if(UsartType1.RX_pData[2]==0x3)
+        {
+            //IR_code = REMOTE_MI_LEFT;
+            
+            if(motor_status==0xff || motor_status==2)
+                motor_status = 1; //forward
+            else if(motor_status ==1)
+                motor_status = 0xff;//stop
+        }
+        else if(UsartType1.RX_pData[2]==0x4)
+        {
+            //IR_code = REMOTE_MI_RIGHT;
+            if(motor_status==0xff || motor_status==1)
+                motor_status = 2; //forward
+            else if(motor_status ==2)
+                motor_status = 0xff;//stop
+        }
+    }
+
+    #else
     if(!strcmp(key,"stop"))
     {
         //stop
@@ -1433,6 +1510,7 @@ void UartDebugControlHandle(uint8_t *key)
     }
     else if(key != NULL)//flash time and display scens
     {
+    /*
         ttt = atoi(key);
         if(ttt>15)
         {
@@ -1455,10 +1533,11 @@ void UartDebugControlHandle(uint8_t *key)
         {
             actType = ttt;
         }
-
         drv_pwm_speed(ttt);
+        */
     }
-
+    #endif
+    
     if (IR_code) {
 
         Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);

@@ -11,8 +11,20 @@
 	***************************************************************************
 ***/
 #include "main.h"
+#include "stm32f1xx.h"
+#include "stm32f1xx_hal.h"
 #include "gpio.h"
+#include "delay.h"
+#include "drv_ir.h"
+#include "drv_serial.h"
+#include "softspi.h"
+#include "programs.h"
+#include "config.h"
 
+
+#if(PROJECTOR_FOCUS)
+extern BOOL                     lightingStatus;
+#endif
 
 //LED init
 void LED_GPIO_Init(void)
@@ -220,6 +232,40 @@ void OSRAM_GPIO_Init(void)
     HAL_GPIO_Init(MOTOR_OUT_Port, &GPIO_InitStruct);
 
     HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_SET);    
+}
+#endif
+
+#if PROJECTOR_FOCUS
+void FOCUS_GPIO_Init(void)
+{
+    GPIO_InitTypeDef GPIO_InitStruct;
+
+    GPIO_InitStruct.Pin = GPIO_PIN_1;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = MOTOR_Focus_BIN1_Pin|MOTOR_Focus_AIN2_Pin|MOTOR_Focus_AIN1_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = MOTOR_Focus_BIN2_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    //init for motor
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET); //lighting ON
+    lightingStatus = true;
+
+    /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(GPIOB, MOTOR_Focus_BIN1_Pin|MOTOR_Focus_AIN2_Pin|MOTOR_Focus_AIN1_Pin, GPIO_PIN_RESET);
+    /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(GPIOA, MOTOR_Focus_BIN2_Pin, GPIO_PIN_RESET);
 }
 #endif
 

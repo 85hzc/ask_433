@@ -13,7 +13,7 @@
 #include "config.h"
 
 /* Private variables ---------------------------------------------------------*/
-extern TIM_HandleTypeDef htim1,htim3;
+extern TIM_HandleTypeDef htim1,htim2,htim3;
 
 static uint32_t tickstart = 0;
 static uint32_t tickexpire = 0;
@@ -22,6 +22,8 @@ static uint8_t turn_off = 0;
 #if (PROJECTOR_CUBE)
 extern BOOL              lightingStatus;
 extern uint16_t          brightness;
+#elif (PROJECTOR_FOCUS)
+extern BOOL              lightingStatus;
 #endif
 /* Private function prototypes -----------------------------------------------*/
 
@@ -37,10 +39,11 @@ void Drv_PWM_Init(void)
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
     #endif
-    tickstart = HAL_GetTick();
     #elif (PROJECTOR_OSRAM)
     HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_SET);
     #endif
+
+    tickstart = HAL_GetTick();
 }
 
 void Drv_PWM_Proc(void)
@@ -154,6 +157,11 @@ void drv_pwm_on(void)
         __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_2, i+1);
         #endif
     }
+    #elif(PROJECTOR_FOCUS)
+    if(lightingStatus)
+        return;
+    lightingStatus = true;
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET); //lighting ON
     #endif
 }
 
@@ -163,6 +171,11 @@ void drv_pwm_off(uint32_t delay)
     if(!lightingStatus)
         return;
     lightingStatus = false;
+    #elif (PROJECTOR_FOCUS)
+    if(!lightingStatus)
+        return;
+    lightingStatus = false;
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET); //lighting OFF
     #endif
 
     turn_off = 1;

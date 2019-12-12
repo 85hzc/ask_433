@@ -6,14 +6,18 @@
 
 typedef enum
 {
-#if PROJECTOR_CUBE
+    #if PROJECTOR_CUBE
     AUTO_ALGORITHM = 0,
-#endif
+    #endif
     PHOTO,
     FILM,
+    #if PROJECTOR_OSRAM
+    LIGHT,
+    #endif
     MAX_PROGRAMS,
 
     APP,
+    FIXED,
 
 } PROGRAMS_TYPE_E;
 

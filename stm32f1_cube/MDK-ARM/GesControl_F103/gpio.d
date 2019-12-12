@@ -30,3 +30,14 @@ gescontrol_f103\gpio.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h
 gescontrol_f103\gpio.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 gescontrol_f103\gpio.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 gescontrol_f103\gpio.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
+gescontrol_f103\gpio.o: ../Inc/delay.h
+gescontrol_f103\gpio.o: ../Inc/drv_ir.h
+gescontrol_f103\gpio.o: ../Inc/drv_serial.h
+gescontrol_f103\gpio.o: ../Inc/softspi.h
+gescontrol_f103\gpio.o: ../Inc/programs.h
+gescontrol_f103\gpio.o: ..\Drivers\Fat_spi\config.h
+gescontrol_f103\gpio.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_usart.h
+gescontrol_f103\gpio.o: ..\Drivers\Fat_spi\integer.h
+gescontrol_f103\gpio.o: ..\Drivers\Fat_spi\SPI_SD_driver.h
+gescontrol_f103\gpio.o: ..\Drivers\Fat_spi\ff.h
+gescontrol_f103\gpio.o: ..\Drivers\Fat_spi\diskio.h

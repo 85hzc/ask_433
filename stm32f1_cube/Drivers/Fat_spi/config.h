@@ -49,13 +49,15 @@ typedef enum
     RGB = G|R|B,
 }RGB_Type_E;
 
+#if(PROJECTOR_OSRAM || PROJECTOR_CUBE)
 typedef struct
 {
     DWORD    filesize;
     uint16_t framNum;
-    uint8_t  filename[FILE_NAME_LEN];
-    uint8_t  foldername[FILE_NAME_LEN];
+    uint8_t  filename[FILE_NAME_LEN_SHORT];
+    uint8_t  foldername[FILE_NAME_LEN_SHORT];
 }FILE_INFO_S;
+#endif
 
 #endif
 

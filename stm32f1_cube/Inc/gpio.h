@@ -135,6 +135,15 @@
 #define MOTOR_BIN2_Pin    GPIO_PIN_5
 #define MOTOR_BIN2_Port   GPIOB
 
+#define MOTOR_Focus_AIN1_Pin    GPIO_PIN_2
+#define MOTOR_Focus_AIN1_Port   GPIOB
+#define MOTOR_Focus_AIN2_Pin    GPIO_PIN_1
+#define MOTOR_Focus_AIN2_Port   GPIOB
+#define MOTOR_Focus_BIN1_Pin    GPIO_PIN_0
+#define MOTOR_Focus_BIN1_Port   GPIOB
+#define MOTOR_Focus_BIN2_Pin    GPIO_PIN_7
+#define MOTOR_Focus_BIN2_Port   GPIOA
+
 //#elif(PROJECTOR_MCUGPIO)
 
 #define ROW_0             GPIO_PIN_0
@@ -195,8 +204,6 @@
 #define P2_PIN            GPIO_PIN_7
 #define P3_PIN            GPIO_PIN_6
 #define P4_PIN            GPIO_PIN_5
-
-#define WS_PORT           GPIOA
 
 #define P0_PIN_H          GPIOA->BSRR = P0_PIN;                        // 输出高电平
 #define P0_PIN_L          GPIOA->BSRR = (uint32_t)P0_PIN << 16;        // 输出低电平 

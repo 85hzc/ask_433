@@ -9,17 +9,22 @@
 
 extern uint16_t                 fileTotalFilm[MAX_FILM_FOLDER];
 extern uint16_t                 fileTotalPhoto;
+extern uint16_t                 fileTotallight;
 extern uint16_t                 filmTotalProgram;
 
 static FATFS                    fs;            // Work area (file system object) for logical drive
 static FIL                      fsrc, fdst;      // file objects
 static uint32_t                 fileOffset = 0;
-BYTE                            photo_filename[MAX_FILE_NUM][FILE_NAME_LEN];
+
+
+#if(PROJECTOR_OSRAM || PROJECTOR_CUBE)
+BYTE                            photo_filename[MAX_FILE_NUM][FILE_NAME_LEN_SHORT];
+BYTE                            light_filename[MAX_FILE_NUM][FILE_NAME_LEN_SHORT];
 //BYTE                            film_filename[MAX_FILM_FRAME][FILE_NAME_LEN];
 //BYTE                            film_foldername[MAX_FILM_FOLDER][FILE_NAME_LEN];
 FILE_INFO_S                     film_file[MAX_FILM_FOLDER];
-
 char                            fileBuffer[MAX_FILE_SIZE];
+#endif
 
 #if(PROJECTOR_OSRAM)
 uint8_t                         osram_buff[MATRIX_SIZE][MATRIX_SIZE];
@@ -38,10 +43,12 @@ uint8_t                         cube_buff_RGB[IO_SIZE*CHIP_SIZE*3];
 #endif
 
 uint8_t                         photoProgramIdx = 0;
+uint8_t                         lightProgramIdx = 0;
 uint8_t                         filmProgramIdx = 0;
 uint16_t                        filmFrameIdx = 0;
 PROGRAMS_TYPE_E                 programsType;
 
+#if(PROJECTOR_OSRAM || PROJECTOR_CUBE)
 FRESULT SD_ReadPhotoData(uint8_t *path)
 {
     FRESULT res;
@@ -82,9 +89,9 @@ FRESULT SD_ReadPhotoData(uint8_t *path)
     {
         for( j=0; j<CUBE_COL_SIZE; j++ )
         {
-            cube_buff_R[i][j] = fileBuffer[i*36+j*3];
-            cube_buff_G[i][j] = fileBuffer[i*36+j*3+1];
-            cube_buff_B[i][j] = fileBuffer[i*36+j*3+2];
+            cube_buff_R[i][j] = fileBuffer[i*96+j*3];
+            cube_buff_G[i][j] = fileBuffer[i*96+j*3+1];
+            cube_buff_B[i][j] = fileBuffer[i*96+j*3+2];
         }
     }
 #endif
@@ -158,9 +165,9 @@ FRESULT SD_ReadFilmData()
     {
         for( j=0; j<CUBE_COL_SIZE; j++ )
         {
-            cube_buff_R[i][j] = fileBuffer[i*36+j*3];
-            cube_buff_G[i][j] = fileBuffer[i*36+j*3+1];
-            cube_buff_B[i][j] = fileBuffer[i*36+j*3+2];
+            cube_buff_R[i][j] = fileBuffer[i*96+j*3];
+            cube_buff_G[i][j] = fileBuffer[i*96+j*3+1];
+            cube_buff_B[i][j] = fileBuffer[i*96+j*3+2];
         }
     }
 #endif
@@ -208,9 +215,9 @@ FRESULT SD_ReadFilmData()
     {
         for( j=0; j<CUBE_COL_SIZE; j++ )
         {
-            cube_buff_G[i][j] = fileBuffer[i*36+j*3];
-            cube_buff_R[i][j] = fileBuffer[i*36+j*3+1];
-            cube_buff_B[i][j] = fileBuffer[i*36+j*3+2];
+            cube_buff_G[i][j] = fileBuffer[i*96+j*3]; //96=32(col)*3(r/g/b)
+            cube_buff_R[i][j] = fileBuffer[i*96+j*3+1];
+            cube_buff_B[i][j] = fileBuffer[i*96+j*3+2];
         }
     }
 #endif
@@ -256,6 +263,41 @@ void SD_ReadPhotoFileList(char *path)
         }
         fileTotalPhoto = i_name;
         printf(" %d\r\n",fileTotalPhoto);
+    }
+    else
+    {
+        printf("open path %s failed.\r\n",path);
+    }
+}
+
+void SD_ReadLightFileList(char *path)
+{
+    FILINFO finfo;
+    DIR dirs;
+    int i_name=0, br;
+    FRESULT res;
+
+    /*挂载文件系统*/
+    f_mount(0, &fs);
+    res =  f_opendir(&dirs, path);
+    if (res == FR_OK)
+    {
+        printf("light files ");
+
+        while (f_readdir(&dirs, &finfo) == FR_OK)
+        {
+            if (finfo.fattrib & AM_ARC)
+            {
+                if(!finfo.fname[0]){      //文件名不为空，如果为空，则表明该目录下面的文件已经读完了
+                    break;
+                }
+                stringcopy(light_filename[i_name], (BYTE*)finfo.fname);
+                //printf("          [%d]:%s\r\n",i_name,light_filename[i_name]);
+                i_name++;
+            }
+        }
+        fileTotallight = i_name;
+        printf(" %d\r\n",fileTotallight);
     }
     else
     {
@@ -382,5 +424,5 @@ void SD_fileCopy(void)
     f_close(&fsrc);
     f_close(&fdst);
 }
-
+#endif
 

@@ -25,12 +25,17 @@ extern char                 fileBuffer[MAX_FILE_SIZE];   // file copy buffer
 extern char                 osram_buff[MATRIX_SIZE][MATRIX_SIZE];
 extern uint16_t             filmFrameIdx;
 extern uint8_t              msgBuf[128];
-extern BYTE                 photo_filename[MAX_FILE_NUM][FILE_NAME_LEN];
+extern BYTE                 photo_filename[MAX_FILE_NUM][FILE_NAME_LEN_SHORT];
+extern BYTE                 light_filename[MAX_FILE_NUM][FILE_NAME_LEN_SHORT];
 extern uint8_t              photoProgramIdx;
-extern uint16_t             fileTotalPhoto;  //¾²Ì¬Í¼Æ¬Êý
+extern uint8_t              lightProgramIdx;
+extern uint16_t             fileTotalPhoto;
+extern uint16_t             fileTotallight;
 uint64_t                    systime = 0;
 uint64_t                    systime1 = 0;
-uint8_t                     currentAdjustment = 0;//0 ~ 0x1f
+uint8_t                     currentAdjustment = 0x3;//0 ~ 0x1f
+uint8_t                     currentAdjustId = 1;//0 ~ 0x1f
+uint8_t                     currentAdjustList[4]={0x3,0xB,0x17,0x1f};
 BOOL                        eplosCfgFlag;
 uint8_t                     eplosSLPxen;
 extern PROGRAMS_TYPE_E      programsType;
@@ -39,6 +44,7 @@ void i2c_read(unsigned char addr, unsigned char* buf, int len);
 void i2c_write(unsigned char addr, unsigned char* buf, int len);
 uint8_t I2CReadFromRegister(uint8_t SlaveAddress, uint8_t regaddr, uint8_t *resp, uint8_t NumByteToRead);
 uint8_t I2CWriteToRegister(uint8_t SlaveAddress, uint8_t RegisterAddr, uint8_t *command, uint8_t NumByteToWrite);
+void OSRAM_Introduce();
 
 uint8_t displayMatrix0Q[16][16] = {
 
@@ -321,9 +327,28 @@ uint8_t I2CWriteToRegister(uint8_t SlaveAddress, uint8_t RegisterAddr, uint8_t *
 
 void OSRAM_QuadrantConvert(void)
 {
-    uint8_t row, col, tmp, tmpR[16];
+    uint8_t i,j;
+    uint8_t row, col, tmp, tmpR[16],buff[MATRIX_SIZE];
 
-    for(uint8_t i = 0; i < 16; i++ )
+    //up down reversal
+    for( i = 0; i < 16; i++ )
+    {
+        memcpy(buff,osram_buff[i],MATRIX_SIZE);
+        memcpy(osram_buff[i],osram_buff[MATRIX_SIZE-1-i],MATRIX_SIZE);
+        memcpy(osram_buff[MATRIX_SIZE-1-i],buff,MATRIX_SIZE);
+    }
+    //left right reversal
+    for( i = 0; i < MATRIX_SIZE; i++ )
+    {
+        for( j = 0; j < 16; j++ )
+        {
+            tmp = osram_buff[i][j];
+            osram_buff[i][j] = osram_buff[i][MATRIX_SIZE-1-j];
+            osram_buff[i][MATRIX_SIZE-1-j] = tmp;
+        }
+    }
+
+    for( i = 0; i < 16; i++ )
     {
         memcpy(displayMatrix0Q[i], &osram_buff[16+i][0], 16);
         memcpy(displayMatrix1Q[i], &osram_buff[i][0], 16);
@@ -349,7 +374,6 @@ void OSRAM_QuadrantConvert(void)
                 displayMatrix2Q[row][15-col] = displayMatrix2Q[row][col];
                 displayMatrix2Q[row][col] = tmp;
             }
-             
         }
 
         if(row%2==0)
@@ -385,7 +409,6 @@ void OSRAM_QuadrantConvert(void)
         memcpy(displayMatrix2Q[row], displayMatrix2Q[15-row], sizeof(tmpR));
         memcpy(displayMatrix2Q[15-row], tmpR, sizeof(tmpR));
     }
-    
 }
 
 void OSRAM_QuadrantShow(void)
@@ -643,7 +666,7 @@ void OSRAM_play(void)
     FRESULT res = FR_OK;
     static uint8_t j=0;
 
-    if((runFlag || ((programsType==FILM))) && powerFlag)
+    if((runFlag || (programsType==FILM)) && powerFlag)
     {
         runFlag = 0;
 
@@ -661,6 +684,20 @@ void OSRAM_play(void)
 
             res = SD_ReadPhotoData(path);
         }
+        else if(programsType==FIXED)
+        {
+            OSRAM_Introduce();
+        }
+        else if(programsType==LIGHT)
+        {
+            uint8_t path[FILE_PATH_LEN];
+
+            memset(path, 0, FILE_PATH_LEN);
+            sprintf(path,"/OSRAM/Light/%s",light_filename[lightProgramIdx%fileTotallight]);
+
+            res = SD_ReadPhotoData(path);
+        }
+
         else if(programsType==APP)
         {
             //printf("msgbuf id[bit]:\r\n");
@@ -737,6 +774,16 @@ void OSRAM_Start()
     SD_ReadPhotoData(path);
     OSRAM_DriverEplos();
     Delay_ms(3000);
+}
+
+void OSRAM_Introduce()
+{
+    uint8_t path[FILE_PATH_LEN];
+
+    memset(path, 0, sizeof(path));
+    sprintf(path,"/OSRAM/Start/intr.dat");
+    printf("%s\r\n",path);
+    SD_ReadPhotoData(path);
 }
 
 #endif

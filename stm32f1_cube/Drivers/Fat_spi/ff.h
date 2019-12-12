@@ -237,7 +237,7 @@ typedef struct _FILINFO {
     WORD fdate;         /* Last modified date */
     WORD ftime;         /* Last modified time */
     BYTE fattrib;       /* Attribute */
-    char fname[13];     /* Short file name (8.3 format) */
+    char fname[FILE_NAME_LEN_SHORT];     /* Short file name (8.3 format 13 bytes) */
 #if _USE_LFN
     char *lfname;       /* Pointer to the LFN buffer */
     int lfsize;         /* Size of LFN buffer [bytes] */

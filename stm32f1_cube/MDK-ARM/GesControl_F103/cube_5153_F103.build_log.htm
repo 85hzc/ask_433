@@ -27,168 +27,118 @@ Project File Date:  10/31/2019
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'GesControl_F103'
-compiling drv_fan.c...
-../Inc/gpio.h(199): warning:  #47-D: incompatible redefinition of macro "WS_PORT"  (declared at line 189)
-  #define WS_PORT           GPIOA
-..\Src\drv_fan.c(85): warning:  #188-D: enumerated type mixed with another type
-          lightingStatus = 
-rue;
-..\Src\drv_fan.c(87): warning:  #188-D: enumerated type mixed with another type
-          lightingStatus = 
+compiling programs.c...
+..\Src\programs.c(58): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
+      res = f_open(&fsrc, path, 
+A_OPEN_EXISTING | 
+A_READ);
+..\Src\programs.c(64): warning:  #223-D: function "memset" declared implicitly
+      memset(fileBuffer, 0, MAX_FILE_SIZE);
+..\Src\programs.c(109): warning:  #223-D: function "memset" declared implicitly
+      memset(path, 0, sizeof(path));
+..\Src\programs.c(112): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+      sprintf(path,"/OSRAM/Film/%s/%s",film_file[filmProgramIdx%filmTotalProgram].foldername,film_file[filmProgramIdx%filmTotalProgram].filename);
+..\Src\programs.c(119): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
+      res = f_open(&fsrc, path, 
+A_OPEN_EXISTING | 
+A_READ);
+..\Src\programs.c(106): warning:  #177-D: variable "a"  was declared but never referenced
+      UINT a = 1,i,j;
+..\Src\programs.c(106): warning:  #177-D: variable "i"  was declared but never referenced
+      UINT a = 1,i,j;
+..\Src\programs.c(106): warning:  #177-D: variable "j"  was declared but never referenced
+      UINT a = 1,i,j;
+..\Src\programs.c(142): warning:  #223-D: function "memset" declared implicitly
+      memset(fileBuffer, 0, MAX_FILE_SIZE);
+..\Src\programs.c(259): warning:  #223-D: function "stringcopy" declared implicitly
+                  stringcopy(photo_filename[i_name], (BYTE*)finfo.fname);
+..\Src\programs.c(240): warning:  #177-D: variable "br"  was declared but never referenced
+      int i_name=0, br;
+..\Src\programs.c(294): warning:  #223-D: function "stringcopy" declared implicitly
+                  stringcopy(light_filename[i_name], (BYTE*)finfo.fname);
+..\Src\programs.c(277): warning:  #177-D: variable "br"  was declared but never referenced
+      int i_name=0, br;
+..\Src\programs.c(318): warning:  #223-D: function "memset" declared implicitly
+      memset(path, 0, sizeof(path));
+..\Src\programs.c(343): warning:  #223-D: function "stringcopy" declared implicitly
+                  stringcopy(film_file[filmId].filename, (BYTE*)finfo.fname);
+..\Src\programs.c(312): warning:  #177-D: variable "br"  was declared but never referenced
+      int br;
+..\Src\programs.c(383): warning:  #223-D: function "stringcopy" declared implicitly
+                  stringcopy(film_file[i_name].foldername, (BYTE*)finfo.fname);
+..\Src\programs.c(362): warning:  #177-D: variable "br"  was declared but never referenced
+      int i_name=0, br;
+..\Src\programs.c(402): warning:  #223-D: function "memset" declared implicitly
+      memset(buffer,0,sizeof(buffer));
+..\Src\programs.c: 19 warnings, 0 errors
+compiling eplos.c...
+..\Src\eplos.c(47): warning:  #1295-D: Deprecated declaration OSRAM_Introduce - give arg types
+  void OSRAM_Introduce();
+..\Src\eplos.c(271): warning:  #223-D: function "memset" declared implicitly
+      memset(array, 0, sizeof(array));
+..\Src\eplos.c(290): warning:  #223-D: function "memset" declared implicitly
+      memset(array, 0, sizeof(array));
+..\Src\eplos.c(307): warning:  #223-D: function "memset" declared implicitly
+    memset(pBuffer, 0, NumByteToRead);
+..\Src\eplos.c(336): warning:  #223-D: function "memcpy" declared implicitly
+          memcpy(buff,osram_buff[i],MATRIX_SIZE);
+..\Src\eplos.c(353): warning:  #223-D: function "memcpy" declared implicitly
+          memcpy(displayMatrix0Q[i], &osram_buff[16+i][0], 16);
+..\Src\eplos.c(400): warning:  #223-D: function "memcpy" declared implicitly
+          memcpy(tmpR, displayMatrix1Q[row], sizeof(tmpR));
+..\Src\eplos.c(408): warning:  #223-D: function "memcpy" declared implicitly
+          memcpy(tmpR, displayMatrix2Q[row], sizeof(tmpR));
+..\Src\eplos.c(416): warning:  #177-D: variable "tmp"  was declared but never referenced
+      uint8_t row, col, tmp;
+..\Src\eplos.c(461): warning:  #177-D: variable "fixel"  was declared but never referenced
+      unsigned short k,fixel;
+..\Src\eplos.c(650): warning:  #188-D: enumerated type mixed with another type
+          eplosCfgFlag = 
 alse;
-..\Src\drv_fan.c(118): warning:  #177-D: variable "step"  was declared but never referenced
-      uint32_t i=brightness, step;
-..\Src\drv_fan.c(150): warning:  #188-D: enumerated type mixed with another type
-      lightingStatus = 
-rue;
-..\Src\drv_fan.c(173): warning:  #188-D: enumerated type mixed with another type
-      lightingStatus = 
-alse;
-..\Src\drv_fan.c: 6 warnings, 0 errors
-compiling main.c...
-../Inc/gpio.h(199): warning:  #47-D: incompatible redefinition of macro "WS_PORT"  (declared at line 189)
-  #define WS_PORT           GPIOA
-../Inc/softspi.h(57): warning:  #1295-D: Deprecated declaration CS_Enable - give arg types
-  void CS_Enable();
-../Inc/softspi.h(60): warning:  #1295-D: Deprecated declaration CS_Disable - give arg types
-  void CS_Disable();
-../Inc/softspi.h(66): warning:  #1295-D: Deprecated declaration SDReadByte - give arg types
-  u8 SDReadByte();
-../Inc/softspi.h(72): warning:  #1295-D: Deprecated declaration SDReset - give arg types
-  u8 SDReset();
-../Inc/softspi.h(75): warning:  #1295-D: Deprecated declaration SDInit - give arg types
-  u8 SDInit();
-../Src/main.c(61): warning:  #188-D: enumerated type mixed with another type
-  BOOL                     usartTxFlag = 
-alse;
-../Src/main.c(122): warning:  #1295-D: Deprecated declaration AppControlCubeHandle - give arg types
-  void AppControlCubeHandle();
-../Src/main.c(123): warning:  #1295-D: Deprecated declaration oppRFMsgSendProc - give arg types
-  void oppRFMsgSendProc();
-../Src/main.c(189): warning:  #188-D: enumerated type mixed with another type
-      runFlag = 
-rue;
-../Src/main.c(190): warning:  #188-D: enumerated type mixed with another type
-      powerFlag = 
-rue;
-../Src/main.c(198): warning:  #223-D: function "Drv_SERIAL_Init" declared implicitly
-      Drv_SERIAL_Init();
-../Src/main.c(252): warning:  #223-D: function "memset" declared implicitly
-          memset(data, 0, sizeof(data));
-../Src/main.c(253): warning:  #223-D: function "strncpy" declared implicitly
-          strncpy(data, ptr, UsartType1.RX_Size);
-../Src/main.c(286): warning:  #188-D: enumerated type mixed with another type
-          usartTxFlag = 0;
-../Src/main.c(313): warning:  #223-D: function "Drv_SERIAL_Read_Act" declared implicitly
-      if (HAL_OK == Drv_SERIAL_Read_Act(single_cmd))
-../Src/main.c(317): warning:  #223-D: function "Drv_CMD_Handler" declared implicitly
-          (void)Drv_CMD_Handler(single_cmd);
-../Src/main.c(367): warning:  #188-D: enumerated type mixed with another type
-                  powerFlag = 
-rue;
-../Src/main.c(376): warning:  #188-D: enumerated type mixed with another type
-                  powerFlag = 
-alse;
-../Src/main.c(401): warning:  #223-D: function "Drv_SERIAL_Act" declared implicitly
-              Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
-../Src/main.c(418): warning:  #174-D: expression has no effect
-              
-PP_SWAP_S(totalLen);
-../Src/main.c(425): warning:  #223-D: function "memset" declared implicitly
-              memset(msgBuf,0,sizeof(msgBuf));
-../Src/main.c(426): warning:  #223-D: function "memcpy" declared implicitly
-              memcpy(&msgBuf[0], &pFirstPackage->data[11], 6);
-../Src/main.c(448): warning:  #223-D: function "memcpy" declared implicitly
-                  memcpy(&msgBuf[6 + (index-1) * 19], &pMainPackage->data[0], len);
-../Src/main.c(462): warning:  #223-D: function "memcpy" declared implicitly
-                  memcpy(&msgBuf[6 + (index-1) * 19], &pMainPackage->data[0], 19);
-../Src/main.c(471): warning:  #223-D: function "Drv_SERIAL_Act" declared implicitly
-              Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
-../Src/main.c(335): warning:  #177-D: variable "ucLen"  was declared but never referenced
-      uint8_t ucLen = 0;
-../Src/main.c(524): warning:  #174-D: expression has no effect
-          
-PP_SWAP_S(gOppBleMsg.msgHeader.pstApp.uwMsgType);
-../Src/main.c(541): warning:  #174-D: expression has no effect
-          
-PP_SWAP_S(pFisrtPackage->totalLen);
-../Src/main.c(542): warning:  #223-D: function "memcpy" declared implicitly
-          memcpy(&pFisrtPackage->data[0], &gOppBleMsg.msgBuf[0], curSdLen);       
-../Src/main.c(566): warning:  #223-D: function "memcpy" declared implicitly
-          memcpy(&pMainPackage->data[0], &gOppBleMsg.msgBuf[17+ (sdIndex-1)*19], curSdLen);       
-../Src/main.c(614): warning:  #223-D: function "drv_pwm_speed" declared implicitly
-      drv_pwm_speed(brightness);
-../Src/main.c(667): warning:  #223-D: function "SD_ReadPhotoFileList" declared implicitly
-      SD_ReadPhotoFileList("/WS2801/Photo");
-../Src/main.c(668): warning:  #223-D: function "SD_ReadFilmFolderList" declared implicitly
-      SD_ReadFilmFolderList("/WS2801/Film");
-../Src/main.c(672): warning:  #223-D: function "SD_ReadFilmFileList" declared implicitly
-          SD_ReadFilmFileList(i);
-../Src/main.c(724): warning:  #223-D: function "WS2801_play" declared implicitly
-          WS2801_play();
-../Src/main.c(935): warning:  #223-D: function "LED_GPIO_Init" declared implicitly
-      LED_GPIO_Init();
-../Src/main.c(945): warning:  #223-D: function "WS2801_GPIO_Init" declared implicitly
-      WS2801_GPIO_Init();
-../Src/main.c(905): warning:  #177-D: variable "GPIO_InitStruct"  was declared but never referenced
-      GPIO_InitTypeDef GPIO_InitStruct;
-../Src/main.c(1053): warning:  #223-D: function "HAL_TIM_MspPostInit" declared implicitly
-    HAL_TIM_MspPostInit(&htim1);
-../Src/main.c(1116): warning:  #223-D: function "HAL_TIM_MspPostInit" declared implicitly
-    HAL_TIM_MspPostInit(&htim2);
-../Src/main.c(1225): warning:  #223-D: function "HAL_TIM_MspPostInit" declared implicitly
-    HAL_TIM_MspPostInit(&htim3);
-../Src/main.c(1406): warning:  #223-D: function "strcmp" declared implicitly
-      if(!strcmp(key,"stop"))
-../Src/main.c(1409): warning:  #188-D: enumerated type mixed with another type
-          runFlag = 
-alse;
-../Src/main.c(1414): warning:  #188-D: enumerated type mixed with another type
-          runFlag = 
-rue;
-../Src/main.c(1432): warning:  #188-D: enumerated type mixed with another type
-          powerFlag = powerFlag==
-rue?
-alse:
-rue;
-../Src/main.c(1436): warning:  #223-D: function "atoi" declared implicitly
-          ttt = atoi(key);
-../Src/main.c(1459): warning:  #223-D: function "drv_pwm_speed" declared implicitly
-          drv_pwm_speed(ttt);
-../Src/main.c(1464): warning:  #223-D: function "Drv_SERIAL_Act" declared implicitly
-          Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
-../Src/main.c(1543): warning:  #223-D: function "memset" declared implicitly
-      memset(data,0,sizeof(data));
-../Src/main.c(1544): warning:  #223-D: function "memcpy" declared implicitly
-      memcpy(data, &UsartType2.RX_pData[1], 20);
-../Src/main.c(1559): warning:  #188-D: enumerated type mixed with another type
-                  powerFlag = 
-rue;
-../Src/main.c(1569): warning:  #188-D: enumerated type mixed with another type
-                  powerFlag = 
-alse;
-../Src/main.c(1595): warning:  #223-D: function "Drv_SERIAL_Act" declared implicitly
-              Drv_SERIAL_Act(SET_CODE(CMD_CODE_MASK_IR, CMD_OP_IR_CODE), IR_code);
-../Src/main.c(1539): warning:  #177-D: variable "pId"  was declared but never referenced
-      uint8_t pId,fId,keyval;
-../Src/main.c(1539): warning:  #177-D: variable "fId"  was declared but never referenced
-      uint8_t pId,fId,keyval;
-../Src/main.c(1539): warning:  #177-D: variable "keyval"  was declared but never referenced
-      uint8_t pId,fId,keyval;
-../Src/main.c(1540): warning:  #177-D: variable "ptype"  was declared but never referenced
-      PROGRAMS_TYPE_E ptype;
-../Src/main.c(1650): warning:  #223-D: function "memcpy" declared implicitly
-      memcpy(gOppBleMsg.msgBuf, blePadMsg, sizeof(blePadMsg));
-../Src/main.c(867): warning:  #177-D: function "MX_USART3_UART_Init"  was declared but never referenced
-  static void MX_USART3_UART_Init(void)
-../Src/main.c(987): warning:  #177-D: function "MX_TIM1_Init"  was declared but never referenced
-  static void MX_TIM1_Init(void)
-../Src/main.c(1057): warning:  #177-D: function "MX_TIM2_Init"  was declared but never referenced
-  static void MX_TIM2_Init(void)
-../Src/main.c: 62 warnings, 0 errors
+..\Src\eplos.c(671): warning:  #188-D: enumerated type mixed with another type
+          runFlag = 0;
+..\Src\eplos.c(675): warning:  #223-D: function "SD_ReadFilmData" declared implicitly
+              res = SD_ReadFilmData();
+..\Src\eplos.c(675): warning:  #188-D: enumerated type mixed with another type
+              res = SD_ReadFilmData();
+..\Src\eplos.c(682): warning:  #223-D: function "memset" declared implicitly
+              memset(path, 0, FILE_PATH_LEN);
+..\Src\eplos.c(683): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+              sprintf(path,"/OSRAM/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
+..\Src\eplos.c(685): warning:  #223-D: function "SD_ReadPhotoData" declared implicitly
+              res = SD_ReadPhotoData(path);
+..\Src\eplos.c(685): warning:  #188-D: enumerated type mixed with another type
+              res = SD_ReadPhotoData(path);
+..\Src\eplos.c(696): warning:  #223-D: function "memset" declared implicitly
+              memset(path, 0, FILE_PATH_LEN);
+..\Src\eplos.c(697): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+              sprintf(path,"/OSRAM/Light/%s",light_filename[lightProgramIdx%fileTotallight]);
+..\Src\eplos.c(699): warning:  #223-D: function "SD_ReadPhotoData" declared implicitly
+              res = SD_ReadPhotoData(path);
+..\Src\eplos.c(699): warning:  #188-D: enumerated type mixed with another type
+              res = SD_ReadPhotoData(path);
+..\Src\eplos.c(751): warning:  #223-D: function "memset" declared implicitly
+      memset(path, 0, sizeof(path));
+..\Src\eplos.c(752): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+      sprintf(path,"/OSRAM/Start/start1.dat");
+..\Src\eplos.c(754): warning:  #223-D: function "SD_ReadPhotoData" declared implicitly
+      SD_ReadPhotoData(path);
+..\Src\eplos.c(759): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+      sprintf(path,"/OSRAM/Start/start2.dat");
+..\Src\eplos.c(766): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+      sprintf(path,"/OSRAM/Start/start3.dat");
+..\Src\eplos.c(773): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+      sprintf(path,"/OSRAM/Start/start4.dat");
+..\Src\eplos.c(784): warning:  #223-D: function "memset" declared implicitly
+      memset(path, 0, sizeof(path));
+..\Src\eplos.c(785): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
+      sprintf(path,"/OSRAM/Start/intr.dat");
+..\Src\eplos.c(787): warning:  #223-D: function "SD_ReadPhotoData" declared implicitly
+      SD_ReadPhotoData(path);
+..\Src\eplos.c: 31 warnings, 0 errors
 linking...
-Program Size: Code=38662 RO-data=730 RW-data=292 ZI-data=11100  
-"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 68 Warning(s).
+Program Size: Code=29798 RO-data=294 RW-data=1200 ZI-data=8536  
+"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 50 Warning(s).
 
 <h2>Software Packages used:</h2>
 

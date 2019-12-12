@@ -11,11 +11,11 @@
 ***/
 
 #include "delay.h"
+#include "main.h"
 #include "gpio.h"
 #include "mbi5153.h"
 #include "mbi5124.h"
 #include "mcugpio.h"
-#include "main.h"
 
 static uint32_t TimingDelay;  //计数变量
 volatile uint32_t gclk_pluse = 0xff;

@@ -1,7 +1,4 @@
 gescontrol_f103\drv_motor.o: ..\Src\drv_motor.c
-gescontrol_f103\drv_motor.o: ../Inc/drv_motor.h
-gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
-gescontrol_f103\drv_motor.o: ../Inc/stm32f1xx_hal_conf.h
 gescontrol_f103\drv_motor.o: ../Inc/main.h
 gescontrol_f103\drv_motor.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 gescontrol_f103\drv_motor.o: ../Inc/gpio.h
@@ -13,14 +10,16 @@ gescontrol_f103\drv_motor.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
 gescontrol_f103\drv_motor.o: ../Drivers/CMSIS/Include/core_cmFunc.h
 gescontrol_f103\drv_motor.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h
 gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
-gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h
-gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h
-gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-gescontrol_f103\drv_motor.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
-gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio_ex.h
+gescontrol_f103\drv_motor.o: ../Inc/stm32f1xx_hal_conf.h
 gescontrol_f103\drv_motor.o: ../Inc/main.h
 gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
+gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h
+gescontrol_f103\drv_motor.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h
+gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
+gescontrol_f103\drv_motor.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc_ex.h
+gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h
+gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio_ex.h
 gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h
 gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma_ex.h
 gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h
@@ -31,4 +30,6 @@ gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_s
 gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 gescontrol_f103\drv_motor.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
+gescontrol_f103\drv_motor.o: ../Inc/delay.h
 gescontrol_f103\drv_motor.o: ../Inc/drv_serial.h
+gescontrol_f103\drv_motor.o: ../Inc/drv_motor.h
