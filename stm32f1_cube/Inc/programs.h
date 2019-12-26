@@ -10,12 +10,12 @@ typedef enum
     AUTO_ALGORITHM = 0,
     #endif
     PHOTO,
-    FILM,
+
     #if PROJECTOR_OSRAM
     LIGHT,
     #endif
     MAX_PROGRAMS,
-
+    FILM,
     APP,
     FIXED,
 

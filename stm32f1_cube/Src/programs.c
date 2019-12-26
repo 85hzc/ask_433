@@ -29,9 +29,9 @@ char                            fileBuffer[MAX_FILE_SIZE];
 #if(PROJECTOR_OSRAM)
 uint8_t                         osram_buff[MATRIX_SIZE][MATRIX_SIZE];
 #elif(PROJECTOR_CUBE)
-uint8_t                         cube_buff_G[CUBE_ROW_SIZE][CUBE_COL_SIZE];
-uint8_t                         cube_buff_R[CUBE_ROW_SIZE][CUBE_COL_SIZE];
-uint8_t                         cube_buff_B[CUBE_ROW_SIZE][CUBE_COL_SIZE];
+uint8_t                         cube_buff_G[CUBE_RGB_SIZE][CUBE_COL_SIZE];
+uint8_t                         cube_buff_R[CUBE_RGB_SIZE][CUBE_COL_SIZE];
+uint8_t                         cube_buff_B[CUBE_RGB_SIZE][CUBE_COL_SIZE];
 #elif(PROJECTOR_MBI5124)
 //;
 #elif(CUBEPLT_SLAVE)
@@ -89,9 +89,9 @@ FRESULT SD_ReadPhotoData(uint8_t *path)
     {
         for( j=0; j<CUBE_COL_SIZE; j++ )
         {
-            cube_buff_R[i][j] = fileBuffer[i*96+j*3];
-            cube_buff_G[i][j] = fileBuffer[i*96+j*3+1];
-            cube_buff_B[i][j] = fileBuffer[i*96+j*3+2];
+            cube_buff_R[i][j] = fileBuffer[i*96+j*3]/RGB_SCALE;
+            cube_buff_G[i][j] = fileBuffer[i*96+j*3+1]/RGB_SCALE;
+            cube_buff_B[i][j] = fileBuffer[i*96+j*3+2]/RGB_SCALE;
         }
     }
 #endif
@@ -132,7 +132,7 @@ FRESULT SD_ReadFilmData()
     FRESULT res;
     UINT a = 1,i,j;
 
-    printf("%d\r\n",fileOffset);
+    //printf("%d\r\n",fileOffset);
     res = f_lseek(&fsrc, fileOffset);           //偏移到文件尾部（问题：file_size不为0 导致后续写入变慢）
     if(res != 0)
     {

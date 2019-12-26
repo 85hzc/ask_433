@@ -56,13 +56,14 @@ uint16_t                 fileTotalPhoto;  //静态图片数
 uint16_t                 fileTotallight;  //静态图片数
 
 //uint16_t                 fileTotalFilm[MAX_FILM_FOLDER]; //每个影片的帧数
-uint16_t                 filmTotalProgram;  //Film目录下的影片个数
+uint16_t                 filmTotalProgram = 0;  //Film目录下的影片个数
 uint8_t                  single_cmd[CMD_LEN_MAX];
 uint16_t                 actType = 1;
 uint16_t                 actTime = 100;
 BOOL                     usartTxFlag = false;
 
 #if(PROJECTOR_CUBE)
+uint16_t                 col_up,col_down;
 uint8_t                  usartTxData[3];
 uint32_t                 brightness;//init in appinit
 BOOL                     lightingStatus;
@@ -87,7 +88,7 @@ DMA_HandleTypeDef        hdma_usart1_rx, hdma_usart2_rx, hdma_usart3_rx;
 DMA_HandleTypeDef        hdma_usart1_tx, hdma_usart2_tx, hdma_usart3_tx;
 USART_RECEIVETYPE        UsartType1, UsartType2, UsartType3;
 
-TIM_HandleTypeDef        htim1,htim2,htim3;;
+TIM_HandleTypeDef        htim1,htim2,htim3;
 SPI_HandleTypeDef        hspi1,hspi2;
 
 extern volatile uint16_t I2C_SDA_PIN;
@@ -637,10 +638,6 @@ int main(void)
 
     appInit();
 
-#if(PROJECTOR_CUBE)
-    drv_pwm_speed(brightness);
-#endif
-
 #ifdef SUPPORT_FATFS
 #ifdef SPI_HARD
     SPI_Configuration();    //SPI初始化
@@ -711,10 +708,21 @@ int main(void)
 
     printf("Files Ready!\r\n");
 
+    //如果启动进入film模式，需要初始化file
+    //SD_OpenFilmData();
+
 #if(PROJECTOR_MBI5124)
     //reg_config();
 #elif(PROJECTOR_OSRAM)
     OSRAM_Start();
+#elif(PROJECTOR_CUBE)
+    CUBE_Start();
+
+    col_up = CUBE_PILLAR_SIZE;
+    col_down = CUBE_PILLAR_DOWN_SIZE;
+    
+    drv_pwm_speed(brightness);
+
 #endif
 
     while (1)

@@ -26,7 +26,7 @@ extern BYTE                     photo_filename[MAX_FILE_NUM][FILE_NAME_LEN_SHORT
 extern uint8_t                  cube_buff_G[CUBE_ROW_SIZE][CUBE_COL_SIZE];
 extern uint8_t                  cube_buff_R[CUBE_ROW_SIZE][CUBE_COL_SIZE];
 extern uint8_t                  cube_buff_B[CUBE_ROW_SIZE][CUBE_COL_SIZE];
-
+extern uint16_t                 col_up,col_down;
 //extern USART_TransmiteTYPE      Usart1Tx;
 extern PROGRAMS_TYPE_E          programsType;
 extern uint16_t                 filmFrameIdx;
@@ -42,9 +42,10 @@ BOOL                            RGB_white_firsttime_flag = true;
 uint8_t                         cubeSoftFrameId = 0;
 BOOL                            newReqFlag = true;
 BOOL                            cubeRGBStatus = false;
+BOOL                            photoOpenFlag = true;
 
 static uint64_t                 systime = 0;
-
+/*
 static uint32_t GRB30[30]={//30
                        0xFFFF00,0xE6FF1E,0xCDFF37,0xB4FF50,0x9BFF69,
                        0x82FF82,0x69FF9B,0x50FFB4,0x37FFCD,0x1EFFE6,
@@ -54,6 +55,20 @@ static uint32_t GRB30[30]={//30
 
                        0xFF00FF,0xFF1EE6,0xFF37CD,0xFF50B4,0xFF699B,
                        0xFF8282,0xFF9B69,0xFFB450,0xFFCD37,0xFFE61E};
+*/
+
+
+static uint32_t GRB48[CUBE_RGB_SIZE]={
+                       0xFFFF0F,0xEFFF18,0xDFFF1F,0xCFFF2F,0xBFFF3F,0xAFFF4F,0x9FFF5F,0x8FFF6F,
+                       0x7FFF7F,0x6FFF8F,0x5FFF9F,0x4FFFAF,0x3FFFBF,0x2FFFCF,0x1FFFDF,0x18FFEF,
+                       
+                       0x0FEFFF,0x18DFFF,0x1FCFFF,0x2FBFFF,0x3FAFFF,0x4F9FFF,0x5F8FFF,0x6F7FFF,
+                       0x7F6FFF,0x8F5FFF,0x9F4FFF,0xAF3FFF,0xBF2FFF,0xCF1FFF,0xDF18FF,0xEF0FFF,
+                       
+                       0xFF18EF,0xFF1FDF,0xFF2FCF,0xFF3FBF,0xFF4FAF,0xFF5F9F,0xFF6F8F,0xFF7F7F,
+                       0xFF8F6F,0xFF9F5F,0xFFAF4F,0xFFBF3F,0xFFCF2F,0xFFDF1F,0xFFEF18,0xFFFF0F
+                       };
+
 
 static uint32_t GRB[24]={//24
                        0xFFFF0F,0xDFFF1F,0xBFFF3F,0x9FFF5F,
@@ -64,6 +79,10 @@ static uint32_t GRB[24]={//24
    
                        0xFF1FDF,0xFF3FBF,0xFF5F9F,0xFF7F7F,
                        0xFF9F5F,0xFFBF3F,0xFFDF1F,0xFFEF0F};
+
+void WS2801_framRefresh(void);
+
+
 /*
 void Din_1(void)
 {
@@ -328,13 +347,12 @@ void Send_2811_oneString(uint8_t *g,uint8_t *r,uint8_t *b)        //传送16位灰度
     }
 }
 
-
 void Send_2811_totalPixels1()
 {
     unsigned short fixel;
     uint8_t        row, col;
 
-    for(col = 0; col < CUBE_PILLAR_SIZE; col++)
+    for(col = 0; col < col_up; col++)
     {
         for(row = 0; row < CUBE_ROW_SIZE; row++)
         {
@@ -352,7 +370,7 @@ void Send_2811_totalPixels2()
     unsigned short fixel;
     uint8_t        row, col;
 
-    for(col = 0; col < CUBE_PILLAR_DOWN_SIZE; col++)
+    for(col = 0; col < col_down; col++)
     {
         for(row = 0; row < CUBE_ROW_SIZE; row++)
         {
@@ -400,33 +418,34 @@ void calc_RGB_COL(uint8_t *buff_G,uint8_t *buff_R,uint8_t *buff_B)
     uint16_t        uwPWM[4];
     uint8_t         sRGB[3];
     
-    for( col = 0; col < CUBE_COL_SIZE; col++ )
+    for( col = 0; col < CUBE_RGB_SIZE; col++ )
     {
         //初始化颜色组
-        if(col+base < CUBE_COL_SIZE)
+        //if(col+base < CUBE_COL_SIZE)
         {
-            sRGB[0] = (GRB30[col+base]>>8) &0xff;
-            sRGB[1] = (GRB30[col+base]>>16)&0xff;
-            sRGB[2] = (GRB30[col+base])    &0xff;
+            sRGB[0] = ((GRB48[col+base]>>8) &0xff);
+            sRGB[1] = ((GRB48[col+base]>>16)&0xff);
+            sRGB[2] = ((GRB48[col+base])    &0xff);
             #if CUBE_LED_ALG
             oppColorRGBtoRGBPWM(uwPWM, sRGB, 255);
             #endif
         }
-        else
+        /*else
         {
-            sRGB[0] = (GRB30[(col+base)-(CUBE_COL_SIZE)]>>8) &0xff;
-            sRGB[1] = (GRB30[(col+base)-(CUBE_COL_SIZE)]>>16)&0xff;
-            sRGB[2] = (GRB30[(col+base)-(CUBE_COL_SIZE)])    &0xff;
+            sRGB[0] = (GRB48[(col+base)]>>8) &0xff;
+            sRGB[1] = (GRB48[(col+base)-(CUBE_COL_SIZE)]>>16)&0xff;
+            sRGB[2] = (GRB48[(col+base)-(CUBE_COL_SIZE)])    &0xff;
             #if CUBE_LED_ALG
             oppColorRGBtoRGBPWM(uwPWM, sRGB, 255);
             #endif
-        }
+        }*/
         
-        buff_R[col] = uwPWM[0];
-        buff_G[col] = uwPWM[1];
-        buff_B[col] = uwPWM[2];
+        buff_R[col] = uwPWM[0]/RGB_SCALE;
+        buff_G[col] = uwPWM[1]/RGB_SCALE;
+        buff_B[col] = uwPWM[2]/RGB_SCALE;
     }
 }
+
 
 void calc_RGB_ROW(uint8_t *buff_G,uint8_t *buff_R,uint8_t *buff_B)
 {
@@ -462,9 +481,36 @@ void calc_RGB_ROW(uint8_t *buff_G,uint8_t *buff_R,uint8_t *buff_B)
         oppColorRGBtoRGBPWM(uwPWM,  sRGB, 255);
         #endif
 
-        buff_R[row] = uwPWM[0];
-        buff_G[row] = uwPWM[1];
-        buff_B[row] = uwPWM[2];
+        buff_R[row] = uwPWM[0]/RGB_SCALE;
+        buff_G[row] = uwPWM[1]/RGB_SCALE;
+        buff_B[row] = uwPWM[2]/RGB_SCALE;
+    }
+}
+
+
+void calc_RGB_Photo_point()
+{
+    uint8_t         row=0,col=0;
+    uint16_t        uwPWM[4];
+    uint8_t         sRGB[3];
+
+    for( row = 0; row < CUBE_ROW_SIZE; row++ )
+    {
+        for( col = 0; col < CUBE_COL_SIZE; col++ )
+        {
+            //初始化颜色组
+
+            sRGB[0] = cube_buff_R[row][col];
+            sRGB[1] = cube_buff_G[row][col];
+            sRGB[2] = cube_buff_B[row][col];
+            #if CUBE_LED_ALG
+            oppColorRGBtoRGBPWM(uwPWM,  sRGB, 255);
+            #endif
+
+            cube_buff_R[row][col] = uwPWM[0];
+            cube_buff_G[row][col] = uwPWM[1];
+            cube_buff_B[row][col] = uwPWM[2];
+        }
     }
 }
 
@@ -601,9 +647,60 @@ void ScenceGradualChange()
 
     for( row=0; row<CUBE_ROW_SIZE; row++ )
     {
-        memset(cube_buff_G[row], gcolor, CUBE_COL_SIZE);
-        memset(cube_buff_R[row], rcolor, CUBE_COL_SIZE);
-        memset(cube_buff_B[row], bcolor, CUBE_COL_SIZE);
+        memset(cube_buff_G[row], gcolor/RGB_SCALE, CUBE_COL_SIZE);
+        memset(cube_buff_R[row], rcolor/RGB_SCALE, CUBE_COL_SIZE);
+        memset(cube_buff_B[row], bcolor/RGB_SCALE, CUBE_COL_SIZE);
+    }
+}
+
+void scenceCandle()
+{
+    static uint8_t calc=0;
+    uint8_t     row=0,col=0;
+    uint32_t    g[CUBE_COL_SIZE];
+    uint8_t     r[CUBE_COL_SIZE];
+    uint8_t     b[CUBE_COL_SIZE];
+    uint8_t     h[10]={1,2,3,4,5,5,4,3,2,1};
+
+    if(newReqFlag)
+    {
+        newReqFlag = 0;
+        drv_pwm_speed(500);
+
+        //颜色上升
+        for( row=6; row<24; row++ )
+        {
+            memcpy(cube_buff_G[row], 0xff/RGB_SCALE,CUBE_COL_SIZE);
+            memcpy(cube_buff_R[row], 0xff/RGB_SCALE,CUBE_COL_SIZE);
+            memcpy(cube_buff_B[row], 0xff/RGB_SCALE,CUBE_COL_SIZE);
+        }
+    }
+    else
+    {
+
+        for(col=22;col<CUBE_COL_SIZE;col++)
+        {
+            //初始化灯头颜色组
+            {
+                for( row=5; row>5-h[(calc-22)%10]; row-- )
+                {
+                    memset(cube_buff_G[row], 0x0/RGB_SCALE, CUBE_COL_SIZE);
+                    memset(cube_buff_R[row], 0xff/RGB_SCALE, CUBE_COL_SIZE);
+                    memset(cube_buff_B[row], 0/RGB_SCALE, CUBE_COL_SIZE);
+                }
+            }
+        }
+    }
+    
+    for( row=0; row<CUBE_ROW_SIZE; row++ )
+    {
+        printf("---------------------------\r\n");
+        for( col=0; col<CUBE_COL_SIZE; col++ )
+        {
+            printf("[%d %d]:%x %x %x",row,col,
+                    cube_buff_G[row][col],cube_buff_R[row][col],cube_buff_B[row][col]);
+        }
+        printf("\r\n");
     }
 }
 
@@ -617,12 +714,12 @@ void ScenceLayering()
     if(newReqFlag)
     {
         newReqFlag = 0;
-        for( row=0; row<CUBE_ROW_SIZE; row++ )
+        for( row=0; row<CUBE_RGB_SIZE; row++ )
         {
             //初始化颜色组
-            memset(cube_buff_G[row], (GRB[row]>>16)&0xff, CUBE_COL_SIZE);
-            memset(cube_buff_R[row], (GRB[row]>>8) &0xff, CUBE_COL_SIZE);
-            memset(cube_buff_B[row], (GRB[row])    &0xff, CUBE_COL_SIZE);
+            memset(cube_buff_G[row], ((GRB48[row]>>16)&0xff)/RGB_SCALE, CUBE_COL_SIZE);
+            memset(cube_buff_R[row], ((GRB48[row]>>8) &0xff)/RGB_SCALE, CUBE_COL_SIZE);
+            memset(cube_buff_B[row], ((GRB48[row])    &0xff)/RGB_SCALE, CUBE_COL_SIZE);
         }
     }
     else
@@ -632,7 +729,7 @@ void ScenceLayering()
         memcpy(b, cube_buff_B[0],CUBE_COL_SIZE);
 
         //颜色上升
-        for( row=0; row<CUBE_ROW_SIZE-1; row++ )
+        for( row=0; row<CUBE_RGB_SIZE-1; row++ )
         {
             memcpy(cube_buff_G[row], cube_buff_G[row+1],CUBE_COL_SIZE);
             memcpy(cube_buff_R[row], cube_buff_R[row+1],CUBE_COL_SIZE);
@@ -640,9 +737,9 @@ void ScenceLayering()
         }
 
         //新导入的一行颜色
-        memcpy(cube_buff_G[CUBE_ROW_SIZE-1], g, CUBE_COL_SIZE);
-        memcpy(cube_buff_R[CUBE_ROW_SIZE-1], r, CUBE_COL_SIZE);
-        memcpy(cube_buff_B[CUBE_ROW_SIZE-1], b, CUBE_COL_SIZE);
+        memcpy(cube_buff_G[CUBE_RGB_SIZE-1], g, CUBE_COL_SIZE);
+        memcpy(cube_buff_R[CUBE_RGB_SIZE-1], r, CUBE_COL_SIZE);
+        memcpy(cube_buff_B[CUBE_RGB_SIZE-1], b, CUBE_COL_SIZE);
     }
     /*
     for( row=0; row<CUBE_ROW_SIZE; row++ )
@@ -663,7 +760,7 @@ void ScenceCycle()
     uint8_t         row=0,col=0,base,idx;
     uint8_t         sRGB[3];
     uint16_t        uwPWM [4];
-    static uint8_t  buff_G[CUBE_COL_SIZE],buff_R[CUBE_COL_SIZE],buff_B[CUBE_COL_SIZE];
+    static uint8_t  buff_G[CUBE_RGB_SIZE],buff_R[CUBE_RGB_SIZE],buff_B[CUBE_RGB_SIZE];
     
     if(newReqFlag)
     {
@@ -672,7 +769,10 @@ void ScenceCycle()
         calc_RGB_COL(buff_G,buff_R,buff_B);
     }
 
-    base = calc%CUBE_COL_SIZE;
+    if(calc==CUBE_RGB_SIZE)
+        calc = 0;
+
+    base = calc%CUBE_RGB_SIZE;
 
     for( col = 0; col < CUBE_COL_SIZE; col++ )
     {
@@ -680,9 +780,9 @@ void ScenceCycle()
         //初始化颜色组
         //if(col+base < CUBE_COL_SIZE)
         {
-            sRGB[0] = buff_R[idx];
-            sRGB[1] = buff_G[idx];
-            sRGB[2] = buff_B[idx];
+            sRGB[0] = buff_R[idx]/RGB_SCALE;
+            sRGB[1] = buff_G[idx]/RGB_SCALE;
+            sRGB[2] = buff_B[idx]/RGB_SCALE;
         }
         //else
         {
@@ -718,7 +818,7 @@ void ScenceSection()
 {
     uint8_t     col,row,random;
 
-    random = systime%15;
+    random = systime%24;
 
     if(newReqFlag)
     {
@@ -731,9 +831,9 @@ void ScenceSection()
         for( row=0; row<CUBE_ROW_SIZE; row++ )
         {
             //初始化颜色组
-            cube_buff_G[row][col] = (GRB[random+(row/6)*7]>>16)&0xff;
-            cube_buff_R[row][col] = (GRB[random+(row/6)*7]>>8) &0xff;
-            cube_buff_B[row][col] = (GRB[random+(row/6)*7])    &0xff;
+            cube_buff_G[row][col] = ((GRB48[random+(row/6)*8]>>16)&0xff)/RGB_SCALE;
+            cube_buff_R[row][col] = ((GRB48[random+(row/6)*8]>>8) &0xff)/RGB_SCALE;
+            cube_buff_B[row][col] = ((GRB48[random+(row/6)*8])    &0xff)/RGB_SCALE;
         }
     }
 
@@ -823,15 +923,18 @@ void ScenceWaving()
     static uint8_t  calc = 0;
     uint8_t     row=0,col=0,idx;
 
+    if(calc==CUBE_RGB_SIZE)
+        calc=0;
+    
     for( row=0; row<CUBE_ROW_SIZE; row++ )
     {
         //初始化颜色组
         for( col=0; col<CUBE_COL_SIZE; col++ )
         {
-            idx = (col+row+calc)%CUBE_RGB_SIZE;
-            cube_buff_G[row][col] = GRB30[idx]>>16&0xff;
-            cube_buff_R[row][col] = GRB30[idx]>>8 &0xff;
-            cube_buff_B[row][col] = GRB30[idx]    &0xff;
+            idx = (col*2+row+calc)%CUBE_RGB_SIZE;
+            cube_buff_G[row][col] = (GRB48[idx]>>16&0xff)/RGB_SCALE;
+            cube_buff_R[row][col] = (GRB48[idx]>>8 &0xff)/RGB_SCALE;
+            cube_buff_B[row][col] = (GRB48[idx]    &0xff)/RGB_SCALE;
         }
     }
     
@@ -850,6 +953,70 @@ void ScenceWaving()
     calc++;
 }
 
+uint8_t PhotoCycle()
+{
+    uint8_t         row=0,col=0;
+    uint8_t         buff_G[24],buff_R[24],buff_B[24];
+    
+    if(newReqFlag)
+    {
+        newReqFlag = 0;
+        calc_RGB_Photo_point();
+    }
+
+    for( row=0; row<CUBE_ROW_SIZE; row++ )
+    {
+        buff_G[row] = cube_buff_G[row][0];
+        buff_R[row] = cube_buff_R[row][0];
+        buff_B[row] = cube_buff_B[row][0];
+    }
+
+    for( col = 0; col < CUBE_COL_SIZE-1; col++ )
+    {
+        for( row=0; row<CUBE_ROW_SIZE; row++ )
+        {
+            cube_buff_G[row][col] = cube_buff_G[row][col+1];
+            cube_buff_R[row][col] = cube_buff_R[row][col+1];
+            cube_buff_B[row][col] = cube_buff_B[row][col+1];
+            //printf("[%d %d %d] ",cube_buff_G[row][col],cube_buff_R[row][col],cube_buff_B[row][col]);
+        }
+        //printf("\r\n");
+    }
+
+    for( row=0; row<CUBE_ROW_SIZE; row++ )
+    {
+        cube_buff_G[row][CUBE_COL_SIZE-1] = buff_G[row];
+        cube_buff_R[row][CUBE_COL_SIZE-1] = buff_R[row];
+        cube_buff_B[row][CUBE_COL_SIZE-1] = buff_B[row];
+    }
+    
+    /*
+    for( row=0; row<CUBE_ROW_SIZE; row++ )
+    {
+        printf("---------------------------\r\n");
+        for( col=0; col<CUBE_COL_SIZE; col++ )
+        {
+            printf("[%d %d]:%x %x %x",row,col,
+                    cube_buff_G[row][col],cube_buff_R[row][col],cube_buff_B[row][col]);
+        }
+        printf("\r\n");
+    }*/
+    
+    return 0;
+}
+
+void OffRGB()
+{
+    uint16_t row,col;
+
+    for( row=0; row<CUBE_RGB_SIZE; row++ )
+    {
+        memset(cube_buff_G[row], 0, CUBE_COL_SIZE);
+        memset(cube_buff_R[row], 0, CUBE_COL_SIZE);
+        memset(cube_buff_B[row], 0, CUBE_COL_SIZE);
+    }
+    WS2801_framRefresh();
+}
 
 void WS2801_framRefresh(void)
 {
@@ -895,19 +1062,26 @@ FRESULT WS2801_softScen()
             res = FR_OK;
         }
     }
+    /*
     else if(cubeSoftFrameId%PROGRAM_NUM == 1)
     {
-        //if(HAL_GetTick()-systime > 1000)
+        //printf("scenceCandle\r\n");
+        scenceCandle();
+        res = FR_OK;
+    }*/
+    else if(cubeSoftFrameId%PROGRAM_NUM == 1)
+    {
+        if(HAL_GetTick()-systime > 10000)
         {
             //printf("Layering\r\n");
             ScenceLayering();
-            //systime = HAL_GetTick();
+            systime = HAL_GetTick();
             res = FR_OK;
         }
     }
     else if(cubeSoftFrameId%PROGRAM_NUM == 2)
     {
-        if(HAL_GetTick()-systime > 1000)
+        if(HAL_GetTick()-systime > 10000)
         {
             ScenceCycle();
             systime = HAL_GetTick();
@@ -934,7 +1108,7 @@ FRESULT WS2801_softScen()
     }
     else if(cubeSoftFrameId%PROGRAM_NUM >= 5)
     {
-        if(HAL_GetTick()-systime > 2000000 || newReqFlag)
+        if(HAL_GetTick()-systime > 1000000 || newReqFlag)
         {
             systime = HAL_GetTick();
             ScenceSection();
@@ -947,11 +1121,11 @@ FRESULT WS2801_softScen()
 
 void WS2801_play(void)
 {
-    FRESULT res = FR_OK;
+    FRESULT res = FR_NOT_READY;
     BOOL    flash_flag = false;
     uint8_t row;
 
-    if(runFlag || ((programsType!=PHOTO)/* && (HAL_GetTick() - systime>100000)*/))
+    //if(runFlag || ((programsType!=PHOTO)/* && (HAL_GetTick() - systime>100000)*/))
     {
 #if 0
         SD_ReadFileData();
@@ -962,12 +1136,13 @@ void WS2801_play(void)
         memcpy(Usart1Tx.TX_pData,fileBuffer,TX_LEN);
         Usart1Tx.TX_flag = 1;
 #else
-        runFlag = 0;
+        //runFlag = 0;
 
         if(cubeRGBStatus)
         {
             RGB_white_firsttime_flag = true;
             //printf("cubept=%d,pt=%d\r\n",cubeSoftFrameId,programsType);
+            /*
             if(programsType==FILM)
             {
                 res = SD_ReadFilmData();
@@ -977,7 +1152,8 @@ void WS2801_play(void)
                     flash_flag = true;
                 }
             }
-            else if(programsType==AUTO_ALGORITHM)
+            else */
+            if(programsType==AUTO_ALGORITHM)
             {
                 res = WS2801_softScen();
                 if(res==FR_OK)
@@ -985,14 +1161,31 @@ void WS2801_play(void)
                 else
                     return;
             }
-            else
+            else if(programsType==PHOTO)
             {
-                uint8_t path[FILE_PATH_LEN];
+                if(photoOpenFlag)
+                {
+                    photoOpenFlag = false;
+                    uint8_t path[FILE_PATH_LEN];
 
-                memset(path, 0, FILE_PATH_LEN);
-                sprintf(path,"/WS2801/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
-
-                res = SD_ReadPhotoData(path);
+                    memset(path, 0, FILE_PATH_LEN);
+                    sprintf(path,"/WS2801/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
+                    res = SD_ReadPhotoData(path);
+                }
+                else
+                {
+                    if(HAL_GetTick()-systime > 30000)
+                    {
+                        //printf("PhotoCycle\r\n");
+                        res = PhotoCycle();
+                        systime = HAL_GetTick();
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                
                 if(res==FR_OK)
                     flash_flag = true;
             }
@@ -1035,6 +1228,23 @@ void WS2801_play(void)
 #endif
         //systime = HAL_GetTick();
     }
+}
+
+void CUBE_Start()
+{
+    uint8_t row;
+    newReqFlag = true;
+    ScenceCycle();
+
+    for(int i = 0; i < 10; i++)
+    {
+        col_down = i+1;
+        WS2801_framRefresh();
+        Delay_ms(200);
+    }
+    Delay_ms(500);
+
+    OffRGB();
 }
 
 #if 0

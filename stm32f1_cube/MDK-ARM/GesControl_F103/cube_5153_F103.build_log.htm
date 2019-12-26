@@ -27,118 +27,54 @@ Project File Date:  10/31/2019
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'GesControl_F103'
-compiling programs.c...
-..\Src\programs.c(58): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
-      res = f_open(&fsrc, path, 
-A_OPEN_EXISTING | 
-A_READ);
-..\Src\programs.c(64): warning:  #223-D: function "memset" declared implicitly
-      memset(fileBuffer, 0, MAX_FILE_SIZE);
-..\Src\programs.c(109): warning:  #223-D: function "memset" declared implicitly
-      memset(path, 0, sizeof(path));
-..\Src\programs.c(112): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
-      sprintf(path,"/OSRAM/Film/%s/%s",film_file[filmProgramIdx%filmTotalProgram].foldername,film_file[filmProgramIdx%filmTotalProgram].filename);
-..\Src\programs.c(119): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "const char *"
-      res = f_open(&fsrc, path, 
-A_OPEN_EXISTING | 
-A_READ);
-..\Src\programs.c(106): warning:  #177-D: variable "a"  was declared but never referenced
-      UINT a = 1,i,j;
-..\Src\programs.c(106): warning:  #177-D: variable "i"  was declared but never referenced
-      UINT a = 1,i,j;
-..\Src\programs.c(106): warning:  #177-D: variable "j"  was declared but never referenced
-      UINT a = 1,i,j;
-..\Src\programs.c(142): warning:  #223-D: function "memset" declared implicitly
-      memset(fileBuffer, 0, MAX_FILE_SIZE);
-..\Src\programs.c(259): warning:  #223-D: function "stringcopy" declared implicitly
-                  stringcopy(photo_filename[i_name], (BYTE*)finfo.fname);
-..\Src\programs.c(240): warning:  #177-D: variable "br"  was declared but never referenced
-      int i_name=0, br;
-..\Src\programs.c(294): warning:  #223-D: function "stringcopy" declared implicitly
-                  stringcopy(light_filename[i_name], (BYTE*)finfo.fname);
-..\Src\programs.c(277): warning:  #177-D: variable "br"  was declared but never referenced
-      int i_name=0, br;
-..\Src\programs.c(318): warning:  #223-D: function "memset" declared implicitly
-      memset(path, 0, sizeof(path));
-..\Src\programs.c(343): warning:  #223-D: function "stringcopy" declared implicitly
-                  stringcopy(film_file[filmId].filename, (BYTE*)finfo.fname);
-..\Src\programs.c(312): warning:  #177-D: variable "br"  was declared but never referenced
-      int br;
-..\Src\programs.c(383): warning:  #223-D: function "stringcopy" declared implicitly
-                  stringcopy(film_file[i_name].foldername, (BYTE*)finfo.fname);
-..\Src\programs.c(362): warning:  #177-D: variable "br"  was declared but never referenced
-      int i_name=0, br;
-..\Src\programs.c(402): warning:  #223-D: function "memset" declared implicitly
-      memset(buffer,0,sizeof(buffer));
-..\Src\programs.c: 19 warnings, 0 errors
-compiling eplos.c...
-..\Src\eplos.c(47): warning:  #1295-D: Deprecated declaration OSRAM_Introduce - give arg types
-  void OSRAM_Introduce();
-..\Src\eplos.c(271): warning:  #223-D: function "memset" declared implicitly
-      memset(array, 0, sizeof(array));
-..\Src\eplos.c(290): warning:  #223-D: function "memset" declared implicitly
-      memset(array, 0, sizeof(array));
-..\Src\eplos.c(307): warning:  #223-D: function "memset" declared implicitly
-    memset(pBuffer, 0, NumByteToRead);
-..\Src\eplos.c(336): warning:  #223-D: function "memcpy" declared implicitly
-          memcpy(buff,osram_buff[i],MATRIX_SIZE);
-..\Src\eplos.c(353): warning:  #223-D: function "memcpy" declared implicitly
-          memcpy(displayMatrix0Q[i], &osram_buff[16+i][0], 16);
-..\Src\eplos.c(400): warning:  #223-D: function "memcpy" declared implicitly
-          memcpy(tmpR, displayMatrix1Q[row], sizeof(tmpR));
-..\Src\eplos.c(408): warning:  #223-D: function "memcpy" declared implicitly
-          memcpy(tmpR, displayMatrix2Q[row], sizeof(tmpR));
-..\Src\eplos.c(416): warning:  #177-D: variable "tmp"  was declared but never referenced
-      uint8_t row, col, tmp;
-..\Src\eplos.c(461): warning:  #177-D: variable "fixel"  was declared but never referenced
-      unsigned short k,fixel;
-..\Src\eplos.c(650): warning:  #188-D: enumerated type mixed with another type
-          eplosCfgFlag = 
-alse;
-..\Src\eplos.c(671): warning:  #188-D: enumerated type mixed with another type
-          runFlag = 0;
-..\Src\eplos.c(675): warning:  #223-D: function "SD_ReadFilmData" declared implicitly
-              res = SD_ReadFilmData();
-..\Src\eplos.c(675): warning:  #188-D: enumerated type mixed with another type
-              res = SD_ReadFilmData();
-..\Src\eplos.c(682): warning:  #223-D: function "memset" declared implicitly
-              memset(path, 0, FILE_PATH_LEN);
-..\Src\eplos.c(683): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
-              sprintf(path,"/OSRAM/Photo/%s",photo_filename[photoProgramIdx%fileTotalPhoto]);
-..\Src\eplos.c(685): warning:  #223-D: function "SD_ReadPhotoData" declared implicitly
-              res = SD_ReadPhotoData(path);
-..\Src\eplos.c(685): warning:  #188-D: enumerated type mixed with another type
-              res = SD_ReadPhotoData(path);
-..\Src\eplos.c(696): warning:  #223-D: function "memset" declared implicitly
-              memset(path, 0, FILE_PATH_LEN);
-..\Src\eplos.c(697): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
-              sprintf(path,"/OSRAM/Light/%s",light_filename[lightProgramIdx%fileTotallight]);
-..\Src\eplos.c(699): warning:  #223-D: function "SD_ReadPhotoData" declared implicitly
-              res = SD_ReadPhotoData(path);
-..\Src\eplos.c(699): warning:  #188-D: enumerated type mixed with another type
-              res = SD_ReadPhotoData(path);
-..\Src\eplos.c(751): warning:  #223-D: function "memset" declared implicitly
-      memset(path, 0, sizeof(path));
-..\Src\eplos.c(752): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
-      sprintf(path,"/OSRAM/Start/start1.dat");
-..\Src\eplos.c(754): warning:  #223-D: function "SD_ReadPhotoData" declared implicitly
-      SD_ReadPhotoData(path);
-..\Src\eplos.c(759): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
-      sprintf(path,"/OSRAM/Start/start2.dat");
-..\Src\eplos.c(766): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
-      sprintf(path,"/OSRAM/Start/start3.dat");
-..\Src\eplos.c(773): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
-      sprintf(path,"/OSRAM/Start/start4.dat");
-..\Src\eplos.c(784): warning:  #223-D: function "memset" declared implicitly
-      memset(path, 0, sizeof(path));
-..\Src\eplos.c(785): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *restrict"
-      sprintf(path,"/OSRAM/Start/intr.dat");
-..\Src\eplos.c(787): warning:  #223-D: function "SD_ReadPhotoData" declared implicitly
-      SD_ReadPhotoData(path);
-..\Src\eplos.c: 31 warnings, 0 errors
+compiling drv_serial.c...
+..\Src\drv_serial.c(79): warning:  #223-D: function "memset" declared implicitly
+      memset(single_cmd, 0, sizeof(single_cmd));
+..\Src\drv_serial.c(106): warning:  #223-D: function "memcpy" declared implicitly
+      memcpy(act_cmd.multi_cmd[act_cmd.wr_id], pData, CMD_LEN_MAX-1);
+..\Src\drv_serial.c(116): warning:  #223-D: function "memcpy" declared implicitly
+          memcpy(pData, act_cmd.multi_cmd[act_cmd.rd_id], CMD_LEN_MAX-1);
+..\Src\drv_serial.c(140): warning:  #188-D: enumerated type mixed with another type
+              cubeRGBStatus = !cubeRGBStatus;
+..\Src\drv_serial.c(142): warning:  #188-D: enumerated type mixed with another type
+              photoOpenFlag = 
+rue;
+..\Src\drv_serial.c(154): warning:  #223-D: function "OffRGB" declared implicitly
+                  OffRGB();
+..\Src\drv_serial.c(180): warning:  #223-D: function "drv_pwm_on" declared implicitly
+                  drv_pwm_on();
+..\Src\drv_serial.c(182): warning:  #223-D: function "drv_pwm_off" declared implicitly
+                  drv_pwm_off(0);
+..\Src\drv_serial.c(201): warning:  #223-D: function "SD_OpenFilmData" declared implicitly
+                      SD_OpenFilmData();
+..\Src\drv_serial.c(271): warning:  #223-D: function "SD_OpenFilmData" declared implicitly
+                      SD_OpenFilmData();
+..\Src\drv_serial.c(331): warning:  #223-D: function "OffRGB" declared implicitly
+                  OffRGB();
+..\Src\drv_serial.c(334): warning:  #188-D: enumerated type mixed with another type
+                  photoOpenFlag = 
+rue;
+..\Src\drv_serial.c(335): warning:  #188-D: enumerated type mixed with another type
+                  programsType = (programsType+1)%MAX_PROGRAMS;
+..\Src\drv_serial.c(343): warning:  #223-D: function "SD_OpenFilmData" declared implicitly
+                      SD_OpenFilmData();
+..\Src\drv_serial.c(348): warning:  #188-D: enumerated type mixed with another type
+                      photoOpenFlag = 
+rue;
+..\Src\drv_serial.c(375): warning:  #223-D: function "drv_pwm_speed_stepup" declared implicitly
+                  drv_pwm_speed_stepup(LIGHTING_STEP);
+..\Src\drv_serial.c(393): warning:  #223-D: function "drv_pwm_speed_stepdown" declared implicitly
+                  drv_pwm_speed_stepdown(LIGHTING_STEP);
+..\Src\drv_serial.c(474): warning:  #127-D: expected a statement
+              }
+..\Src\drv_serial.c(22): warning:  #177-D: variable "tickstart"  was declared but never referenced
+  static uint32_t          tickstart;
+..\Src\drv_serial.c(64): warning:  #177-D: function "Drv_MOTOR_CMD_Handler"  was declared but never referenced
+  static int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param);
+..\Src\drv_serial.c: 20 warnings, 0 errors
 linking...
-Program Size: Code=29798 RO-data=294 RW-data=1200 ZI-data=8536  
-"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 50 Warning(s).
+Program Size: Code=38182 RO-data=594 RW-data=468 ZI-data=12540  
+"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 20 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -161,7 +97,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.1
-Build Time Elapsed:  00:00:04
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>

@@ -15,11 +15,13 @@
 #include "drv_serial.h"
 #include "programs.h"
 #include "config.h"
+#include "delay.h"
 
 ACT_CMD act_cmd;
 
 static uint32_t          tickstart;
 
+extern TIM_HandleTypeDef htim1,htim2,htim3;
 extern uint8_t           single_cmd[CMD_LEN_MAX];
 extern uint8_t           photoProgramIdx;
 extern uint8_t           lightProgramIdx;
@@ -33,6 +35,7 @@ extern BYTE              photo_filename[MAX_FILE_NUM][FILE_NAME_LEN_SHORT];
 extern BYTE              light_filename[MAX_FILE_NUM][FILE_NAME_LEN_SHORT];
 extern uint16_t          fileTotalPhoto;
 extern uint16_t          fileTotallight;
+extern BOOL              photoOpenFlag;
 #endif
 
 #if(PROJECTOR_OSRAM)
@@ -45,6 +48,8 @@ extern uint8_t           currentAdjustList[4];
 extern uint8_t           cubeSoftFrameId;
 extern uint8_t           newReqFlag;
 extern BOOL              cubeRGBStatus;
+extern uint32_t          brightness;//init in appinit
+extern BOOL              lightingStatus;
 #endif
 
 extern PROGRAMS_TYPE_E   programsType;
@@ -133,7 +138,27 @@ static void handle_func_MIkeys(uint16_t key)
             runFlag = true;
             cubeRGBStatus = !cubeRGBStatus;
             newReqFlag = true;
+            photoOpenFlag = true;
             printf("cubeRGBStatus [%d]\r\n", cubeRGBStatus);
+            if(cubeRGBStatus)
+            {
+                if(lightingStatus)
+                {
+                    __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, 0);
+                    __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_2, 0);
+                }
+            }
+            else
+            {
+                OffRGB();
+                Delay_ms(100);
+                if(lightingStatus)
+                {
+                    __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1, brightness);
+                    __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_2, brightness);
+                }
+            }
+            
             #elif(PROJECTOR_OSRAM)
             runFlag = true;
             programsType = APP;
@@ -302,7 +327,10 @@ static void handle_func_MIkeys(uint16_t key)
             if(cubeRGBStatus)
             #endif
             {
+                OffRGB();
                 runFlag = true;
+                newReqFlag = true;
+                photoOpenFlag = true;
                 programsType = (programsType+1)%MAX_PROGRAMS;
                 #if(PROJECTOR_CUBE||PROJECTOR_OSRAM)
                 if(programsType==FILM)
@@ -316,6 +344,7 @@ static void handle_func_MIkeys(uint16_t key)
                 }
                 else if(programsType==PHOTO)
                 {
+                    photoOpenFlag = true;
                     printf("photo [%s]\r\n", photo_filename[photoProgramIdx%fileTotalPhoto]);
                 }
                 #if(PROJECTOR_CUBE)

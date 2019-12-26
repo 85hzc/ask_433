@@ -54,14 +54,14 @@
 #define PROJECTOR_MBI5124   0
 
 //OSRAM eplos芯片投射灯方案
-#define PROJECTOR_OSRAM     1
+#define PROJECTOR_OSRAM     0
 
 //gpio控制16*16方案
 #define PROJECTOR_MCUGPIO   0
 
 //分体系列立体吊灯方案
-#define PROJECTOR_CUBE      0
-#define CUBE_MASTER         0
+#define PROJECTOR_CUBE      1
+#define CUBE_MASTER         1
 #define CUBE_SLAVE          0
 #define CUBE_LED_ALG        1
 
@@ -84,7 +84,8 @@
 #define MATRIX_SIZE         32
 #define MAX_FILE_SIZE       2080
 #elif(PROJECTOR_CUBE)
-#define CUBE_RGB_SIZE       30
+#define RGB_SCALE           1
+#define CUBE_RGB_SIZE       48//
 #define CUBE_ROW_SIZE       24
 #define CUBE_PILLAR_SIZE    22
 #define CUBE_PILLAR_DOWN_SIZE  10
