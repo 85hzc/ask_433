@@ -3,11 +3,6 @@
 
 #include <iostm8s103f3.h>
 
-//#define         THERMOELECTRIC_SENSOR
-#define         READ_REALTIME
-
-#define         SW_SENSOR  PD_IDR_IDR4
-
 #define         SW_K1    PD_IDR_IDR4
 #define         SW_K2    PA_IDR_IDR1
 #define         SW_K3    PC_IDR_IDR5
@@ -18,7 +13,13 @@
 #define         SW_K7    PC_IDR_IDR3
 #define         SW_K8    PC_IDR_IDR4
 
+#define         SW_SENSOR  SW_K3
+
+#ifdef THERMOELECTRIC_SENSOR
+#define         KEY_DELAY 50
+#else
 #define         KEY_DELAY 20
+#endif
 
 enum
 {

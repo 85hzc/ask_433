@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspace>
     <project>
-        <path>$WS_DIR$\..\..\..\..\接收demo\软件工程文件\Project\LED.ewp</path>
+        <path>$WS_DIR$\..\..\ASK-DEMO_RX_NEW\Project\LED_rx.ewp</path>
     </project>
     <project>
         <path>$WS_DIR$\LED_tx.ewp</path>

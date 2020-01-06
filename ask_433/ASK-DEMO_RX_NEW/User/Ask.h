@@ -13,8 +13,16 @@
 //#define max_time_l       15      //窄脉冲最大允许时间
 //#define min_time_l       6      //窄脉冲最小允许时间
 
+#if 0
 #if 0 //欧顶灯透传
+#define ODD
 #define ASK_SEND_LEN        4
+//#define NETID               0xAA
+#else //调焦灯
+#define TJD
+#define ASK_SEND_LEN        3
+#define NETID               0xBB
+#endif
 #else
 #define ASK_SEND_LEN        3
 #define READ_REALTIME

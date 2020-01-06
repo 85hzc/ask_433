@@ -113,7 +113,7 @@ __interrupt __root void UART1_Recv_IRQHandler()
 {
   unsigned char ch;
   ch=UART1_DR;
-  Uart_Sendbyte(ch);
+  //Uart_Sendbyte(ch);
 }
 
 

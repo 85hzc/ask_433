@@ -61,11 +61,11 @@ int main(void)
   {
     if(uart_flag)
     {
-      Uart_Sendbyte(0x88);
-      for(i=0;i<5;i++)
-      {
-         Uart_Sendbyte(rxBuff[i]);
-      }
+        Uart_Sendbyte(0x88);
+        for(i=0;i<5;i++)
+        {
+           Uart_Sendbyte(rxBuff[i]);
+        }
         //read eeprom info
         if(rxBuff[0]==0xf1 &&rxBuff[1]==0xf2)
         {

@@ -26,7 +26,7 @@ unsigned char Recv_data[ASK_SEND_LEN];
 
 unsigned char in_bit_n = 0;
 
-int  pwm_duty=8000, pwm_duty_last=0, lighting_status=1;//total 16000
+int  pwm_duty=50, pwm_duty_last=0, lighting_status=1;//total 16000
 unsigned char instNum=0;
 FM24C_Data_S  EE_dev_data;
 
@@ -191,7 +191,7 @@ void ProcessRecv()
 
     #ifdef READ_REALTIME
     FM24C_ReadDevInfo(0);
-    /*
+    
     Uart_Sendbyte(0xff);
     Uart_Sendbyte(Recv_data[0]);
     Uart_Sendbyte(Recv_data[1]);
@@ -199,7 +199,7 @@ void ProcessRecv()
     Uart_Sendbyte(fm24c_data.assoAddr[0]);
     Uart_Sendbyte(fm24c_data.assoAddr[1]);
     Uart_Sendbyte(0xff);
-    */
+    
     //匹配ID和设备地址
     if((Recv_data[0]==fm24c_data.assoAddr[0])&&
        (Recv_data[1]==fm24c_data.assoAddr[1])&&
@@ -208,7 +208,18 @@ void ProcessRecv()
       ProcessOut();
     }
     #else
-    Uart_Senddata(Recv_data, ASK_SEND_LEN);
+    #ifdef TJD
+    if(Recv_data[0]==NETID)
+    #endif
+    {
+        #ifdef ODD
+        Recv_data[0]==0xA;
+        Recv_data[1]==0xB;
+        Recv_data[2]==0x28;
+        #endif
+        Uart_Senddata(Recv_data, ASK_SEND_LEN);
+        DelayMS(200);
+    }
     //匹配ID和设备地址
     if((Recv_data[0]==EE_dev_data.assoAddr[0])&&
        (Recv_data[1]==EE_dev_data.assoAddr[1])&&
@@ -359,7 +370,7 @@ void ProcessOut()
                 Led_twinkle();
                 if(lighting_status)
                 {
-                    pwm_duty = (pwm_duty+4000>16000) ? 16000 : pwm_duty+4000;
+                    pwm_duty = (pwm_duty+25>100) ? 100 : pwm_duty+25;
                     
                     if(pwm_duty_last != pwm_duty)
                     {
@@ -374,7 +385,7 @@ void ProcessOut()
                 Led_twinkle();
                 if(lighting_status)
                 {
-                    pwm_duty = (pwm_duty-4000>4000) ? pwm_duty-4000 : 4000;
+                    pwm_duty = (pwm_duty-25>25) ? pwm_duty-25 : 25;
 
                     if(pwm_duty_last != pwm_duty)
                     {

@@ -145,6 +145,8 @@ void TIM1_PWM_SET()//改变周期
   CH3_PWM_SET(pwm_duty);
   pwm_duty_last = pwm_duty;
   lighting_status = 1;
+
+  TIM1_PSCRH =0;//定时器分频
   
   //ch3 config
   TIM1_CCMR3|=0x60;

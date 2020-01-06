@@ -95,7 +95,7 @@ void Ask_IO_Init()
 void Ask_process()
 {
   unsigned char i,j;
-  unsigned char key_value=0;
+  unsigned char key_value=KEY_NULL;
 
   Ask_IO_Init();
   ReadSelfAddr();
@@ -134,6 +134,19 @@ void Ask_process()
       Ask_send_buf[0]=EE_dev_data.assoAddr[0];
       Ask_send_buf[1]=EE_dev_data.assoAddr[1];
 
+      #ifdef TJD
+      Ask_send_buf[0]=NETID;
+      #endif
+      #if 1
+      Ask_send_buf[1] = 0;
+      Ask_send_buf[2] = key_value;
+  
+      ask_send(Ask_send_buf, ASK_SEND_LEN);
+      ask_send(Ask_send_buf, ASK_SEND_LEN);
+      ask_send(Ask_send_buf, ASK_SEND_LEN);
+      ask_send(Ask_send_buf, ASK_SEND_LEN);
+
+      #else
       for(i=0;i<EE_dev_data.instNum;i++)
       {
         for(j=0;j<8;j++)
@@ -152,6 +165,7 @@ void Ask_process()
           }
         }
       }
+      #endif
       #endif
       #ifndef THERMOELECTRIC_SENSOR
       Led_off_all();

@@ -19,7 +19,7 @@
 #include "motor.h"
 #endif
 
-#define PWM_SET     16000
+#define PWM_SET     100   //16000
 
 #endif
 
