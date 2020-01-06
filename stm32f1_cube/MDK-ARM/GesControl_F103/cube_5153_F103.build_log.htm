@@ -27,54 +27,7 @@ Project File Date:  10/31/2019
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'GesControl_F103'
-compiling drv_serial.c...
-..\Src\drv_serial.c(79): warning:  #223-D: function "memset" declared implicitly
-      memset(single_cmd, 0, sizeof(single_cmd));
-..\Src\drv_serial.c(106): warning:  #223-D: function "memcpy" declared implicitly
-      memcpy(act_cmd.multi_cmd[act_cmd.wr_id], pData, CMD_LEN_MAX-1);
-..\Src\drv_serial.c(116): warning:  #223-D: function "memcpy" declared implicitly
-          memcpy(pData, act_cmd.multi_cmd[act_cmd.rd_id], CMD_LEN_MAX-1);
-..\Src\drv_serial.c(140): warning:  #188-D: enumerated type mixed with another type
-              cubeRGBStatus = !cubeRGBStatus;
-..\Src\drv_serial.c(142): warning:  #188-D: enumerated type mixed with another type
-              photoOpenFlag = 
-rue;
-..\Src\drv_serial.c(154): warning:  #223-D: function "OffRGB" declared implicitly
-                  OffRGB();
-..\Src\drv_serial.c(180): warning:  #223-D: function "drv_pwm_on" declared implicitly
-                  drv_pwm_on();
-..\Src\drv_serial.c(182): warning:  #223-D: function "drv_pwm_off" declared implicitly
-                  drv_pwm_off(0);
-..\Src\drv_serial.c(201): warning:  #223-D: function "SD_OpenFilmData" declared implicitly
-                      SD_OpenFilmData();
-..\Src\drv_serial.c(271): warning:  #223-D: function "SD_OpenFilmData" declared implicitly
-                      SD_OpenFilmData();
-..\Src\drv_serial.c(331): warning:  #223-D: function "OffRGB" declared implicitly
-                  OffRGB();
-..\Src\drv_serial.c(334): warning:  #188-D: enumerated type mixed with another type
-                  photoOpenFlag = 
-rue;
-..\Src\drv_serial.c(335): warning:  #188-D: enumerated type mixed with another type
-                  programsType = (programsType+1)%MAX_PROGRAMS;
-..\Src\drv_serial.c(343): warning:  #223-D: function "SD_OpenFilmData" declared implicitly
-                      SD_OpenFilmData();
-..\Src\drv_serial.c(348): warning:  #188-D: enumerated type mixed with another type
-                      photoOpenFlag = 
-rue;
-..\Src\drv_serial.c(375): warning:  #223-D: function "drv_pwm_speed_stepup" declared implicitly
-                  drv_pwm_speed_stepup(LIGHTING_STEP);
-..\Src\drv_serial.c(393): warning:  #223-D: function "drv_pwm_speed_stepdown" declared implicitly
-                  drv_pwm_speed_stepdown(LIGHTING_STEP);
-..\Src\drv_serial.c(474): warning:  #127-D: expected a statement
-              }
-..\Src\drv_serial.c(22): warning:  #177-D: variable "tickstart"  was declared but never referenced
-  static uint32_t          tickstart;
-..\Src\drv_serial.c(64): warning:  #177-D: function "Drv_MOTOR_CMD_Handler"  was declared but never referenced
-  static int8_t Drv_MOTOR_CMD_Handler(uint8_t code, uint16_t param);
-..\Src\drv_serial.c: 20 warnings, 0 errors
-linking...
-Program Size: Code=38182 RO-data=594 RW-data=468 ZI-data=12540  
-"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 20 Warning(s).
+"GesControl_F103\cube_5153_F103.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -97,7 +50,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.1
-Build Time Elapsed:  00:00:03
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>

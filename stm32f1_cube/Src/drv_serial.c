@@ -35,7 +35,6 @@ extern BYTE              photo_filename[MAX_FILE_NUM][FILE_NAME_LEN_SHORT];
 extern BYTE              light_filename[MAX_FILE_NUM][FILE_NAME_LEN_SHORT];
 extern uint16_t          fileTotalPhoto;
 extern uint16_t          fileTotallight;
-extern BOOL              photoOpenFlag;
 #endif
 
 #if(PROJECTOR_OSRAM)
@@ -45,6 +44,7 @@ extern uint8_t           currentAdjustment;
 extern uint8_t           currentAdjustId;//0 ~ 0x1f
 extern uint8_t           currentAdjustList[4];
 #elif(PROJECTOR_CUBE)
+extern BOOL              photoOpenFlag;
 extern uint8_t           cubeSoftFrameId;
 extern uint8_t           newReqFlag;
 extern BOOL              cubeRGBStatus;
@@ -247,7 +247,7 @@ static void handle_func_MIkeys(uint16_t key)
                     else
                         cubeSoftFrameId = 0;
                 }
-                printf("soft [%d]\r\n", cubeSoftFrameId%PROGRAM_NUM);
+                printf("soft [%d]\r\n", cubeSoftFrameId%SOFT_PROGRAMS_MAX);
             }
             #endif
             break;
@@ -305,7 +305,7 @@ static void handle_func_MIkeys(uint16_t key)
                     else
                         cubeSoftFrameId=0xff;
                 }
-                printf("soft [%d]\r\n", cubeSoftFrameId%PROGRAM_NUM);
+                printf("soft [%d]\r\n", cubeSoftFrameId%SOFT_PROGRAMS_MAX);
             }
             #endif
             break;
@@ -327,10 +327,12 @@ static void handle_func_MIkeys(uint16_t key)
             if(cubeRGBStatus)
             #endif
             {
-                OffRGB();
                 runFlag = true;
+                #if(PROJECTOR_CUBE)
                 newReqFlag = true;
-                photoOpenFlag = true;
+                OffRGB();
+                #endif
+                //photoOpenFlag = true;
                 programsType = (programsType+1)%MAX_PROGRAMS;
                 #if(PROJECTOR_CUBE||PROJECTOR_OSRAM)
                 if(programsType==FILM)
@@ -344,13 +346,15 @@ static void handle_func_MIkeys(uint16_t key)
                 }
                 else if(programsType==PHOTO)
                 {
+                    #if(PROJECTOR_CUBE)
                     photoOpenFlag = true;
+                    #endif
                     printf("photo [%s]\r\n", photo_filename[photoProgramIdx%fileTotalPhoto]);
                 }
                 #if(PROJECTOR_CUBE)
                 else if(programsType==AUTO_ALGORITHM)
                 {
-                    printf("soft [%d]\r\n", cubeSoftFrameId%PROGRAM_NUM);
+                    printf("soft [%d]\r\n", cubeSoftFrameId%SOFT_PROGRAMS_MAX);
                 }
                 #endif
                 #endif

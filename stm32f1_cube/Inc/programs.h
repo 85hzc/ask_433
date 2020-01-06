@@ -21,4 +21,17 @@ typedef enum
 
 } PROGRAMS_TYPE_E;
 
+typedef enum
+{
+    WHOLE_SHOW = 0,
+    CANDLE_SHOW,
+    LAYING_SHOW,
+    CYCLE_SHOW,
+    WAVING_SHOW,
+    RAINBOW_SHOW,
+    SECT_SHOW,
+
+    SOFT_PROGRAMS_MAX,
+} SOFT_PROGRAMS_E;
+
 #endif

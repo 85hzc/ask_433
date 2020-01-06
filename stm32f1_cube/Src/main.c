@@ -229,7 +229,7 @@ void Drv_SERIAL_Proc(void)
     {
         UsartType2.RX_flag = 0;
 
-        #if 0
+        #if 1
         printf("BLE rx len=%d  [",UsartType2.RX_Size);
         for(int i=0; i<UsartType2.RX_Size; i++)
         {
@@ -1561,7 +1561,9 @@ void AppControlEplosHandle()
     memset(data,0,sizeof(data));
     memcpy(data, &UsartType2.RX_pData[1], 20);
 
-    if(UsartType2.RX_pData[0]==0x00)//ble mesh msg
+    if(UsartType2.RX_pData[0]==0x00 &&
+        UsartType2.RX_pData[1]==0x60 && 
+        UsartType2.RX_pData[2]==0x5F)//ble mesh msg
     {
         if(data[9]==0xd && data[10]==0x3 && data[11]==0x0)
         {
@@ -1630,7 +1632,9 @@ void AppControlCubeHandle()
     memset(data,0,sizeof(data));
     memcpy(data, &UsartType2.RX_pData[1], 20);
 
-    if(UsartType2.RX_pData[0]==0x00)//ble mesh msg
+    if(UsartType2.RX_pData[0]==0x00 &&
+        UsartType2.RX_pData[1]==0x60 && 
+        UsartType2.RX_pData[2]==0x5F)//ble mesh msg
     {
         if(data[9]==0xd && data[10]==0x3 && data[11]==0x0)
         {

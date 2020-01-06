@@ -39,9 +39,9 @@ extern uint16_t                 brightness;
 //uint8_t                         GData4[CHIP_SIZE], RData4[CHIP_SIZE], BData4[CHIP_SIZE];
 
 BOOL                            RGB_white_firsttime_flag = true;
-uint8_t                         cubeSoftFrameId = 0;
+uint8_t                         cubeSoftFrameId = 2;
 BOOL                            newReqFlag = true;
-BOOL                            cubeRGBStatus = false;
+BOOL                            cubeRGBStatus = true;//false;
 BOOL                            photoOpenFlag = true;
 
 static uint64_t                 systime = 0;
@@ -660,48 +660,63 @@ void scenceCandle()
     uint32_t    g[CUBE_COL_SIZE];
     uint8_t     r[CUBE_COL_SIZE];
     uint8_t     b[CUBE_COL_SIZE];
-    uint8_t     h[10]={1,2,3,4,5,5,4,3,2,1};
+    uint8_t     h[10]={0,1,2,3,4,5,4,3,2,1};
+
+    if(calc==10)
+        calc = 0;
 
     if(newReqFlag)
     {
         newReqFlag = 0;
-        drv_pwm_speed(500);
+        //drv_pwm_speed(500);//Insufficient power supply when white led ON.
+
+        for( row=0; row<6; row++ )
+        {
+            memset(cube_buff_G[row], 0, CUBE_COL_SIZE);
+            memset(cube_buff_R[row], 0, CUBE_COL_SIZE);
+            memset(cube_buff_B[row], 0, CUBE_COL_SIZE);
+        }
 
         //颜色上升
         for( row=6; row<24; row++ )
         {
-            memcpy(cube_buff_G[row], 0xff/RGB_SCALE,CUBE_COL_SIZE);
-            memcpy(cube_buff_R[row], 0xff/RGB_SCALE,CUBE_COL_SIZE);
-            memcpy(cube_buff_B[row], 0xff/RGB_SCALE,CUBE_COL_SIZE);
+            memset(cube_buff_G[row], 0xff/RGB_SCALE,CUBE_COL_SIZE);
+            memset(cube_buff_R[row], 0xff/RGB_SCALE,CUBE_COL_SIZE);
+            memset(cube_buff_B[row], 0xff/RGB_SCALE,CUBE_COL_SIZE);
         }
     }
     else
     {
+        for( row=0; row<6; row++ )
+        {
+            memset(cube_buff_G[row], 0, CUBE_COL_SIZE);
+            memset(cube_buff_R[row], 0, CUBE_COL_SIZE);
+            memset(cube_buff_B[row], 0, CUBE_COL_SIZE);
+        }
 
-        for(col=22;col<CUBE_COL_SIZE;col++)
+        for(col=0;col<CUBE_COL_SIZE;col++)
         {
             //初始化灯头颜色组
+            for( row=6; row>h[(calc+col)%10]; row-- )
             {
-                for( row=5; row>5-h[(calc-22)%10]; row-- )
-                {
-                    memset(cube_buff_G[row], 0x0/RGB_SCALE, CUBE_COL_SIZE);
-                    memset(cube_buff_R[row], 0xff/RGB_SCALE, CUBE_COL_SIZE);
-                    memset(cube_buff_B[row], 0/RGB_SCALE, CUBE_COL_SIZE);
-                }
+                cube_buff_G[row-1][col] = 0x0 /RGB_SCALE;
+                cube_buff_R[row-1][col] = 0xff/RGB_SCALE;
+                cube_buff_B[row-1][col] = 0x0 /RGB_SCALE;
             }
         }
     }
-    
+    /*
     for( row=0; row<CUBE_ROW_SIZE; row++ )
     {
-        printf("---------------------------\r\n");
+        printf("--------------------------------------------------------------------------------------------\r\n");
         for( col=0; col<CUBE_COL_SIZE; col++ )
         {
-            printf("[%d %d]:%x %x %x",row,col,
-                    cube_buff_G[row][col],cube_buff_R[row][col],cube_buff_B[row][col]);
+            printf("%2x%2x%2x ",cube_buff_G[row][col],cube_buff_R[row][col],cube_buff_B[row][col]);
         }
         printf("\r\n");
     }
+    */
+    calc++;
 }
 
 void ScenceLayering()
@@ -1053,7 +1068,7 @@ FRESULT WS2801_softScen()
 {
     FRESULT res = FR_TIMEOUT;
 
-    if(cubeSoftFrameId%PROGRAM_NUM == 0)
+    if(cubeSoftFrameId%SOFT_PROGRAMS_MAX == WHOLE_SHOW)
     {
         //if(HAL_GetTick()-systime > 1000)
         {
@@ -1062,14 +1077,13 @@ FRESULT WS2801_softScen()
             res = FR_OK;
         }
     }
-    /*
-    else if(cubeSoftFrameId%PROGRAM_NUM == 1)
+    else if(cubeSoftFrameId%SOFT_PROGRAMS_MAX == CANDLE_SHOW)
     {
         //printf("scenceCandle\r\n");
         scenceCandle();
         res = FR_OK;
-    }*/
-    else if(cubeSoftFrameId%PROGRAM_NUM == 1)
+    }
+    else if(cubeSoftFrameId%SOFT_PROGRAMS_MAX == LAYING_SHOW)
     {
         if(HAL_GetTick()-systime > 10000)
         {
@@ -1079,7 +1093,7 @@ FRESULT WS2801_softScen()
             res = FR_OK;
         }
     }
-    else if(cubeSoftFrameId%PROGRAM_NUM == 2)
+    else if(cubeSoftFrameId%SOFT_PROGRAMS_MAX == CYCLE_SHOW)
     {
         if(HAL_GetTick()-systime > 10000)
         {
@@ -1088,7 +1102,7 @@ FRESULT WS2801_softScen()
             res = FR_OK;
         }
     }
-    else if(cubeSoftFrameId%PROGRAM_NUM == 3)
+    else if(cubeSoftFrameId%SOFT_PROGRAMS_MAX == WAVING_SHOW)
     {
         //if(HAL_GetTick()-systime > 1000)
         {
@@ -1098,7 +1112,7 @@ FRESULT WS2801_softScen()
             res = FR_OK;
         }
     }
-    else if(cubeSoftFrameId%PROGRAM_NUM == 4)
+    else if(cubeSoftFrameId%SOFT_PROGRAMS_MAX == RAINBOW_SHOW)
     {
         if(newReqFlag)
         {
@@ -1106,7 +1120,7 @@ FRESULT WS2801_softScen()
             res = FR_OK;
         }
     }
-    else if(cubeSoftFrameId%PROGRAM_NUM >= 5)
+    else if(cubeSoftFrameId%SOFT_PROGRAMS_MAX >= SECT_SHOW)
     {
         if(HAL_GetTick()-systime > 1000000 || newReqFlag)
         {

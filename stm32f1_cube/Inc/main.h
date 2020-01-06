@@ -95,7 +95,7 @@
 #define CHIP_SIZE_DOWN      (CUBE_ROW_SIZE*CUBE_PILLAR_DOWN_SIZE)
 
 #define MAX_FILE_SIZE       2304//(4096*4)       //256 must be % comfort
-#define PROGRAM_NUM         6
+//#define PROGRAM_NUM         6
 #define GRAY_STEP           2
 #define LIGHTING_STEP       150
 #elif(PROJECTOR_MBI5124)
