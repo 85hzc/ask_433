@@ -54,14 +54,14 @@
 #define PROJECTOR_MBI5124   0
 
 //OSRAM eplos芯片投射灯方案
-#define PROJECTOR_OSRAM     0
+#define PROJECTOR_OSRAM     1
 
 //gpio控制16*16方案
 #define PROJECTOR_MCUGPIO   0
 
 //分体系列立体吊灯方案
-#define PROJECTOR_CUBE      1
-#define CUBE_MASTER         1
+#define PROJECTOR_CUBE      0
+#define CUBE_MASTER         0
 #define CUBE_SLAVE          0
 #define CUBE_LED_ALG        1
 

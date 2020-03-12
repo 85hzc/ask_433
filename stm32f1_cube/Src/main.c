@@ -74,6 +74,7 @@ uint8_t                  motor_status = 0xff;//stop
 #elif(CUBEPLT_MASTER)
 uint8_t                  usartTxData[1024];
 #elif(PROJECTOR_OSRAM)
+uint8_t                  g_minu = 0, g_hour = 0;
 extern uint8_t           eplosSLPxen;
 extern BOOL              eplosCfgFlag;
 #endif
@@ -105,7 +106,9 @@ extern PROGRAMS_TYPE_E   programsType;
 #if PROJECTOR_CUBE
 #define DEBUG_UART       huart1
 #else
-#define DEBUG_UART       huart3
+#define DEBUG_UART       huart1
+//#define DEBUG_UART       huart3
+//#define DEBUG_UART       huart2 //圆形开发板
 #endif
 /* USER CODE END PV */
 
@@ -130,6 +133,7 @@ void oppRFMsgSendProc();
 void oppRFMsgRecvCallBack(uint8_t *data);
 #endif
 #if PROJECTOR_OSRAM
+void WifiControlEplosHandle(uint8_t *data);
 void AppControlEplosHandle();
 void oppRFMsgSendProc();
 void oppRFMsgRecvCallBack(uint8_t *data);
@@ -206,7 +210,7 @@ void appInit(void)
 
     //芯片配置相关参数
 #if(PROJECTOR_OSRAM)
-    programsType = PHOTO;
+    programsType = CLOCK;
     eplosCfgFlag = true;
     eplosSLPxen = DISABLE;
     Drv_MOTOR_Init();
@@ -224,6 +228,7 @@ void Drv_SERIAL_Proc(void)
 {
     uint8_t *ptr,data[128];
 
+#if 1
     //BLE mesh 8258/8269
     if(UsartType2.RX_flag)
     {
@@ -261,7 +266,89 @@ void Drv_SERIAL_Proc(void)
         UartDebugControlHandle(data);
     }
     #endif
-    
+#else//临时调试
+    //wifi 1
+    if(UsartType1.RX_flag)
+    {
+        UsartType1.RX_flag = 0;
+
+        #if 1
+        printf("WIFI rx len=%d  [",UsartType1.RX_Size);
+        for(int i=0; i<UsartType1.RX_Size; i++)
+        {
+            printf("0x%02x ",UsartType1.RX_pData[i]);
+        }
+        printf("]\r\n");
+        #endif
+
+        
+        ptr = UsartType1.RX_pData;
+        memset(data, 0, sizeof(data));
+        strncpy(data, ptr, UsartType1.RX_Size);
+
+        if(g_hour !=  (data[8]-'0')*10+(data[9]-'0')||
+                g_minu != (data[10]-'0')*10+(data[11]-'0'))
+        {
+            g_hour =  (data[8]-'0')*10+(data[9]-'0');
+            g_minu = (data[10]-'0')*10+(data[11]-'0');
+
+            WifiControlEplosHandle(data);
+            
+            if(programsType==CLOCK)
+            {
+                runFlag = true;
+            }
+        }
+    }
+
+    //debug 2
+    if(UsartType2.RX_flag)
+    {
+        UsartType2.RX_flag = 0;
+
+        ptr = UsartType2.RX_pData;
+
+        memset(data, 0, sizeof(data));
+        strncpy(data, ptr, UsartType2.RX_Size);
+        //UartDebugControlHandle(data);
+    }
+#endif
+
+    #if(PROJECTOR_OSRAM) //for wifi uart clock info
+    //wifi 3
+    if(UsartType3.RX_flag)
+    {
+        UsartType3.RX_flag = 0;
+
+        #if 1
+        printf("WIFI rx len=%d  [",UsartType3.RX_Size);
+        for(int i=0; i<UsartType3.RX_Size; i++)
+        {
+            printf("0x%02x ",UsartType3.RX_pData[i]);
+        }
+        printf("]\r\n");
+        #endif
+
+        ptr = UsartType3.RX_pData;
+        memset(data, 0, sizeof(data));
+        strncpy(data, ptr, UsartType3.RX_Size);
+
+        if(g_hour !=  (data[8]-'0')*10+(data[9]-'0')||
+                g_minu != (data[10]-'0')*10+(data[11]-'0'))
+        {
+            g_hour =  (data[8]-'0')*10+(data[9]-'0');
+            g_minu = (data[10]-'0')*10+(data[11]-'0');
+
+            WifiControlEplosHandle(data);
+            
+            if(programsType==CLOCK)
+            {
+                runFlag = true;
+            }
+        }
+    }
+    #endif
+    /*
     #if(PROJECTOR_CUBE==0)
     if(UsartType3.RX_flag)    //debug
     {
@@ -271,20 +358,9 @@ void Drv_SERIAL_Proc(void)
         memset(data, 0, sizeof(data));
         strncpy(data, ptr, UsartType3.RX_Size);
         UartDebugControlHandle(data);
-        /*
-        if(key[0]==8)
-        {
-            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
-        }
-        else if(key[0]==9)
-        {
-            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
-        }
-        */
-        //HAL_UART_Transmit(&DEBUG_UART, UsartType3.RX_pData, UsartType3.RX_Size, 0xffff);
     }
     #endif
-
+    */
     #if(CUBE_MASTER)
     if(usartTxFlag)
     {
@@ -720,9 +796,7 @@ int main(void)
 
     col_up = CUBE_PILLAR_SIZE;
     col_down = CUBE_PILLAR_DOWN_SIZE;
-    
     drv_pwm_speed(brightness);
-
 #endif
 
     while (1)
@@ -1617,7 +1691,6 @@ void AppControlEplosHandle()
     {
         oppRFMsgRecvCallBack(data);
     }
-    
 }
 #endif
 

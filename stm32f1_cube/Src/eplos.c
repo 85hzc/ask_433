@@ -23,6 +23,7 @@ extern BOOL                 runFlag;
 extern BOOL                 powerFlag;
 extern char                 fileBuffer[MAX_FILE_SIZE];   // file copy buffer
 extern char                 osram_buff[MATRIX_SIZE][MATRIX_SIZE];
+extern char                 osram_clock[MATRIX_SIZE][MATRIX_SIZE];
 extern uint16_t             filmFrameIdx;
 extern uint8_t              msgBuf[128];
 extern BYTE                 photo_filename[MAX_FILE_NUM][FILE_NAME_LEN_SHORT];
@@ -643,6 +644,23 @@ void OSRAM_DriverEplos()
 
 void OSRAM_config(void)
 {
+    static BOOL eplosClockStatus = false;
+
+    if(programsType==CLOCK) //ON/OFF regular intervals
+    {
+        if(g_hour == 7 && g_minu == 0 && eplosClockStatus == false)
+        {
+            eplosClockStatus = true;
+            eplosCfgFlag = true;
+            eplosSLPxen = false;
+        }
+        else if(g_hour == 19 && g_minu == 0 && eplosClockStatus == true)
+        {
+            eplosClockStatus = false;
+            eplosCfgFlag = true;
+            eplosSLPxen = true;
+        }
+    }
 
     if(eplosCfgFlag)
     {
@@ -664,9 +682,9 @@ void OSRAM_play(void)
 {
     uint8_t i;
     FRESULT res = FR_OK;
-    static uint8_t j=0;
+    static uint8_t j=0, secFlag=0;
 
-    if((runFlag || (programsType==FILM)) && powerFlag)
+    if((runFlag || (programsType==FILM) || (programsType==CLOCK)) && powerFlag)
     {
         runFlag = 0;
 
@@ -697,7 +715,56 @@ void OSRAM_play(void)
 
             res = SD_ReadPhotoData(path);
         }
+        else if(programsType==CLOCK)
+        {
+            /*
+            printf("\r\n");
+            for( i=0; i<MATRIX_SIZE; i++ )
+            {
+                for( j=0; j<MATRIX_SIZE; j++ )
+                {
+                    printf("%d ",osram_buff[i][j]);
+                }
+                printf("\r\n");
+            }
+            printf("\r\n");
+            */
 
+            if(HAL_GetTick()-systime > 260*1000)// one second
+            {
+
+                memcpy(osram_buff,osram_clock,MATRIX_SIZE*MATRIX_SIZE);
+                if(secFlag)
+                {
+                    osram_buff[7][15]=1;
+                    osram_buff[7][16]=1;
+                    osram_buff[8][15]=1;
+                    osram_buff[8][16]=1;
+                    osram_buff[12][15]=1;
+                    osram_buff[12][16]=1;
+                    osram_buff[13][15]=1;
+                    osram_buff[13][16]=1;
+                    secFlag = 0;
+                }
+                else
+                {
+                    osram_buff[7][15]=0;
+                    osram_buff[7][16]=0;
+                    osram_buff[8][15]=0;
+                    osram_buff[8][16]=0;
+                    osram_buff[12][15]=0;
+                    osram_buff[12][16]=0;
+                    osram_buff[13][15]=0;
+                    osram_buff[13][16]=0;
+                    secFlag = 1;
+                }
+                systime = HAL_GetTick();
+            }
+            else
+            {
+                return;
+            }
+        }
         else if(programsType==APP)
         {
             //printf("msgbuf id[bit]:\r\n");
@@ -752,28 +819,28 @@ void OSRAM_Start()
     printf("%s\r\n",path);
     SD_ReadPhotoData(path);
     OSRAM_DriverEplos();
-    Delay_ms(3000);
+    Delay_ms(1000);
 
     memset(path, 0, sizeof(path));
     sprintf(path,"/OSRAM/Start/start2.dat");
     printf("%s\r\n",path);
     SD_ReadPhotoData(path);
     OSRAM_DriverEplos();
-    Delay_ms(3000);
+    Delay_ms(1000);
 
     memset(path, 0, sizeof(path));
     sprintf(path,"/OSRAM/Start/start3.dat");
     printf("%s\r\n",path);
     SD_ReadPhotoData(path);
     OSRAM_DriverEplos();
-    Delay_ms(3000);
+    Delay_ms(1000);
 
     memset(path, 0, sizeof(path));
     sprintf(path,"/OSRAM/Start/start4.dat");
     printf("%s\r\n",path);
     SD_ReadPhotoData(path);
     OSRAM_DriverEplos();
-    Delay_ms(3000);
+    Delay_ms(1000);
 }
 
 void OSRAM_Introduce()

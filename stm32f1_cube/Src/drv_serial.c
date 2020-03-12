@@ -43,6 +43,9 @@ extern uint8_t           eplosSLPxen;
 extern uint8_t           currentAdjustment;
 extern uint8_t           currentAdjustId;//0 ~ 0x1f
 extern uint8_t           currentAdjustList[4];
+extern uint8_t           osram_clock[MATRIX_SIZE][MATRIX_SIZE];
+extern uint8_t           osram_buff[MATRIX_SIZE][MATRIX_SIZE];
+
 #elif(PROJECTOR_CUBE)
 extern BOOL              photoOpenFlag;
 extern uint8_t           cubeSoftFrameId;
@@ -355,6 +358,12 @@ static void handle_func_MIkeys(uint16_t key)
                 else if(programsType==AUTO_ALGORITHM)
                 {
                     printf("soft [%d]\r\n", cubeSoftFrameId%SOFT_PROGRAMS_MAX);
+                }
+                #endif
+                #if(PROJECTOR_OSRAM)
+                else if(programsType==CLOCK)
+                {
+                    memcpy(osram_buff,osram_clock,MATRIX_SIZE*MATRIX_SIZE);
                 }
                 #endif
                 #endif

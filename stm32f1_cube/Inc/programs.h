@@ -9,10 +9,12 @@ typedef enum
     #if PROJECTOR_CUBE
     AUTO_ALGORITHM = 0,
     #endif
+    
     PHOTO,
 
     #if PROJECTOR_OSRAM
     LIGHT,
+    CLOCK,
     #endif
     MAX_PROGRAMS,
     FILM,
