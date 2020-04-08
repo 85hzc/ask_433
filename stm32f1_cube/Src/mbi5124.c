@@ -319,7 +319,7 @@ uint8_t MBI_SdiInput_Play()
 
     //写入16*2*16数据
     line = currentLine;
-    for(ch = 0; ch < 16; ch++)//每个MBI5153有16个通道
+    for(ch = 0; ch < 16; ch++)//每个MBI5124有16个通道
     {
         //for(j = 0; j < MBI5124_SIZE; j++)//级联IC数量
         {
@@ -342,10 +342,6 @@ uint8_t MBI_SdiInput_Play()
         {
             currentLine++;
         }
-        /*else
-        {
-            currentCh++;
-        }*/
     }
     return 0;
 }
